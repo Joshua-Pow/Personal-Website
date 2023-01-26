@@ -4,6 +4,8 @@ import Header from "components/Header";
 import Hero from "components/Hero";
 import About from "components/About";
 
+//TODO: fix mobile view for about section squishing image
+
 const inter = Inter({ subsets: ["latin"] });
 //--color-1: #02010a;
 // --color-2: #140152;
@@ -11,7 +13,10 @@ const inter = Inter({ subsets: ["latin"] });
 // --color-4: #33108f;
 export default function Home() {
   return (
-    <div className="bg-[rgb(36,36,36)] text-white h-screen snap-y snap-mandatory overflow-scroll z-0">
+    <div
+      className="bg-[rgb(36,36,36)] text-white h-screen snap-y snap-mandatory overflow-y-scroll
+     overflow-x-hidden z-0"
+    >
       <Head>
         <title>Joshua&apos;s Website</title>
       </Head>
