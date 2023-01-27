@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import ProgrammingLanguages from "./programmingLanguages";
+import ProgrammingLanguages from "./ProgrammingLanguages";
 
 type Props = {
   image: string;
