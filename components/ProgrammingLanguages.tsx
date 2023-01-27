@@ -13,7 +13,7 @@ export default function ProgrammingLanguages({ languages }: Props) {
       {languages.map((language, index) => {
         return (
           <Image
-            className="h-10 w-10 rounded-full"
+            className="h-10 w-10"
             width={10}
             height={10}
             key={index}
