@@ -17,7 +17,8 @@ function Experience({}: Props) {
         Experience
       </h3>
 
-      <div
+      {/* Use framer motion to */}
+      <motion.div
         className="w-full flex space-x-5 overflow-x-scroll p-10 snap-x snap-mandatory 
       scrollbar-track-gray-400/20 scrollbar-thumb-[#683ED8]"
       >
@@ -56,7 +57,7 @@ function Experience({}: Props) {
           startDate={"September 2022"}
           summary={["In progress"]}
         />
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

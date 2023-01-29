@@ -5,7 +5,10 @@ import Hero from "components/Hero";
 import About from "components/About";
 import Experience from "components/Experience";
 
-//TODO: fix mobile view for about section squishing image
+//TODO: fix emojis on hero page
+//TODO: add playground to website
+//TODO: fix citi image not loading
+//TODO: fix programming language photos on citi page
 
 const inter = Inter({ subsets: ["latin"] });
 //--color-1: #02010a;
