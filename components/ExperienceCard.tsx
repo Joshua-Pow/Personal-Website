@@ -22,7 +22,12 @@ function ExperienceCard({
   summary,
 }: Props) {
   return (
-    <div>
+    <motion.div
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.1}
+      dragMomentum={false}
+    >
       <article
         className="flex flex-col rounded-lg items-center space-y-7 
       flex-shrink-0 w-[300px] md:w-[600px] xl:w-[900px] snap-center bg-[#292929] 
@@ -60,7 +65,7 @@ function ExperienceCard({
           </ul>
         </div>
       </article>
-    </div>
+    </motion.div>
   );
 }
 

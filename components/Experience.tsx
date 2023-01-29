@@ -17,10 +17,9 @@ function Experience({}: Props) {
         Experience
       </h3>
 
-      {/* Use framer motion to */}
       <motion.div
         className="w-full flex space-x-5 overflow-x-scroll p-10 snap-x snap-mandatory 
-      scrollbar-track-gray-400/20 scrollbar-thumb-[#683ED8]"
+        scrollbar-track-gray-400/20 scrollbar-thumb-[#683ED8]"
       >
         <ExperienceCard
           image={"./rbc.svg"}

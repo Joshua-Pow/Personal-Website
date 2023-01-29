@@ -7,8 +7,8 @@ import Experience from "components/Experience";
 
 //TODO: fix emojis on hero page
 //TODO: add playground to website
-//TODO: fix citi image not loading
-//TODO: fix programming language photos on citi page
+//TODO: progrmaming languages on mobile dont fit
+//TODO: Make scrollbars coloured
 
 const inter = Inter({ subsets: ["latin"] });
 //--color-1: #02010a;
