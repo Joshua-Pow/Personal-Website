@@ -36,7 +36,7 @@ function Experience({}: Props) {
           ]}
         />
         <ExperienceCard
-          image={"./citi.svg"}
+          image={"./Citi.svg"}
           title={"Technology Summer Analyst"}
           company={"Citi"}
           languages={["java", "springboot", "python", "react", "mui", "oracle"]}
