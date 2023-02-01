@@ -30,10 +30,15 @@ function About({}: Props) {
           background{" "}
         </h4>
         <p className="text-sm ">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sunt
-          suscipit veniam assumenda provident enim. Esse quod architecto illo
-          reprehenderit voluptatibus et minima nostrum omnis, alias quisquam
-          beatae labore explicabo temporibus?
+          I am a third year computer engineering student at the University of
+          Toronto with a passion for everything and anything Software. I am
+          currently looking for a co-op position for the summer of 2023. I have
+          experience with a variety of technologies and languages including
+          React, C++, C, Python, JavaScript and am currently learning TypeScript
+          (which is what this website is made in!). I am also familiar with the
+          Agile development process and have over 1+ year of experience working
+          in a team environment. I am a quick learner and am always looking for
+          new technologies to learn.
         </p>
       </div>
     </motion.div>
