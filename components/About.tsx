@@ -20,10 +20,10 @@ function About({}: Props) {
         transition={{ duration: 1.2 }}
         whileInView={{ x: 0, opacity: 1 }}
         src="../aboutMe.jpg"
-        className="w-48 h-48 sm:w-96 sm:h-96 rounded-full object-cover md:rounded-lg md:w-64 md:h-95 xl:w-[500px] xl:h-[600px]"
+        className="w-44 h-44 sm:w-96 sm:h-96 rounded-full object-cover md:rounded-lg md:w-64 md:h-95 xl:w-[500px] xl:h-[600px]"
       />
 
-      <div className="space-y-4 md:space-y-10">
+      <div className="space-y-4 md:space-y-10 pb-8">
         <h4 className="text-2xl md:text-4xl font-semibold">
           Some <span className="underline decoration-[#683ED8]">info</span>{" "}
           about my background{" "}
