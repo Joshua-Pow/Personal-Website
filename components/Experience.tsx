@@ -10,6 +10,7 @@ function Experience({}: Props) {
   const [data, setData] = useState<{
     image: string;
     title: string;
+    team: string;
     id: string;
     company: string;
     languages: string[];
