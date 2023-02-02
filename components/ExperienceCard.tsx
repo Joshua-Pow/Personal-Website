@@ -6,7 +6,7 @@ import ProgrammingLanguages from "./ProgrammingLanguages";
 type Props = {
   image: string;
   title: string;
-  id: number;
+  id: string;
   company: string;
   languages: string[];
   startDate: string;
