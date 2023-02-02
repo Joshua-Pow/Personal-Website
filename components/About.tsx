@@ -23,7 +23,7 @@ function About({}: Props) {
         className="w-44 h-44 sm:w-96 sm:h-96 rounded-full object-cover md:rounded-lg md:w-64 md:h-95 xl:w-[500px] xl:h-[600px]"
       />
 
-      <div className="space-y-4 md:space-y-10 pb-8">
+      <div className="space-y-4 md:space-y-10 pb-20">
         <h4 className="text-2xl md:text-4xl font-semibold">
           Some <span className="underline decoration-[#683ED8]">info</span>{" "}
           about my background{" "}
