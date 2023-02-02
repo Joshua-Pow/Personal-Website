@@ -7,8 +7,9 @@ import Experience from "components/Experience";
 
 //TODO: fix emojis on hero page
 //TODO: add playground to website
-//TODO: progrmaming languages on mobile dont fit
-//TODO: Make scrollbars coloured
+//TODO: citi progrmaming languages on mobile dont fit
+//TODO: Resizing on mobile for carosel doesnt work
+//Add ids for components in experience section (https://github.com/framer/motion/issues/905)
 
 const inter = Inter({ subsets: ["latin"] });
 //--color-1: #02010a;

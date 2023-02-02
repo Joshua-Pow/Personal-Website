@@ -35,7 +35,7 @@ export default function Hero({}: Props) {
         <h2 className="text-sm uppercase text-gray-500 pb-2 tracking-[15px]">
           Software Engineer
         </h2>
-        <h1 className="text-5xl lg:text-6xl font-semibold px-10">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold px-10">
           <span className="mr-3">{text}</span>
           <Cursor cursorColor="#430ecf" />
         </h1>
@@ -49,8 +49,10 @@ export default function Hero({}: Props) {
             <button className="heroButton">Experience</button>
           </Link>
 
-          <Link href={"#sandbox"}>
-            <button className="heroButton">Coming soon...</button>
+          <Link href={""}>
+            <button className="heroButton animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent">
+              Coming soon...
+            </button>
           </Link>
         </div>
       </div>
