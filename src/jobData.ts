@@ -41,3 +41,19 @@ export const jobData = [
       summary: ["In progress"],
     },
   ];
+  
+  export type JobData = {
+    image: string;
+    title: string;
+    team: string;
+    id: string;
+    company: string;
+    languages: string[];
+    startDate: string;
+    endDate?: string;
+    summary: string[];
+  };
+  
+  
+  
+  

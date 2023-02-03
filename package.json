@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@next/font": "13.1.5",
+    "@react-three/fiber": "^8.10.1",
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
     "@types/react-dom": "18.0.10",
+    "@types/three": "^0.149.0",
     "@vercel/analytics": "^0.1.8",
     "eslint": "8.32.0",
     "eslint-config-next": "13.1.5",
@@ -22,7 +24,9 @@
     "react-dom": "18.2.0",
     "react-simple-typewriter": "^5.0.1",
     "react-social-icons": "^5.15.0",
+    "react-spotify-web-playback": "^0.11.3",
     "swiper": "^8.4.6",
+    "three": "^0.149.0",
     "typescript": "4.9.4"
   },
   "devDependencies": {

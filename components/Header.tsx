@@ -1,7 +1,8 @@
 import React from "react";
 import { SocialIcon } from "react-social-icons";
 import { easeIn, easeOut, motion } from "framer-motion";
-
+import { Canvas } from "@react-three/fiber";
+import Blob from "./Blob";
 type Props = {};
 
 function Header({}: Props) {
@@ -29,13 +30,17 @@ function Header({}: Props) {
           bgColor="transparent"
         />
       </motion.div>
-
       <motion.div
-        initial={{ x: 500, opacity: 0, scale: 0.5 }}
-        animate={{ x: 0, opacity: 1, scale: 1 }}
-        transition={{ duration: 1.5, easings: [easeIn, easeOut] }}
-        className="flex flex-row items-center text-gray-300 cursor-pointer"
-      ></motion.div>
+        // initial={{ x: 500, opacity: 0, scale: 0.5 }}
+        // animate={{ x: 0, opacity: 1, scale: 1 }}
+        // transition={{ duration: 1.5, easings: [easeIn, easeOut] }}
+        className="flex flex-row items-center text-gray-300"
+      >
+        {" "}
+        <Canvas camera={{ position: [0.0, 0.0, 8.0] }}>
+          <Blob />
+        </Canvas>
+      </motion.div>{" "}
     </header>
   );
 }

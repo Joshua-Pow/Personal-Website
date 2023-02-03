@@ -4,6 +4,8 @@ import Header from "components/Header";
 import Hero from "components/Hero";
 import About from "components/About";
 import Experience from "components/Experience";
+import { Canvas } from "@react-three/fiber";
+import Blob from "components/Blob";
 
 //TODO: fix emojis on hero page
 //TODO: add playground to website
