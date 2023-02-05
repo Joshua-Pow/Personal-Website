@@ -31,7 +31,7 @@ function Header({}: Props) {
         />
       </motion.div>
       <motion.div
-        className="w-[100px] h-[100px]"
+        className="w-[110px] h-[110px] bg-center"
         // style={{ width: "100px" }}
         initial={{ x: 500, opacity: 0, scale: 0.5 }}
         animate={{ x: 0, opacity: 1, scale: 1 }}
