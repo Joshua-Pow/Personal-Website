@@ -31,16 +31,15 @@ function Header({}: Props) {
         />
       </motion.div>
       <motion.div
-        // initial={{ x: 500, opacity: 0, scale: 0.5 }}
-        // animate={{ x: 0, opacity: 1, scale: 1 }}
-        // transition={{ duration: 1.5, easings: [easeIn, easeOut] }}
-        className="flex flex-row items-center text-gray-300"
+        className=""
+        style={{ width: "100px" }}
+        initial={{ x: 500, opacity: 0, scale: 0.5 }}
+        animate={{ x: 0, opacity: 1, scale: 1 }}
       >
-        {" "}
         <Canvas camera={{ position: [0.0, 0.0, 8.0] }}>
           <Blob />
         </Canvas>
-      </motion.div>{" "}
+      </motion.div>
     </header>
   );
 }
