@@ -11,7 +11,7 @@ function About({}: Props) {
       transition={{ duration: 1.5 }}
       className="pt-32 flex flex-col relative h-screen text-center md:text-left md:flex-row md:gap-8 max-w-7xl px-10 justify-evenly mx-auto items-center"
     >
-      <h3 className="top-[190px] absolute uppercase tracking-[20px] mr-[-20px] text-gray-500 text-2xl">
+      <h3 className="top-[120px] absolute uppercase tracking-[20px] mr-[-20px] text-gray-500 text-2xl">
         About
       </h3>
 
@@ -23,12 +23,12 @@ function About({}: Props) {
         className="w-44 h-44 sm:w-96 sm:h-96 rounded-full object-cover md:rounded-lg md:w-64 md:h-95 xl:w-[500px] xl:h-[600px]"
       />
 
-      <div className="space-y-4 md:space-y-10 pb-20">
-        <h4 className="text-2xl md:text-4xl font-semibold">
+      <div className="space-y-4 sm:space-y-10">
+        <h4 className="text-2xl sm:text-4xl font-semibold">
           Some <span className="underline decoration-[#683ED8]">info</span>{" "}
-          about my background{" "}
+          about me{" "}
         </h4>
-        <p className="text-xs md:text-sm ">
+        <p className="text-xs sm:text-sm ">
           I am a{" "}
           <b className="text-[#d3bdf4]">
             third year computer engineering student at the University of Toronto

@@ -7,7 +7,7 @@ type Props = {};
 
 function Header({}: Props) {
   return (
-    <header className="sticky top-0 p-5 flex flex-items-start justify-between max-w-7xl mx-auto z-20 xl:items-center">
+    <header className="sticky top-0 p-5 flex justify-between max-w-7xl mx-auto z-20 xl:items-center">
       <motion.div
         initial={{ x: -500, opacity: 0, scale: 0.5 }}
         animate={{ x: 0, opacity: 1, scale: 1 }}
@@ -31,8 +31,8 @@ function Header({}: Props) {
         />
       </motion.div>
       <motion.div
-        className=""
-        style={{ width: "100px" }}
+        className="w-[100px] h-[100px]"
+        // style={{ width: "100px" }}
         initial={{ x: 500, opacity: 0, scale: 0.5 }}
         animate={{ x: 0, opacity: 1, scale: 1 }}
       >

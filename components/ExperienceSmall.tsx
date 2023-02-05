@@ -28,6 +28,7 @@ function ExperienceSmall({ key, setOpen, open, setData, job, item }: Props) {
         setData(job);
       }}
       variants={item}
+      key={key}
     >
       <motion.img
         className="w-32 h-32 mb-3 sm:mb-0 md:w-[150px] md:h-[150px] object-cover object-center"

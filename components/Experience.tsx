@@ -54,7 +54,7 @@ function Experience({}: Props) {
       className="h-screen max-w-full flex flex-col pt-40 px-10 md:pt-0 relative overflow-hidden 
       md:flex-row justify-evenly mx-auto items-center"
     >
-      <h3 className="absolute top-[190px] uppercase tracking-[20px] mr-[-20px] text-gray-500 text-2xl">
+      <h3 className="absolute top-[120px] uppercase tracking-[20px] mr-[-20px] text-gray-500 text-2xl">
         Experience
       </h3>
 
