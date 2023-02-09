@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { JobData } from "../src/jobData";
 
 type Props = {
-  key: number;
+  key: string;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setData: React.Dispatch<React.SetStateAction<JobData | null>>;
   open: boolean;
