@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState } from "react";
+import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import ExperienceBig from "./ExperienceBig";
 import { jobData } from "../src/jobData";
@@ -70,14 +71,15 @@ function Experience({}: Props) {
         >
           {jobData.map((job, index) => {
             return (
-              <ExperienceSmall
-                key={index}
-                setOpen={setOpen}
-                open={open}
-                setData={setData}
-                job={job}
-                item={item}
-              />
+              <React.Fragment key={index}>
+                <ExperienceSmall
+                  setOpen={setOpen}
+                  open={open}
+                  setData={setData}
+                  job={job}
+                  item={item}
+                />
+              </React.Fragment>
             );
           })}
         </motion.div>

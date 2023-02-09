@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { JobData } from "../src/jobData";
 
 type Props = {
-  key: string;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setData: React.Dispatch<React.SetStateAction<JobData | null>>;
   open: boolean;
@@ -16,7 +15,7 @@ type Props = {
   job: JobData;
 };
 
-function ExperienceSmall({ key, setOpen, open, setData, job, item }: Props) {
+function ExperienceSmall({ setOpen, open, setData, job, item }: Props) {
   return (
     <motion.div
       layout
@@ -28,7 +27,6 @@ function ExperienceSmall({ key, setOpen, open, setData, job, item }: Props) {
         setData(job);
       }}
       variants={item}
-      key={key}
     >
       <motion.img
         className="w-32 h-32 mb-3 sm:mb-0 md:w-[150px] md:h-[150px] object-cover object-center"
