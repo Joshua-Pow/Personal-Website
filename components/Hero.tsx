@@ -1,4 +1,5 @@
 import React from "react";
+import { MouseEvent } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import Image from "next/image";
 import BackgroundCircles from "./BackgroundCircles";
@@ -21,12 +22,41 @@ export default function Hero({}: Props) {
     delaySpeed: 2000,
   });
 
+  const hackerEffect = (
+    event: React.MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
+  ) => {
+    const alphabet = "abcdefghijklmnopqrstuvwxyz";
+    const original = (event.target as HTMLButtonElement).name;
+    let iteration = 0;
+
+    let interval = setInterval(() => {
+      (event.target as HTMLButtonElement).innerText = (
+        event.target as HTMLButtonElement
+      ).innerText
+        .split("")
+        .map((letter, index) => {
+          if (index < iteration) {
+            return original[index];
+          } else {
+            return alphabet[Math.floor(Math.random() * alphabet.length)];
+          }
+        })
+        .join("");
+
+      if (iteration > original.length) {
+        clearInterval(interval);
+      }
+      iteration += 1 / 3;
+    }, 30);
+  };
+
   return (
     <div className="h-screen flex flex-col space-y-8 items-center justify-center text-center overflow-hidden">
       <BackgroundCircles />
       <Image
         className="relative rounded-full h-32 w-32 mx-auto object-cover"
         src={mypic}
+        priority
         width={200}
         height={200}
         alt={""}
@@ -42,11 +72,23 @@ export default function Hero({}: Props) {
 
         <div className="pt-5">
           <Link href={"#about"}>
-            <button className="heroButton">About</button>
+            <button
+              className="heroButton"
+              onMouseOver={(event) => hackerEffect(event)}
+              name="About"
+            >
+              About
+            </button>
           </Link>
 
           <Link href={"#experience"}>
-            <button className="heroButton">Experience</button>
+            <button
+              className="heroButton"
+              onMouseOver={(event) => hackerEffect(event)}
+              name="Experience"
+            >
+              Experience
+            </button>
           </Link>
 
           <Link href={""}>

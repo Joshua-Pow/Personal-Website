@@ -2,7 +2,13 @@ import React, { useMemo, useRef } from "react";
 import vertexShader from "./vertexShader";
 import fragmentShader from "./fragmentShader";
 import { useFrame } from "@react-three/fiber";
-import { BufferGeometry, Material, ShaderMaterial, MathUtils, Mesh } from "three";
+import {
+  BufferGeometry,
+  Material,
+  ShaderMaterial,
+  MathUtils,
+  Mesh,
+} from "three";
 
 const Blob = () => {
   const mesh = useRef<Mesh<BufferGeometry, Material | Material[]> | null>(null);
@@ -20,11 +26,12 @@ const Blob = () => {
       (mesh.current.material as ShaderMaterial).uniforms.u_time.value =
         0.4 * clock.getElapsedTime();
 
-      (mesh.current.material as ShaderMaterial).uniforms.u_intensity.value = MathUtils.lerp(
-        (mesh.current.material as ShaderMaterial).uniforms.u_intensity.value,
-        hover.current ? 1 : 0.15,
-        0.02
-      );
+      (mesh.current.material as ShaderMaterial).uniforms.u_intensity.value =
+        MathUtils.lerp(
+          (mesh.current.material as ShaderMaterial).uniforms.u_intensity.value,
+          hover.current ? 1 : 0.15,
+          0.02
+        );
     }
   });
   return (
