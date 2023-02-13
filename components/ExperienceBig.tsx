@@ -22,7 +22,7 @@ type Props = {
 function ExperienceBig({ open, setOpen, variants, data }: Props) {
   return (
     <motion.div
-      className="h-96 md:h-auto flex z-2 flex-col absolute rounded-lg items-center space-y-7
+      className="h-96 md:h-1/2 flex z-2 flex-col absolute rounded-lg items-center space-y-7
               flex-shrink-0 w-3/4 sm:w-[300px] md:w-[600px] xl:w-[900px] bg-[#292929]
               p-10 cursor-pointer transition-opacity duration-200 overflow-y-scroll"
       style={{

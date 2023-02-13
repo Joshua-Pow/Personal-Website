@@ -1,3 +1,5 @@
+@import url('https://fonts.cdnfonts.com/css/clash-display');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&display=swap');
 @tailwind base;
 
 /* Firefox */
@@ -20,7 +22,14 @@
     background-color: #683ED8;
     border-radius: 4px;
     width: 8px;
-    
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Clash Display', sans-serif;
+  }
+
+  p {
+    font-family: 'Archivo', sans-serif;
   }
 
 @tailwind components;
