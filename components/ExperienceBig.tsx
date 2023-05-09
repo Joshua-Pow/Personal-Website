@@ -22,9 +22,9 @@ type Props = {
 function ExperienceBig({ open, setOpen, variants, data }: Props) {
   return (
     <motion.div
-      className="h-96 md:h-1/2 flex z-2 flex-col absolute rounded-lg items-center space-y-7
-              flex-shrink-0 w-3/4 sm:w-[300px] md:w-[600px] xl:w-[900px] bg-[#292929]
-              p-10 cursor-pointer transition-opacity duration-200 overflow-y-scroll"
+      className="z-2 absolute flex h-96 w-3/4 flex-shrink-0 cursor-pointer flex-col items-center
+              space-y-7 overflow-y-scroll rounded-lg bg-[#292929] p-10 transition-opacity
+              duration-200 sm:w-[300px] md:h-1/2 md:w-[600px] xl:w-[900px]"
       style={{
         position: "fixed",
         top: "30%",
@@ -38,28 +38,28 @@ function ExperienceBig({ open, setOpen, variants, data }: Props) {
       exit={{ scale: 1, opacity: 0 }}
     >
       <motion.img
-        className="w-32 h-32 md:w-32 md:h-32 xl:w-[200px] xl:h-[200px] img-fluid"
+        className="img-fluid h-32 w-32 md:h-32 md:w-32 xl:h-[200px] xl:w-[200px]"
         src={data?.image}
         alt={""}
       />
 
       <motion.div className="px-0 md:px-10">
-        <motion.h4 className="text-xl md:text-4xl font-light">
+        <motion.h4 className="text-xl font-light md:text-4xl">
           {data!.title} <br /> {data!.team}
         </motion.h4>
 
         <motion.div>
-          <p className="font-bold text-xl md:text-2xl mt-1">{data?.company}</p>
-          <div className="flex space-x-2 my-2">
+          <p className="mt-1 text-xl font-bold md:text-2xl">{data?.company}</p>
+          <div className="my-2 flex space-x-2">
             <ProgrammingLanguages languages={data!.languages} />
           </div>
 
-          <p className="uppercase pb-5 text-grey-300">
+          <p className="text-grey-300 pb-5 uppercase">
             {` ${data?.startDate} - `}{" "}
             {data?.endDate ? `${data?.endDate}` : "Current"}
           </p>
 
-          <ul className="list-disc space-y-4 ml-2">
+          <ul className="ml-2 list-disc space-y-4">
             {data?.summary.map((item, index) => (
               <li key={index} className="text-xs md:text-sm">
                 {item}

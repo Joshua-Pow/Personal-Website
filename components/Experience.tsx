@@ -52,10 +52,10 @@ function Experience({}: Props) {
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       transition={{ duration: 1.5 }}
-      className="h-screen max-w-full flex flex-col pt-40 px-10 md:pt-0 relative overflow-hidden 
-      md:flex-row justify-evenly mx-auto items-center"
+      className="relative mx-auto flex h-screen max-w-full flex-col items-center justify-evenly overflow-hidden 
+      px-10 pt-40 md:flex-row md:pt-0"
     >
-      <h3 className="absolute top-[120px] uppercase tracking-[20px] mr-[-20px] text-gray-500 text-2xl">
+      <h3 className="absolute top-[120px] mr-[-20px] text-2xl uppercase tracking-[20px] text-gray-500">
         Experience
       </h3>
 
@@ -64,7 +64,7 @@ function Experience({}: Props) {
           style={{
             filter: open ? "blur(2px)" : "none",
           }}
-          className="h-96 md:h-[60vh] flex flex-col space-y-5 items-center overflow-y-scroll snap-y snap-mandatory snap-center"
+          className="flex h-96 snap-y snap-mandatory snap-center flex-col items-center space-y-5 overflow-y-scroll md:h-[60vh]"
           variants={container}
           initial="hidden"
           animate="visible"

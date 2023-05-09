@@ -19,9 +19,9 @@ function ExperienceSmall({ setOpen, open, setData, job, item }: Props) {
   return (
     <motion.div
       layout
-      className="flex z-100 flex-col rounded-lg items-center
-                  w-[300px] md:w-[600px] xl:w-[900px] bg-[#292929]
-                  p-10 cursor-pointer transition-opacity duration-200"
+      className="z-100 flex w-[300px] cursor-pointer flex-col
+                  items-center rounded-lg bg-[#292929] p-10
+                  transition-opacity duration-200 md:w-[600px] xl:w-[900px]"
       onClick={() => {
         setOpen(!open);
         setData(job);
@@ -29,12 +29,12 @@ function ExperienceSmall({ setOpen, open, setData, job, item }: Props) {
       variants={item}
     >
       <motion.img
-        className="w-32 h-32 mb-3 sm:mb-0 md:w-[150px] md:h-[150px] object-cover object-center"
+        className="mb-3 h-32 w-32 object-cover object-center sm:mb-0 md:h-[150px] md:w-[150px]"
         src={job.image}
         alt={""}
       />
 
-      <motion.h4 className="text-xl text-center md:text-4xl font-light px-0 md:px-10">
+      <motion.h4 className="px-0 text-center text-xl font-light md:px-10 md:text-4xl">
         {job.title} <br /> {job.team}
       </motion.h4>
     </motion.div>

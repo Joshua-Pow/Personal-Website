@@ -51,10 +51,10 @@ export default function Hero({}: Props) {
   };
 
   return (
-    <div className="h-screen flex flex-col space-y-8 items-center justify-center text-center overflow-hidden">
+    <div className="flex h-screen flex-col items-center justify-center space-y-8 overflow-hidden text-center">
       <BackgroundCircles />
       <Image
-        className="relative rounded-full h-32 w-32 mx-auto object-cover"
+        className="relative mx-auto h-32 w-32 rounded-full object-cover"
         src={mypic}
         priority
         width={200}
@@ -62,10 +62,10 @@ export default function Hero({}: Props) {
         alt={""}
       />
       <div className="z-20">
-        <h2 className="text-sm uppercase text-gray-500 pb-2 tracking-[15px] mr-[-15px]">
+        <h2 className="mr-[-15px] pb-2 text-sm uppercase tracking-[15px] text-gray-500">
           Software Engineer
         </h2>
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold px-10">
+        <h1 className="px-10 text-4xl font-semibold md:text-5xl lg:text-6xl">
           <span className="mr-3">{text}</span>
           <Cursor cursorColor="#430ecf" />
         </h1>
@@ -91,7 +91,7 @@ export default function Hero({}: Props) {
             </button>
           </Link>
 
-          <Link href={""}>
+          <Link href={"/playground"}>
             <button className="heroButton animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent">
               Coming soon...
             </button>

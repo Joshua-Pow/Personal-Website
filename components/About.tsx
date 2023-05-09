@@ -9,9 +9,9 @@ function About({}: Props) {
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       transition={{ duration: 1.5 }}
-      className="pt-32 flex flex-col relative h-screen text-center md:text-left md:flex-row md:gap-8 max-w-7xl px-10 justify-evenly mx-auto items-center"
+      className="relative mx-auto flex h-screen max-w-7xl flex-col items-center justify-evenly px-10 pt-32 text-center md:flex-row md:gap-8 md:text-left"
     >
-      <h3 className="top-[120px] absolute uppercase tracking-[20px] mr-[-20px] text-gray-500 text-2xl">
+      <h3 className="absolute top-[120px] mr-[-20px] text-2xl uppercase tracking-[20px] text-gray-500">
         About
       </h3>
 
@@ -20,11 +20,11 @@ function About({}: Props) {
         transition={{ duration: 1.2 }}
         whileInView={{ x: 0, opacity: 1 }}
         src="../aboutMe.jpg"
-        className="w-44 h-44 sm:w-96 sm:h-96 rounded-full object-cover md:rounded-lg md:w-64 md:h-95 xl:w-[500px] xl:h-[600px]"
+        className="md:h-95 h-44 w-44 rounded-full object-cover sm:h-96 sm:w-96 md:w-64 md:rounded-lg xl:h-[600px] xl:w-[500px]"
       />
 
-      <div className="space-y-4 sm:space-y-10 mt-[-3rem]">
-        <h4 className="text-2xl sm:text-4xl font-semibold">
+      <div className="mt-[-3rem] space-y-4 sm:space-y-10">
+        <h4 className="text-2xl font-semibold sm:text-4xl">
           Some <span className="underline decoration-[#683ED8]">info</span>{" "}
           about me{" "}
         </h4>
