@@ -8,9 +8,7 @@ export const metadata = {
   },
 };
 
-type Props = {};
-
-const page = (props: Props) => {
+const page = () => {
   return (
     <div>
       <h1 className="pt-12">History</h1>
