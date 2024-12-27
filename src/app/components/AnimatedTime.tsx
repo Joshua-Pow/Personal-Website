@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
-type Props = {
+interface Props {
   graduationDate: Date;
-};
+}
 
 function AnimatedTime({ graduationDate }: Props) {
   const [timeElapsed, setTimeElapsed] = useState({
@@ -16,28 +16,48 @@ function AnimatedTime({ graduationDate }: Props) {
     seconds: 0,
   });
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const prevTimeRef = useRef(timeElapsed);
+
   useEffect(() => {
+    audioRef.current = new Audio("./click.wav");
+    audioRef.current.volume = 0.05;
+
     const timer = setInterval(() => {
       const now = new Date();
       const diff = now.getTime() - graduationDate.getTime();
 
-      const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
-      const months = Math.floor(
-        (diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30)
-      );
-      const days = Math.floor(
-        (diff % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24)
-      );
-      const hours = Math.floor(
-        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-      );
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      const newTimeElapsed = {
+        years: Math.floor(diff / (1000 * 60 * 60 * 24 * 365)),
+        months: Math.floor(
+          (diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30)
+        ),
+        days: Math.floor(
+          (diff % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24)
+        ),
+        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((diff % (1000 * 60)) / 1000),
+      };
 
-      setTimeElapsed({ years, months, days, hours, minutes, seconds });
+      // Check if any value has changed and play a single tick
+      const hasChanged = Object.entries(newTimeElapsed).some(
+        ([unit, value]) =>
+          value !== prevTimeRef.current[unit as keyof typeof timeElapsed]
+      );
+
+      if (hasChanged) {
+        audioRef.current?.play().catch(() => {});
+      }
+
+      prevTimeRef.current = newTimeElapsed;
+      setTimeElapsed(newTimeElapsed);
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      audioRef.current?.remove();
+    };
   }, [graduationDate]);
 
   return (

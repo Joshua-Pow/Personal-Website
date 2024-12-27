@@ -9,7 +9,7 @@ export default function Home() {
           Hi my name is <span className="font-bold">Joshua Pow</span>
         </p>
         <p>
-          I am a compuer engineer from the{" "}
+          I am a computer engineer from the{" "}
           <span className="font-bold">University of Toronto</span>
         </p>
         <span className="flex items-start justify-center gap-2 py-1">

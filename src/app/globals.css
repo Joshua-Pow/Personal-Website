@@ -3,7 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --background: #fff1e2;
+  --background: linear-gradient(
+    to bottom right,
+    theme("colors.orange.50"),
+    theme("colors.orange.100"),
+    theme("colors.yellow.50")
+  );
   --foreground: #171717;
   scrollbar-gutter: stable;
 }
