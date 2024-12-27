@@ -1,4 +1,3 @@
-import { Link } from "next-view-transitions";
 import AnimatedTime from "./components/AnimatedTime";
 
 export default function Home() {
