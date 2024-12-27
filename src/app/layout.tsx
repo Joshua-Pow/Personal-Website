@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ViewTransitions } from "next-view-transitions";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -43,7 +44,7 @@ export default function RootLayout({
             <main>{children}</main>
             <Footer />
             {/* TODO: Add analytics */}
-            {/* <Analytics /> */}
+            <Analytics />
           </div>
         </body>
       </html>
