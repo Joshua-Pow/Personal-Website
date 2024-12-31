@@ -7,7 +7,7 @@ interface Props {
 }
 
 function playTickSequence(
-  audioRef: React.RefObject<HTMLAudioElement>,
+  audioRef: React.RefObject<HTMLAudioElement | null>,
   count: number
 ) {
   let tickCount = 0;
