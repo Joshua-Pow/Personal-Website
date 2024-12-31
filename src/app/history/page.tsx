@@ -1,5 +1,5 @@
 import React from "react";
-import { AnimatedName } from "../components/AnimatedName";
+import { AnimatedName } from "../../components/AnimatedName";
 
 export const metadata = {
   title: "History",

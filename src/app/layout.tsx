@@ -41,7 +41,9 @@ export default function RootLayout({
       <html lang="en" className={`${inter.variable} antialiased`}>
         <body className="tracking-tight antialiased">
           <div className="relative mx-auto min-h-svh max-w-screen-sm">
-            <main>{children}</main>
+            <main className="h-[calc(100svh-24px-1rem)] w-full">
+              {children}
+            </main>
             <Footer />
             {/* TODO: Add analytics */}
             <Analytics />
@@ -60,7 +62,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="pt-auto absolute bottom-0 mb-4 flex w-full items-center justify-center gap-6">
+    <footer className="absolute bottom-0 mb-4 flex w-full items-center justify-center gap-6">
       {links.map((link) => (
         <a
           key={link.href}

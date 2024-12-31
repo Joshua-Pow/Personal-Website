@@ -6,6 +6,21 @@ interface Props {
   graduationDate: Date;
 }
 
+function playTickSequence(
+  audioRef: React.RefObject<HTMLAudioElement>,
+  count: number
+) {
+  let tickCount = 0;
+  const interval = setInterval(() => {
+    if (tickCount >= count) {
+      clearInterval(interval);
+      return;
+    }
+    audioRef.current?.play().catch(() => {});
+    tickCount++;
+  }, 50); // Play ticks quickly in succession
+}
+
 function AnimatedTime({ graduationDate }: Props) {
   const [timeElapsed, setTimeElapsed] = useState({
     years: 0,
@@ -21,7 +36,7 @@ function AnimatedTime({ graduationDate }: Props) {
 
   useEffect(() => {
     audioRef.current = new Audio("./click.wav");
-    audioRef.current.volume = 0.05;
+    audioRef.current.volume = 0.05; // Lower volume since we'll play multiple ticks
 
     const timer = setInterval(() => {
       const now = new Date();
@@ -40,15 +55,15 @@ function AnimatedTime({ graduationDate }: Props) {
         seconds: Math.floor((diff % (1000 * 60)) / 1000),
       };
 
-      // Check if any value has changed and play a single tick
-      const hasChanged = Object.entries(newTimeElapsed).some(
-        ([unit, value]) =>
-          value !== prevTimeRef.current[unit as keyof typeof timeElapsed]
-      );
-
-      if (hasChanged) {
-        audioRef.current?.play().catch(() => {});
-      }
+      // Check which values changed and play appropriate tick sequences
+      Object.entries(newTimeElapsed).forEach(([unit, value]) => {
+        const prevValue = prevTimeRef.current[unit as keyof typeof timeElapsed];
+        if (value !== prevValue) {
+          const difference = Math.abs(value - prevValue);
+          // Play more ticks for larger changes
+          playTickSequence(audioRef, Math.min(difference + 2, 8));
+        }
+      });
 
       prevTimeRef.current = newTimeElapsed;
       setTimeElapsed(newTimeElapsed);
@@ -61,10 +76,10 @@ function AnimatedTime({ graduationDate }: Props) {
   }, [graduationDate]);
 
   return (
-    <div className="inline-flex gap-2 font-mono">
+    <div className="inline-flex gap-1 font-mono">
       {Object.entries(timeElapsed).map(([unit, value]) => (
         <div key={unit} className="flex flex-col items-center">
-          <div className="relative flex items-center justify-center rounded-md bg-slate-50 px-2 shadow-sm">
+          <div className="relative flex items-center justify-center rounded-md bg-slate-50 px-1 shadow-sm">
             <div className="flex h-full items-center">
               {value
                 .toString()
