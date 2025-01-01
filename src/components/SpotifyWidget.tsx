@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import useSWR from "swr";
-import { Suspense } from "react";
 import {
   CurrentlyPlayingResponse,
   RecentlyPlayedResponse,
@@ -35,14 +34,12 @@ function formatLastPlayedTime(timestamp: string | undefined) {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function SpotifyContent({
-  data,
+  currentlyPlaying,
+  lastPlayed,
 }: {
-  data: {
-    currentlyPlaying: CurrentlyPlayingResponse;
-    lastPlayed: RecentlyPlayedResponse["items"][0];
-  };
+  currentlyPlaying: CurrentlyPlayingResponse;
+  lastPlayed: RecentlyPlayedResponse["items"][0];
 }) {
-  const { currentlyPlaying, lastPlayed } = data;
   const track = currentlyPlaying?.item ?? lastPlayed?.track;
 
   if (!track) return null;
@@ -113,24 +110,17 @@ function SpotifyWidgetSkeleton() {
   );
 }
 
-function SpotifyWidgetContent() {
-  const { data, error } = useSWR<{
+export default function SpotifyWidget() {
+  const { data, isLoading } = useSWR<{
     currentlyPlaying: CurrentlyPlayingResponse;
     lastPlayed: RecentlyPlayedResponse["items"][0];
   }>("/api/spotify", fetcher, {
     refreshInterval: 10000,
     revalidateOnFocus: true,
-    suspense: true,
   });
 
-  if (error || !data) return null;
-  return <SpotifyContent data={data} />;
-}
+  if (isLoading) return <SpotifyWidgetSkeleton />;
+  if (!data) return null;
 
-export default function SpotifyWidget() {
-  return (
-    <Suspense fallback={<SpotifyWidgetSkeleton />}>
-      <SpotifyWidgetContent />
-    </Suspense>
-  );
+  return <SpotifyContent {...data} />;
 }
