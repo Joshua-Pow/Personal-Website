@@ -57,7 +57,7 @@ function SpotifyContent({
           />
         </div>
 
-        <div className="flex flex-col text-sm">
+        <div className="flex min-w-0 flex-col text-sm">
           <Link
             href={track.external_urls.spotify}
             target="_blank"
@@ -94,12 +94,12 @@ function SpotifyContent({
 
 function SpotifyWidgetSkeleton() {
   return (
-    <div className="h-[104px] w-full animate-pulse rounded-lg bg-white/40 p-1">
-      <div className="relative mb-1 flex h-[72px] items-center gap-4 rounded-md bg-white/80">
+    <div className="h-[100px] w-full animate-pulse rounded-lg bg-white/40 p-1">
+      <div className="relative mb-1 flex h-[72px] items-center gap-4 rounded-md bg-gradient-to-br from-orange-50 via-orange-100 to-yellow-50 p-1 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
         <div className="h-16 w-16 flex-shrink-0 rounded-md bg-white/80" />
         <div className="flex flex-1 flex-col gap-2">
-          <div className="h-4 w-3/4 rounded bg-white/80" />
-          <div className="h-4 w-1/2 rounded bg-white/80" />
+          <div className="h-5 w-3/4 rounded bg-white/80" />
+          <div className="h-5 w-1/2 rounded bg-white/80" />
         </div>
       </div>
       <div className="flex items-center gap-2 pl-1">

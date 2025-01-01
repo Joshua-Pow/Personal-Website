@@ -10,7 +10,7 @@ export const metadata = {
 
 const page = () => {
   return (
-    <div>
+    <div className="flex h-full flex-col px-4">
       <h1 className="pt-12">History</h1>
       <AnimatedName />
       <p>
