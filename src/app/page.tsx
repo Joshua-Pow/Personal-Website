@@ -1,33 +1,61 @@
 import AnimatedTime from "@/components/AnimatedTime";
 import SpotifyWidget from "@/components/SpotifyWidget";
+import Link from "next/link";
 export default function Home() {
   return (
-    <div className="flex h-full flex-col px-4">
+    <div className="flex flex-grow flex-col px-8">
       <NameTransition />
-      <div className="my-auto flex flex-col gap-4">
-        <div className="text-center leading-relaxed tracking-tighter">
-          <p>
+      <div className="my-auto flex flex-col gap-10">
+        <div className="space-y-4 text-left leading-relaxed tracking-tighter">
+          <p className="motion-delay-[100ms] motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%]">
             Hi, my name is <span className="font-medium">Joshua Pow</span>
           </p>
-          <p>
+
+          <p className="motion-delay-[200ms] motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%]">
             I&apos;m a computer engineer from the{" "}
             <span className="text-nowrap font-medium">
               University of Toronto
             </span>
           </p>
-          <span className="flex flex-row flex-wrap justify-center gap-2 py-1">
-            <span className="flex h-8 items-center text-nowrap">
+
+          <p className="motion-delay-[350ms] motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%] flex flex-row flex-wrap justify-start gap-1">
+            <span className="flex h-6 items-center text-nowrap sm:h-8">
               I graduated
             </span>
             <AnimatedTime graduationDate={new Date("2024-06-18 11:00:00")} />
-            <span className="flex h-8 items-center text-nowrap">ago.</span>
-          </span>
+            <span className="flex h-6 items-center text-nowrap sm:h-8">
+              ago.
+            </span>
+          </p>
+
+          <p className="motion-delay-[450ms] motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%]">
+            Since then, I&apos;ve been{" "}
+            <Link
+              href="/history"
+              className="font-medium text-orange-600 hover:text-orange-500"
+            >
+              working
+            </Link>{" "}
+            at{" "}
+            <Link
+              href="https://www.npxinnovation.ca/"
+              className="font-medium text-orange-600 hover:text-orange-500"
+            >
+              Nuclear Promise X
+            </Link>
+            , a nuclear innovation company, helping to modernize the industry
+            one{" "}
+            <code className="rounded bg-slate-50/50 px-1 py-0.5 text-neutral-950 shadow-sm">
+              {"<div/>"}
+            </code>{" "}
+            at a time.
+          </p>
         </div>
 
-        <SpotifyWidget />
+        <div className="motion-delay-700 motion-duration-1500 motion-preset-blur-up">
+          <SpotifyWidget />
+        </div>
       </div>
-
-      {/* <Link href="/history">History</Link> */}
     </div>
   );
 }

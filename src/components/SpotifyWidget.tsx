@@ -115,7 +115,7 @@ export default function SpotifyWidget() {
     currentlyPlaying: CurrentlyPlayingResponse;
     lastPlayed: RecentlyPlayedResponse["items"][0];
   }>("/api/spotify", fetcher, {
-    refreshInterval: 10000,
+    refreshInterval: 30000, // 30 seconds
     revalidateOnFocus: true,
   });
 

@@ -40,10 +40,8 @@ export default function RootLayout({
     <ViewTransitions>
       <html lang="en" className={`${inter.variable} antialiased`}>
         <body className="tracking-tight antialiased">
-          <div className="relative mx-auto min-h-svh max-w-screen-sm">
-            <main className="h-[calc(100svh-24px-1rem)] w-full">
-              {children}
-            </main>
+          <div className="relative mx-auto flex min-h-svh max-w-screen-sm flex-col justify-between">
+            <main className="flex w-full flex-grow flex-col">{children}</main>
             <Footer />
             {/* TODO: Add analytics */}
             <Analytics />
@@ -62,7 +60,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="absolute bottom-0 mb-4 flex w-full items-center justify-center gap-6">
+    <footer className="mb-4 mt-8 flex w-full items-center justify-center gap-6">
       {links.map((link) => (
         <a
           key={link.href}

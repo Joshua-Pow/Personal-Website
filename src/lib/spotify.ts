@@ -63,7 +63,7 @@ async function fetchCurrentlyPlaying(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      next: { revalidate: 10 }, // Revalidate every 10 seconds
+      next: { revalidate: 30 }, // Revalidate every 30 seconds
     }
   );
 
@@ -80,7 +80,7 @@ async function fetchLastPlayed(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      next: { revalidate: 10 }, // Revalidate every 10 seconds
+      next: { revalidate: 30 }, // Revalidate every 30 seconds
     }
   );
 

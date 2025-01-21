@@ -76,43 +76,46 @@ function AnimatedTime({ graduationDate }: Props) {
   }, [graduationDate]);
 
   return (
-    <div className="inline-flex gap-1 font-mono">
-      {Object.entries(timeElapsed).map(([unit, value]) => (
-        <div key={unit} className="flex flex-col items-center">
-          <div className="relative flex items-center justify-center rounded-md bg-slate-50 px-1 shadow-sm">
-            <div className="flex h-full items-center">
-              {value
-                .toString()
-                .padStart(2, "0")
-                .split("")
-                .map((digit, idx) => (
-                  <div
-                    key={`${unit}-${idx}`}
-                    className="relative h-8 w-4 overflow-hidden"
-                  >
-                    <div
-                      className="absolute left-0 transition-transform duration-500 ease-in-out"
-                      style={{
-                        transform: `translateY(${-parseInt(digit) * 2}rem)`,
-                      }}
-                    >
-                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                        <div
-                          key={num}
-                          className="flex h-8 w-4 items-center justify-center"
+    <span className="inline-flex gap-0.5 font-mono sm:gap-1">
+      {Object.entries(timeElapsed).map(
+        ([unit, value]) =>
+          !(unit === "years" && value === 0) && (
+            <span key={unit} className="flex flex-col items-center">
+              <span className="relative flex items-center justify-center rounded-md bg-slate-50 px-1 shadow-sm">
+                <span className="flex h-full items-center">
+                  {value
+                    .toString()
+                    .padStart(2, "0")
+                    .split("")
+                    .map((digit, idx) => (
+                      <span
+                        key={`${unit}-${idx}`}
+                        className="relative h-6 w-3 overflow-hidden sm:h-8 sm:w-4"
+                      >
+                        <span
+                          className="absolute left-0 transition-transform duration-500 ease-in-out"
+                          style={{
+                            transform: `translateY(${-parseInt(digit) * (window.innerWidth >= 640 ? 2 : 1.5)}rem)`,
+                          }}
                         >
-                          {num}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-          <span className="mt-1 text-xs">{unit}</span>
-        </div>
-      ))}
-    </div>
+                          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                            <span
+                              key={num}
+                              className="flex h-6 w-3 items-center justify-center text-xs sm:h-8 sm:w-4 sm:text-base"
+                            >
+                              {num}
+                            </span>
+                          ))}
+                        </span>
+                      </span>
+                    ))}
+                </span>
+              </span>
+              <span className="mt-1 text-[8px] sm:text-xs">{unit}</span>
+            </span>
+          )
+      )}
+    </span>
   );
 }
 
