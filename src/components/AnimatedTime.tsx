@@ -93,10 +93,12 @@ function AnimatedTime({ graduationDate }: Props) {
                         className="relative h-6 w-3 overflow-hidden sm:h-8 sm:w-4"
                       >
                         <span
-                          className="absolute left-0 transition-transform duration-500 ease-in-out"
-                          style={{
-                            transform: `translateY(${-parseInt(digit) * (window.innerWidth >= 640 ? 2 : 1.5)}rem)`,
-                          }}
+                          className="absolute left-0 -translate-y-[calc(1.5rem*var(--digit))] transition-transform duration-500 ease-in-out sm:-translate-y-[calc(2rem*var(--digit))]"
+                          style={
+                            {
+                              "--digit": parseInt(digit),
+                            } as React.CSSProperties
+                          }
                         >
                           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                             <span
