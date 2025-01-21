@@ -39,7 +39,7 @@ export default function Home() {
             at{" "}
             <Link
               href="https://www.npxinnovation.ca/"
-              className="font-medium text-orange-600 hover:text-orange-500"
+              className="text-nowrap font-medium text-orange-600 hover:text-orange-500"
             >
               Nuclear Promise X
             </Link>
