@@ -1,24 +1,25 @@
 import AnimatedTime from "@/components/AnimatedTime";
 import SpotifyWidget from "@/components/SpotifyWidget";
 import Link from "next/link";
+
 export default function Home() {
   return (
     <div className="flex flex-grow flex-col px-8">
       <NameTransition />
       <div className="my-auto flex flex-col gap-10">
         <div className="space-y-4 text-left leading-relaxed tracking-tighter">
-          <p className="motion-delay-[100ms] motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%]">
+          <p className="motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-1000 motion-delay-[500ms]">
             Hi, my name is <span className="font-medium">Joshua Pow</span>
           </p>
 
-          <p className="motion-delay-[200ms] motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%]">
+          <p className="motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-1000 motion-delay-[1500ms]">
             I&apos;m a computer engineer from the{" "}
             <span className="text-nowrap font-medium">
               University of Toronto
             </span>
           </p>
 
-          <p className="motion-delay-[350ms] motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%] flex flex-row flex-wrap justify-start gap-1">
+          <p className="flex flex-row flex-wrap justify-start gap-1 motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-1000 motion-delay-[2750ms]">
             <span className="flex h-6 items-center text-nowrap sm:h-8">
               I graduated
             </span>
@@ -28,7 +29,7 @@ export default function Home() {
             </span>
           </p>
 
-          <p className="motion-delay-[450ms] motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%]">
+          <p className="motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-1000 motion-delay-[4000ms]">
             Since then, I&apos;ve been{" "}
             <Link
               href="/history"
@@ -52,7 +53,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="motion-delay-700 motion-duration-1500 motion-preset-blur-up">
+        <div className="motion-preset-focus-lg motion-duration-700 motion-delay-[8000ms] motion-ease-in">
           <SpotifyWidget />
         </div>
       </div>
@@ -62,25 +63,25 @@ export default function Home() {
 
 function NameTransition() {
   return (
-    <h1 className="transition-element mb-8 self-start pt-6 font-medium sm:pt-12">
+    <h1 className="transition-element mb-8 w-full self-start pt-6 font-medium sm:pt-12">
       <span className="sr-only">Joshua Pow</span>
       <span aria-hidden="true" className="group relative block overflow-hidden">
-        <span className="inline-block transition-all duration-300 ease-in-out group-hover:-translate-y-full">
+        <span className="inline-block">
           {"Joshua Pow".split("").map((letter, index) => (
             <span
               key={index}
-              className="inline-block"
+              className="inline-block transition-all duration-300 ease-in-out group-hover:-translate-y-full"
               style={{ transitionDelay: `${index * 25}ms` }}
             >
               {letter === " " ? "\u00A0" : letter}
             </span>
           ))}
         </span>
-        <span className="absolute left-0 top-0 inline-block translate-y-full transition-all duration-300 ease-in-out group-hover:translate-y-0">
+        <span className="absolute left-0 top-0">
           {"joshpow".split("").map((letter, index) => (
             <span
               key={index}
-              className="inline-block"
+              className="inline-block translate-y-full transition-all duration-300 ease-in-out group-hover:translate-y-0"
               style={{ transitionDelay: `${index * 25}ms` }}
             >
               {letter}

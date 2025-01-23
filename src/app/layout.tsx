@@ -67,7 +67,7 @@ const Footer = () => {
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-400 transition-colors duration-200 hover:text-blue-500"
+          className="text-gray-400 transition-colors duration-200 hover:text-orange-500"
         >
           {link.label}
         </a>
