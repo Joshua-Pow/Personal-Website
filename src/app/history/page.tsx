@@ -64,13 +64,13 @@ const page = () => {
         description={
           <>
             <p>
-              I spent the majoirty of my time building a delivery management
+              I spent the majority of my time building a delivery management
               which helped organize the allocation of drivers, trucks, trailers
               and nuclear waste and components.
             </p>
             <p className="mt-6">
               I created an interactive calendar which was the main interface to
-              schedule shipemnts and deliveries with a drag and drop interface
+              schedule shipments and deliveries with a drag and drop interface
               using{" "}
               <a
                 href="https://fullcalendar.io/"
@@ -192,21 +192,21 @@ const page = () => {
               React.
             </p>
             <p className="mt-6">
-              My team was the FICC Cash anaylstics team. Specifically we
-              maintined a service which simplified the pricing and risk analysis
-              of bonds for other internal teams through. (Not exactly the most
-              UI friendly team as 85% of the work was backend)
+              My team was the FICC Cash analytics team. Specifically we
+              maintained a service which simplified the pricing and risk
+              analysis of bonds for other internal teams through. (Not exactly
+              the most UI friendly team as 85% of the work was backend)
             </p>
             <p className="mt-6">
               I spent half of my time working on performance analysis, which
               lead me to determine our JSON parsing was one of the largest
-              drawbacks. Leading me to cut our avergae execution time to 1/3 of
+              drawbacks. Leading me to cut our average execution time to 1/3 of
               the original time.
             </p>
             <p className="mt-6">
               The rest of my time was spent learning React and creating my first
-              every react app! I basically built a global dashboard my team
-              could use to query logs accross all of our servers whether it be
+              ever react app! I basically built a global dashboard my team could
+              use to query logs across all of our servers whether it be
               development, testing or production. As well as monitoring each
               individual team who utilized our systems and the rates at which
               they consumed.
