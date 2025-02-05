@@ -53,7 +53,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="motion-preset-focus-lg motion-duration-700 motion-delay-[8000ms] motion-ease-in">
+        <div className="motion-preset-focus-lg motion-duration-700 motion-delay-[5500ms] motion-ease-in">
           <SpotifyWidget />
         </div>
       </div>
