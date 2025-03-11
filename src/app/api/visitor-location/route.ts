@@ -2,19 +2,28 @@ import { NextResponse } from "next/server";
 import { geolocation } from "@vercel/functions";
 import { formatLocation } from "@/lib/geoUtils";
 
-// In-memory storage for previous visitor location
-let previousVisitorLocation: string | null = null;
-// In-memory storage for current visitor location
-let currentVisitorLocation: string | null = null;
+// In-memory storage for previous visitor location data
+type VisitorData = {
+  location: string;
+  latitude?: string;
+  longitude?: string;
+};
+
+let previousVisitorData: VisitorData | null = null;
+let currentVisitorData: VisitorData | null = null;
 
 export async function GET() {
   // Return previous visitor's location if available
-  if (previousVisitorLocation) {
-    return NextResponse.json({ location: previousVisitorLocation });
+  if (previousVisitorData) {
+    return NextResponse.json(previousVisitorData);
   }
 
   // Default response if no previous visitor has been recorded yet
-  return NextResponse.json({ location: "somewhere on Earth" });
+  return NextResponse.json({
+    location: "somewhere on Earth",
+    latitude: "0",
+    longitude: "0",
+  });
 }
 
 export async function POST(request: Request) {
@@ -24,17 +33,27 @@ export async function POST(request: Request) {
   // Format the location string using our utility
   const location = formatLocation(geo);
 
+  // Extract coordinates
+  const latitude = geo.latitude;
+  const longitude = geo.longitude;
+
   // Move current visitor to previous visitor
-  if (currentVisitorLocation) {
-    previousVisitorLocation = currentVisitorLocation;
+  if (currentVisitorData) {
+    previousVisitorData = currentVisitorData;
   }
 
-  // Update the current visitor location
-  currentVisitorLocation = location;
+  // Update the current visitor data
+  currentVisitorData = {
+    location,
+    latitude,
+    longitude,
+  };
 
   return NextResponse.json({
     success: true,
     currentLocation: location,
-    previousLocation: previousVisitorLocation || "nowhere yet",
+    previousLocation: previousVisitorData?.location || "nowhere yet",
+    previousLatitude: previousVisitorData?.latitude || "0",
+    previousLongitude: previousVisitorData?.longitude || "0",
   });
 }

@@ -1,6 +1,6 @@
 import AnimatedTime from "@/components/AnimatedTime";
 import SpotifyWidget from "@/components/SpotifyWidget";
-import LastVisitor from "@/components/LastVisitor";
+import VisitorGlobe from "@/components/VisitorGlobe";
 import Link from "next/link";
 
 export default function Home() {
@@ -59,8 +59,8 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="mb-4 flex justify-center">
-        <LastVisitor />
+      <div className="mb-4 flex flex-col items-center">
+        <VisitorGlobe />
       </div>
     </div>
   );
