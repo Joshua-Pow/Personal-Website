@@ -1,5 +1,6 @@
 import AnimatedTime from "@/components/AnimatedTime";
 import SpotifyWidget from "@/components/SpotifyWidget";
+import LastVisitor from "@/components/LastVisitor";
 import Link from "next/link";
 
 export default function Home() {
@@ -56,6 +57,10 @@ export default function Home() {
         <div className="motion-preset-focus-lg motion-duration-700 motion-delay-[5500ms] motion-ease-in">
           <SpotifyWidget />
         </div>
+      </div>
+
+      <div className="mb-4 flex justify-center">
+        <LastVisitor />
       </div>
     </div>
   );
