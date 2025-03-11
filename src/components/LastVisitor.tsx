@@ -3,37 +3,46 @@
 import { useEffect, useState } from "react";
 
 export default function LastVisitor() {
-  const [lastVisitorLocation, setLastVisitorLocation] = useState<string | null>(
-    null
-  );
+  const [previousVisitorLocation, setPreviousVisitorLocation] = useState<
+    string | null
+  >(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchVisitorInfo() {
+    async function recordAndFetchVisitorInfo() {
       try {
-        const response = await fetch("/api/visitor-location");
-        if (!response.ok) throw new Error("Failed to fetch visitor location");
+        // Record the current visitor's location, which will return previous visitor info
+        const recordResponse = await fetch("/api/visitor-location", {
+          method: "POST",
+        });
 
-        const data = await response.json();
-        setLastVisitorLocation(data.location);
+        if (recordResponse.ok) {
+          const data = await recordResponse.json();
+          // The previousLocation property contains the location of the previous visitor, not the current one
+          setPreviousVisitorLocation(data.previousLocation);
+        }
       } catch (error) {
-        console.error("Error fetching visitor location:", error);
-        setLastVisitorLocation("somewhere on Earth");
+        console.error("Error with visitor location:", error);
+        setPreviousVisitorLocation("somewhere on Earth");
       } finally {
         setIsLoading(false);
       }
     }
 
-    fetchVisitorInfo();
+    recordAndFetchVisitorInfo();
   }, []);
 
-  if (isLoading) {
-    return null; // Don't show anything while loading
+  if (
+    isLoading ||
+    !previousVisitorLocation ||
+    previousVisitorLocation === "nowhere yet"
+  ) {
+    return null; // Don't show anything while loading or if there's no previous visitor
   }
 
   return (
     <div className="mt-4 text-xs text-neutral-400 opacity-50 transition-opacity hover:opacity-100">
-      <p>Last visitor was from {lastVisitorLocation}</p>
+      <p>Last visitor was from {previousVisitorLocation}</p>
     </div>
   );
 }
