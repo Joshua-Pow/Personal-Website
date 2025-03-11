@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { geolocation } from "@vercel/functions";
+import { formatLocation } from "@/lib/geoUtils";
 
 // In-memory storage for previous visitor location
 let previousVisitorLocation: string | null = null;
@@ -18,15 +19,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   // Get geo information using Vercel's helper
-  const { city, region, country } = geolocation(request);
+  const geo = geolocation(request);
 
-  // Format the location string
-  let location = country || "unknown country";
-  if (city) {
-    location = city + (region ? `, ${region}` : "") + `, ${location}`;
-  } else if (region) {
-    location = `${region}, ${location}`;
-  }
+  // Format the location string using our utility
+  const location = formatLocation(geo);
 
   // Move current visitor to previous visitor
   if (currentVisitorLocation) {
