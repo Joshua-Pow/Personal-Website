@@ -55,7 +55,7 @@ export default function RootLayout({
 const Footer = () => {
   const links = [
     { href: "https://x.com/joshpow_", label: "@JoshPow" },
-    { href: "https://github.com/joshuapow", label: "github" },
+    { href: "https://github.com/joshua-pow", label: "github" },
     { href: "https://linkedin.com/in/joshuapow", label: "linkedin" },
   ];
 
