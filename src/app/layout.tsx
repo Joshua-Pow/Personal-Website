@@ -3,11 +3,17 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ViewTransitions } from "next-view-transitions";
 import { Analytics } from "@vercel/analytics/react";
+import { ProgressiveBlur } from "@/components/ProgressiveBlur";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
+
+// export const ebGaramond = EB_Garamond({
+//   variable: "--font-garamond",
+//   subsets: ["latin"],
+// });
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -46,6 +52,10 @@ export default function RootLayout({
             {/* TODO: Add analytics */}
             <Analytics />
           </div>
+          <ProgressiveBlur
+            height="12%"
+            blurLevels={[0.5, 1, 2, 4, 8, 16, 32, 64]}
+          />
         </body>
       </html>
     </ViewTransitions>
@@ -60,7 +70,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="mb-4 mt-8 flex w-full items-center justify-center gap-6">
+    <footer className="mb-24 mt-8 flex w-full items-center justify-center gap-6">
       {links.map((link) => (
         <a
           key={link.href}

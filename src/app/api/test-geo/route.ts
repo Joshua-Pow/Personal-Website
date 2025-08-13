@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { geolocation } from "@vercel/functions";
-import { formatLocation, getRegionName } from "@/lib/geoUtils";
+import { formatLocation, getRegionName } from "@/lib/utils/geoUtils";
 import iso3166 from "iso-3166-2";
 
 export async function GET(request: Request) {

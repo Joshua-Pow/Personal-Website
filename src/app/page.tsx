@@ -9,18 +9,26 @@ export default function Home() {
       <NameTransition />
       <div className="my-auto flex flex-col gap-10">
         <div className="space-y-4 text-left leading-relaxed tracking-tighter">
-          <p className="motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-1000 motion-delay-[500ms]">
+          <p
+            className={`motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-[2000ms] motion-ease-out`}
+          >
             Hi, my name is <span className="font-medium">Joshua Pow</span>
           </p>
 
-          <p className="motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-1000 motion-delay-[1500ms]">
+          <p
+            className={`motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-[2000ms] motion-delay-[200ms] motion-ease-out`}
+          >
             I&apos;m a computer engineer from the{" "}
             <span className="text-nowrap font-medium">
-              University of Toronto
+              University of Toronto{" "}
             </span>
+            and an aspiring{" "}
+            <span className="text-nowrap font-medium">Design Engineer</span>.
           </p>
 
-          <p className="flex flex-row flex-wrap justify-start gap-1 motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-1000 motion-delay-[2750ms]">
+          <p
+            className={`flex flex-row flex-wrap justify-start gap-1 motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-[2000ms] motion-delay-[600ms] motion-ease-out`}
+          >
             <span className="flex h-6 items-center text-nowrap sm:h-8">
               I graduated
             </span>
@@ -30,7 +38,9 @@ export default function Home() {
             </span>
           </p>
 
-          <p className="motion-translate-x-in-[0%] motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-1000 motion-delay-[4000ms]">
+          <p
+            className={`motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-[2000ms] motion-delay-[800ms] motion-ease-out`}
+          >
             Since then, I&apos;ve been{" "}
             <Link
               href="/history"
@@ -54,13 +64,12 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="motion-preset-focus-lg motion-duration-700 motion-delay-[5500ms] motion-ease-in">
+        <div className="motion-preset-focus-lg motion-duration-700 motion-delay-[1600ms] motion-ease-out">
           <SpotifyWidget />
         </div>
-      </div>
-
-      <div className="mb-4 flex flex-col items-center">
-        <VisitorGlobe />
+        <div className="motion-preset-focus-lg mb-4 flex flex-col items-center motion-duration-700 motion-delay-[1600ms] motion-ease-out">
+          <VisitorGlobe />
+        </div>
       </div>
     </div>
   );

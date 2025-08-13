@@ -3,7 +3,7 @@ import iso3166 from "iso-3166-2";
 /**
  * Format a location string using available geolocation data
  *
- * @param geo The geolocation data from Vercel
+ * @param geo The geolocation data from Vercel or local API
  * @returns A formatted location string
  */
 export function formatLocation(geo: {

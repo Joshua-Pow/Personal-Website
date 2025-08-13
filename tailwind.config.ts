@@ -12,6 +12,9 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      fontFamily: {
+        serif: ["var(--font-garamond)"],
+      },
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports

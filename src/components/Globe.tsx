@@ -6,7 +6,7 @@ import { useSpring } from "@react-spring/web";
 import { VisitorData } from "./LastVisitor";
 
 interface GlobeProps {
-  visitorData: VisitorData;
+  visitorData?: VisitorData;
 }
 
 export default function Globe({ visitorData }: GlobeProps) {
@@ -23,10 +23,6 @@ export default function Globe({ visitorData }: GlobeProps) {
       friction: 40,
     },
   }));
-
-  // Convert the visitor's coordinates to numbers
-  const markerLatitude = parseFloat(visitorData.latitude) || 0;
-  const markerLongitude = parseFloat(visitorData.longitude) || 0;
 
   useEffect(() => {
     let phi = 0;
@@ -63,7 +59,17 @@ export default function Globe({ visitorData }: GlobeProps) {
       glowColor: [0.8, 0.8, 0.8],
       offset: [0, 0], // Center the globe in the canvas
       scale: 0.9, // Slightly scale down to ensure it fits
-      markers: [{ location: [markerLatitude, markerLongitude], size: 0.06 }],
+      markers: visitorData
+        ? [
+            {
+              location: [
+                parseFloat(visitorData.latitude),
+                parseFloat(visitorData.longitude),
+              ],
+              size: 0.1,
+            },
+          ]
+        : [],
       onRender: (state) => {
         // This is called on each animation frame
         // Add slight automatic rotation
@@ -114,7 +120,7 @@ export default function Globe({ visitorData }: GlobeProps) {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("resize", onResize);
     };
-  }, [api, r, markerLatitude, markerLongitude]);
+  }, [api, r, visitorData]);
 
   return (
     <div className="flex h-full w-full items-center justify-center">
