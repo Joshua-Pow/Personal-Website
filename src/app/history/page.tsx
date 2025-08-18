@@ -38,7 +38,7 @@ const page = () => {
               nuclear terminology.
             </p>
             <p className="mt-6">
-              I am currently working on a Equipment Stats Log which is a
+              I am currently working on an Equipment Stats Log which is a
               dashboard for tracking the live status of components and their
               sensors accross nuclear facilities.
             </p>
@@ -65,8 +65,8 @@ const page = () => {
           <>
             <p>
               I spent the majority of my time building a delivery management
-              which helped organize the allocation of drivers, trucks, trailers
-              and nuclear waste and components.
+              system which helped organize the allocation of drivers, trucks, trailers,
+               nuclear waste and components.
             </p>
             <p className="mt-6">
               I created an interactive calendar which was the main interface to
@@ -104,9 +104,9 @@ const page = () => {
         description={
           <>
             <p>
-              I worked on the Data Fabrication team building as an intern
+              I worked on the Data Fabrication team as an intern
               helping build their internal UI which all of capital markets uses
-              to manage their databases from trading systems, risk analysis
+              to manage their databases. Such as trading systems, risk analysis
               models all the way to logs of miscellaneous services.
             </p>
             <p className="mt-6">
@@ -194,7 +194,7 @@ const page = () => {
             <p className="mt-6">
               My team was the FICC Cash analytics team. Specifically we
               maintained a service which simplified the pricing and risk
-              analysis of bonds for other internal teams through. (Not exactly
+              analysis of bonds for other internal teams through an API. (Not exactly
               the most UI friendly team as 85% of the work was backend)
             </p>
             <p className="mt-6">
@@ -205,7 +205,7 @@ const page = () => {
             </p>
             <p className="mt-6">
               The rest of my time was spent learning React and creating my first
-              ever react app! I basically built a global dashboard my team could
+              ever React app! I basically built a global dashboard my team could
               use to query logs across all of our servers whether it be
               development, testing or production. As well as monitoring each
               individual team who utilized our systems and the rates at which
