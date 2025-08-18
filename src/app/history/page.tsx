@@ -26,7 +26,31 @@ const page = () => {
         description={
           <>
             <p>
-              I worked on our nuclear AI product{" "}
+              Currently, I am working on building and designing a new Knowledge
+              Hub RAG LLM interface for internal employeess to query their
+              companies procedures, standards and data. This is being built in
+              <code>typescript</code> and <code>python</code> with the help of
+              NextJS, Azure Functions and Azure OpenAI for serverless AI.
+            </p>
+            <p className="mt-6">
+              I also designed, developed and deployed an internal Equipment
+              Stats Log for{" "}
+              <a
+                href="https://www.brucepower.com/"
+                className="text-blue-500 hover:underline"
+              >
+                Bruce Power
+              </a>
+              . Specifically, a dashboard for tracking the live status of
+              components and their sensors accross nuclear facilities. The sole
+              purpose was to aid Nuclear Operators in recording and hand off
+              intra day component updates. It was designed in Figma, developed
+              in <code>c#</code>, <code>html</code>, <code>css</code> and{" "}
+              <code>javascript</code> and deployed using Azure DevOps Pipelines
+              as well as Azure App Services.
+            </p>
+            <p className="mt-6">
+              Additionally, I worked on our nuclear AI product{" "}
               <a
                 href="https://npxai.com"
                 className="text-blue-500 hover:underline"
@@ -37,15 +61,11 @@ const page = () => {
               translation service trained on nuclear documents to learn specific
               nuclear terminology.
             </p>
-            <p className="mt-6">
-              I am currently working on an Equipment Stats Log which is a
-              dashboard for tracking the live status of components and their
-              sensors accross nuclear facilities.
-            </p>
           </>
         }
         technologies={[
           { logo: "Next", name: "Next.js" },
+          { logo: "Figma", name: "Figma" },
           { logo: "TypeScript", name: "TypeScript" },
           { logo: "Tailwind", name: "Tailwind" },
           { logo: "Prisma", name: "Prisma" },
@@ -65,13 +85,13 @@ const page = () => {
           <>
             <p>
               I spent the majority of my time building a delivery management
-              system which helped organize the allocation of drivers, trucks, trailers,
-               nuclear waste and components.
+              system which helped organize the allocation of drivers, trucks,
+              trailers, nuclear waste and components.
             </p>
             <p className="mt-6">
-              I created an interactive calendar which was the main interface to
-              schedule shipments and deliveries with a drag and drop interface
-              using{" "}
+              I created an interactive calendar in <code>typescript</code> which
+              was the main interface to schedule shipments and deliveries with a
+              drag and drop interface using{" "}
               <a
                 href="https://fullcalendar.io/"
                 className="text-blue-500 hover:underline"
@@ -104,10 +124,10 @@ const page = () => {
         description={
           <>
             <p>
-              I worked on the Data Fabrication team as an intern
-              helping build their internal UI which all of capital markets uses
-              to manage their databases. Such as trading systems, risk analysis
-              models all the way to logs of miscellaneous services.
+              I worked on the Data Fabrication team as an intern helping build
+              their internal UI which all of capital markets uses to manage
+              their databases. Such as trading systems, risk analysis models all
+              the way to logs of miscellaneous services.
             </p>
             <p className="mt-6">
               The majority of my work was spent implementing a feature to
@@ -194,8 +214,8 @@ const page = () => {
             <p className="mt-6">
               My team was the FICC Cash analytics team. Specifically we
               maintained a service which simplified the pricing and risk
-              analysis of bonds for other internal teams through an API. (Not exactly
-              the most UI friendly team as 85% of the work was backend)
+              analysis of bonds for other internal teams through an API. (Not
+              exactly the most UI friendly team as 85% of the work was backend)
             </p>
             <p className="mt-6">
               I spent half of my time working on performance analysis, which

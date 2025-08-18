@@ -12,6 +12,30 @@ export const Logos = {
       <path d="M64 0A64 64 0 0 0 0 64a64 64 0 0 0 64 64 64 64 0 0 0 35.508-10.838L47.014 49.34v40.238H38.4V38.4h10.768l57.125 73.584A64 64 0 0 0 128 64 64 64 0 0 0 64 0Zm17.777 38.4h8.534v48.776L81.777 75.97Zm24.18 73.92-.111.096a64 64 0 0 0 .111-.096z"></path>
     </svg>
   ),
+  Figma: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 128 128" fill="currentColor" {...props}>
+      <path
+        fill="#0acf83"
+        d="M45.5 129c11.9 0 21.5-9.6 21.5-21.5V86H45.5C33.6 86 24 95.6 24 107.5S33.6 129 45.5 129zm0 0"
+      ></path>
+      <path
+        fill="#a259ff"
+        d="M24 64.5C24 52.6 33.6 43 45.5 43H67v43H45.5C33.6 86 24 76.4 24 64.5zm0 0"
+      ></path>
+      <path
+        fill="#f24e1e"
+        d="M24 21.5C24 9.6 33.6 0 45.5 0H67v43H45.5C33.6 43 24 33.4 24 21.5zm0 0"
+      ></path>
+      <path
+        fill="#ff7262"
+        d="M67 0h21.5C100.4 0 110 9.6 110 21.5S100.4 43 88.5 43H67zm0 0"
+      ></path>
+      <path
+        fill="#1abcfe"
+        d="M110 64.5c0 11.9-9.6 21.5-21.5 21.5S67 76.4 67 64.5 76.6 43 88.5 43 110 52.6 110 64.5zm0 0"
+      ></path>
+    </svg>
+  ),
   Azure: (props: React.SVGProps<SVGSVGElement>) => (
     <svg viewBox="0 0 128 128" {...props}>
       <defs>

@@ -30,6 +30,7 @@ body {
 
 code {
   font-family: "Menlo", "Monaco", "Courier New", monospace;
+  @apply rounded bg-slate-50/50 px-1 py-0.5 text-neutral-950 shadow-sm;
 }
 
 .transition-element {
