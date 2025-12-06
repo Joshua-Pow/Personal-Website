@@ -10,7 +10,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@react-spring/web": "^9.7.5",
+    "@react-spring/web": "^10.0.3",
     "@types/iso-3166-2": "^1.0.3",
     "@upstash/redis": "^1.35.3",
     "@vercel/analytics": "^1.4.1",
@@ -19,7 +19,7 @@
     "cobe": "^0.6.3",
     "iso-3166-2": "^1.0.0",
     "next": "^15.4.8",
-    "next-view-transitions": "^0.3.4",
+    "next-view-transitions": "^0.3.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "swr": "^2.3.0",
