@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { type Geo, geolocation } from "@vercel/functions";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { formatLocation } from "@/lib/utils/geoUtils";
 
 // Internal type for storage
@@ -28,42 +28,38 @@ const localMemoryStore: { [key: string]: VisitorData } = {};
 const CURRENT_VISITOR_KEY = "current-visitor";
 const PREVIOUS_VISITOR_KEY = "previous-visitor";
 
-// Helper to get KV namespace from the request context
-function getKV(request: Request): KVNamespace | null {
-  // In Cloudflare Workers with OpenNext, bindings are available via the env
-  // @ts-expect-error - OpenNext Cloudflare binding access
-  const env = request.env;
-  return env?.VISITOR_LOCATION || null;
-}
-
-export async function POST(
-  request: Request
-): Promise<NextResponse<VisitorLocationResponse>> {
+export async function POST(): Promise<NextResponse<VisitorLocationResponse>> {
   try {
-    let geo: Geo;
-    let location: ReturnType<typeof formatLocation>;
-    let latitude: Geo["latitude"];
-    let longitude: Geo["longitude"];
+    // Get Cloudflare context for geolocation and KV access
+    const { env, cf } = getCloudflareContext();
+
+    let location: string;
+    let latitude: string | undefined;
+    let longitude: string | undefined;
 
     if (isLocalDevelopment) {
       // Mock location as Toronto, Canada for local development
-      geo = {
+      const mockGeo = {
         city: "Toronto",
         country: "CA",
         countryRegion: "ON",
         flag: "🇨🇦",
-        latitude: "43.6532",
-        longitude: "-79.3832",
+      };
+      location = formatLocation(mockGeo);
+      latitude = "43.6532";
+      longitude = "-79.3832";
+    } else {
+      // Get geo information from Cloudflare's cf object
+      // cf object contains: city, country, region, latitude, longitude, etc.
+      const geo = {
+        city: cf?.city,
+        country: cf?.country,
+        countryRegion: cf?.region,
+        flag: getCountryFlag(cf?.country),
       };
       location = formatLocation(geo);
-      latitude = geo.latitude;
-      longitude = geo.longitude;
-    } else {
-      // Get geo information using Vercel's helper in production
-      geo = geolocation(request);
-      location = formatLocation(geo);
-      latitude = geo.latitude;
-      longitude = geo.longitude;
+      latitude = cf?.latitude;
+      longitude = cf?.longitude;
     }
 
     let currentVisitorData: VisitorData | null = null;
@@ -93,7 +89,7 @@ export async function POST(
       previousVisitorData = localMemoryStore[PREVIOUS_VISITOR_KEY] || null;
     } else {
       // Use Cloudflare KV for production
-      const kv = getKV(request);
+      const kv = env.VISITOR_LOCATION;
 
       if (kv) {
         // Get current visitor data
@@ -145,4 +141,16 @@ export async function POST(
       currentLocation: "unknown location",
     });
   }
+}
+
+// Helper function to get country flag emoji from country code
+function getCountryFlag(countryCode?: string): string {
+  if (!countryCode) return "";
+
+  // Convert country code to flag emoji
+  // Each country code letter maps to a regional indicator symbol
+  const codePoints = [...countryCode.toUpperCase()].map(
+    (char) => 127397 + char.charCodeAt(0)
+  );
+  return String.fromCodePoint(...codePoints);
 }

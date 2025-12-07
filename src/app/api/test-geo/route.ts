@@ -1,11 +1,33 @@
 import { NextResponse } from "next/server";
-import { geolocation } from "@vercel/functions";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { formatLocation, getRegionName } from "@/lib/utils/geoUtils";
 import iso3166 from "iso-3166-2";
 
-export async function GET(request: Request) {
-  // Get geolocation data from the request
-  const geo = geolocation(request);
+// Helper function to get country flag emoji from country code
+function getCountryFlag(countryCode?: string): string {
+  if (!countryCode) return "";
+
+  // Convert country code to flag emoji
+  // Each country code letter maps to a regional indicator symbol
+  const codePoints = [...countryCode.toUpperCase()].map(
+    (char) => 127397 + char.charCodeAt(0)
+  );
+  return String.fromCodePoint(...codePoints);
+}
+
+export async function GET() {
+  // Get Cloudflare context which contains cf object with geolocation data
+  const { cf } = getCloudflareContext();
+
+  // Build geo object from Cloudflare's cf properties
+  const geo = {
+    city: cf?.city,
+    country: cf?.country,
+    countryRegion: cf?.region,
+    flag: getCountryFlag(cf?.country),
+    latitude: cf?.latitude,
+    longitude: cf?.longitude,
+  };
 
   // Format the location using our utility
   const formattedLocation = formatLocation(geo);
