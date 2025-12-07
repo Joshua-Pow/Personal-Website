@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import useSWR from "swr";
-import {
+import type {
+  SpotifyApiResponse,
   CurrentlyPlayingResponse,
   RecentlyPlayedResponse,
 } from "@/lib/spotify";
@@ -31,14 +32,20 @@ function formatLastPlayedTime(timestamp: string | undefined) {
   return `${formatted} ${tzString}`;
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = async (url: string): Promise<SpotifyApiResponse> => {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`HTTP error! status: ${res.status}`);
+  }
+  return res.json();
+};
 
 function SpotifyContent({
   currentlyPlaying,
   lastPlayed,
 }: {
-  currentlyPlaying: CurrentlyPlayingResponse;
-  lastPlayed: RecentlyPlayedResponse["items"][0];
+  currentlyPlaying: CurrentlyPlayingResponse | null;
+  lastPlayed: RecentlyPlayedResponse["items"][0] | null;
 }) {
   const track = currentlyPlaying?.item ?? lastPlayed?.track;
 
@@ -113,13 +120,14 @@ function SpotifyWidgetSkeleton() {
 }
 
 export default function SpotifyWidget() {
-  const { data, isLoading } = useSWR<{
-    currentlyPlaying: CurrentlyPlayingResponse;
-    lastPlayed: RecentlyPlayedResponse["items"][0];
-  }>("/api/spotify", fetcher, {
-    refreshInterval: 30000, // 30 seconds
-    revalidateOnFocus: true,
-  });
+  const { data, isLoading } = useSWR<SpotifyApiResponse>(
+    "/api/spotify",
+    fetcher,
+    {
+      refreshInterval: 30000, // 30 seconds
+      revalidateOnFocus: true,
+    }
+  );
 
   if (isLoading) return <SpotifyWidgetSkeleton />;
   if (!data) return null;

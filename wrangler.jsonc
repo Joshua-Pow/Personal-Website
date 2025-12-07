@@ -19,4 +19,11 @@
     // see https://opennext.js.org/cloudflare/howtos/image
     "binding": "IMAGES",
   },
+  "kv_namespaces": [
+    {
+      "binding": "VISITOR_LOCATION",
+      "id": "b06dc77c3fd14e1d888e2416d6dbe60d",
+      "preview_id": "12903b1ce969400281ef34d6f5946b41",
+    },
+  ],
 }

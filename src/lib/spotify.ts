@@ -6,7 +6,7 @@ interface SpotifyToken {
   expires_in: number;
 }
 
-interface SpotifyTrack {
+export interface SpotifyTrack {
   name: string;
   artists: { name: string }[];
   album: {
@@ -28,6 +28,11 @@ export interface RecentlyPlayedResponse {
     track: SpotifyTrack;
     played_at: string;
   }[];
+}
+
+export interface SpotifyApiResponse {
+  currentlyPlaying: CurrentlyPlayingResponse | null;
+  lastPlayed: RecentlyPlayedResponse["items"][0] | null;
 }
 
 const client_id = process.env.SPOTIFY_CLIENT_ID!;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { VisitorLocationResponse } from "@/app/api/visitor-location/route";
 
 export type VisitorData = {
   location: string;
@@ -21,22 +22,31 @@ export default function LastVisitor() {
           method: "POST",
         });
 
-        if (recordResponse.ok) {
-          const data = await recordResponse.json();
-          // Extract data for previous visitor
+        if (!recordResponse.ok) {
+          throw new Error(`HTTP error! status: ${recordResponse.status}`);
+        }
+
+        const data: VisitorLocationResponse = await recordResponse.json();
+
+        // Extract data for previous visitor if available
+        if (
+          data.previousLocation &&
+          data.previousLatitude &&
+          data.previousLongitude
+        ) {
           setPreviousVisitorData({
             location: data.previousLocation,
-            latitude: data.previousLatitude || "0",
-            longitude: data.previousLongitude || "0",
+            latitude: data.previousLatitude,
+            longitude: data.previousLongitude,
           });
+        } else {
+          // No previous visitor data available
+          setPreviousVisitorData(null);
         }
       } catch (error) {
-        console.error("Error with visitor location:", error);
-        setPreviousVisitorData({
-          location: "somewhere on Earth",
-          latitude: "0",
-          longitude: "0",
-        });
+        console.error("Error fetching visitor location:", error);
+        // Set null to hide the component on error
+        setPreviousVisitorData(null);
       } finally {
         setIsLoading(false);
       }
@@ -45,11 +55,7 @@ export default function LastVisitor() {
     recordAndFetchVisitorInfo();
   }, []);
 
-  if (
-    isLoading ||
-    !previousVisitorData ||
-    previousVisitorData.location === "nowhere yet"
-  ) {
+  if (isLoading || !previousVisitorData) {
     return null; // Don't show anything while loading or if there's no previous visitor
   }
 
