@@ -35,6 +35,10 @@ export const metadata: Metadata = {
     template: "%s | Joshua Pow",
   },
   description: "Joshua Pow is a computer engineer and web developer.",
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({
