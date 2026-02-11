@@ -37,7 +37,7 @@ const page = () => {
               Stats Log for{" "}
               <a
                 href="https://www.brucepower.com/"
-                className="font-medium text-blue-500 transition-all duration-200 ease-out hover:text-blue-400 hover:underline active:scale-[0.98]"
+                className="font-medium text-blue-500 transition-all duration-200 ease-out hover:underline active:scale-[0.98]"
               >
                 Bruce Power
               </a>
@@ -53,7 +53,7 @@ const page = () => {
               Additionally, I worked on our nuclear AI product{" "}
               <a
                 href="https://npxai.com"
-                className="font-medium text-blue-500 transition-all duration-200 ease-out hover:text-blue-400 hover:underline active:scale-[0.98]"
+                className="font-medium text-blue-500 transition-all duration-200 ease-outhover:underline active:scale-[0.98]"
               >
                 NPX AI
               </a>{" "}
@@ -94,7 +94,7 @@ const page = () => {
               drag and drop interface using{" "}
               <a
                 href="https://fullcalendar.io/"
-                className="font-medium text-blue-500 transition-all duration-200 ease-out hover:text-blue-400 hover:underline active:scale-[0.98]"
+                className="font-medium text-blue-500 transition-all duration-200 ease-out hover:underline active:scale-[0.98]"
               >
                 FullCalendar
               </a>
