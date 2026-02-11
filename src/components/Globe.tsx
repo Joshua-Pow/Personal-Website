@@ -29,6 +29,11 @@ export default function Globe({ visitorData }: GlobeProps) {
     let width = 300;
     let height = 300;
 
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
     const onResize = () => {
       if (canvasRef.current) {
         // Use fixed size to match the container
@@ -72,11 +77,13 @@ export default function Globe({ visitorData }: GlobeProps) {
         : [],
       onRender: (state) => {
         // This is called on each animation frame
-        // Add slight automatic rotation
+        // Add slight automatic rotation (disabled if reduced motion)
         state.phi = phi + r.get();
 
-        // Adjust phi based on pointer interaction
-        phi += 0.005;
+        // Only auto-rotate if user doesn't prefer reduced motion
+        if (!prefersReducedMotion) {
+          phi += 0.005;
+        }
 
         state.width = width * 2;
         state.height = height * 2;

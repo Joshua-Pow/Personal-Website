@@ -53,11 +53,11 @@ export default function VisitorGlobe() {
   return (
     <div className="mb-8 flex flex-col items-center justify-center">
       {/* Fixed size container for the globe */}
-      <div className="motion-preset-focus-lg flex h-[300px] w-[300px] items-center justify-center motion-opacity-in-[0%] motion-duration-1000 motion-ease-in">
+      <div className="motion-preset-focus-lg flex h-[300px] w-[300px] items-center justify-center motion-opacity-in-[0%] motion-duration-300 motion-ease-out">
         <Globe visitorData={visitorData} />
       </div>
       {!isLoading && visitorData && (
-        <div className="mt-2 text-center text-xs text-neutral-400 opacity-50 transition-opacity hover:opacity-100">
+        <div className="mt-2 text-center text-xs text-neutral-400 opacity-50 transition-all duration-200 hover:opacity-100 active:scale-[0.98]">
           <p>Last visitor was from {visitorData.location}</p>
         </div>
       )}

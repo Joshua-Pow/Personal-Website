@@ -9,6 +9,19 @@ export type VisitorData = {
   longitude: string;
 };
 
+const VISITOR_ID_KEY = "visitor-id";
+
+function getOrCreateVisitorId(): string {
+  if (typeof window === "undefined") return "";
+
+  let visitorId = localStorage.getItem(VISITOR_ID_KEY);
+  if (!visitorId) {
+    visitorId = crypto.randomUUID();
+    localStorage.setItem(VISITOR_ID_KEY, visitorId);
+  }
+  return visitorId;
+}
+
 export default function LastVisitor() {
   const [previousVisitorData, setPreviousVisitorData] =
     useState<VisitorData | null>(null);
@@ -17,9 +30,15 @@ export default function LastVisitor() {
   useEffect(() => {
     async function recordAndFetchVisitorInfo() {
       try {
+        const visitorId = getOrCreateVisitorId();
+
         // Record the current visitor's location, which will return previous visitor info
         const recordResponse = await fetch("/api/visitor-location", {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ visitorId }),
         });
 
         if (!recordResponse.ok) {

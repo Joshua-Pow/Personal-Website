@@ -13,7 +13,7 @@ const page = () => {
     <div className="flex h-full flex-col px-8">
       <h1 className="pt-12 font-medium">History</h1>
       <AnimatedName />
-      <p className="motion-preset-slide-up mb-8">
+      <p className="motion-preset-blur-up-md mb-8">
         I&apos;m a software engineer with a passion for building products that
         make a difference.
       </p>
@@ -37,7 +37,7 @@ const page = () => {
               Stats Log for{" "}
               <a
                 href="https://www.brucepower.com/"
-                className="text-blue-500 hover:underline"
+                className="font-medium text-blue-500 transition-all duration-200 ease-out hover:text-blue-400 hover:underline active:scale-[0.98]"
               >
                 Bruce Power
               </a>
@@ -53,7 +53,7 @@ const page = () => {
               Additionally, I worked on our nuclear AI product{" "}
               <a
                 href="https://npxai.com"
-                className="text-blue-500 hover:underline"
+                className="font-medium text-blue-500 transition-all duration-200 ease-out hover:text-blue-400 hover:underline active:scale-[0.98]"
               >
                 NPX AI
               </a>{" "}
@@ -94,7 +94,7 @@ const page = () => {
               drag and drop interface using{" "}
               <a
                 href="https://fullcalendar.io/"
-                className="text-blue-500 hover:underline"
+                className="font-medium text-blue-500 transition-all duration-200 ease-out hover:text-blue-400 hover:underline active:scale-[0.98]"
               >
                 FullCalendar
               </a>
@@ -136,7 +136,6 @@ const page = () => {
               business analysts to determine the requirements as well as
               implementing the feature.
             </p>
-
             <p className="mt-6">
               This feature was a complex one as we needed a responsive UI which
               illustrated clearly all the processes that were occuring in the

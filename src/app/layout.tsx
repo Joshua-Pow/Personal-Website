@@ -1,15 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ViewTransitions } from "next-view-transitions";
-import { Analytics } from "@vercel/analytics/react";
 import { ProgressiveBlur } from "@/components/ProgressiveBlur";
+import { EdgeBorderEffect } from "@/components/EdgeBorderEffect";
+import ObserverProvider from "@/components/ObserverProvider";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
 
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument",
+  subsets: ["latin"],
+  weight: ["400"],
+});
 // export const ebGaramond = EB_Garamond({
 //   variable: "--font-garamond",
 //   subsets: ["latin"],
@@ -48,18 +54,28 @@ export default function RootLayout({
 }>) {
   return (
     <ViewTransitions>
-      <html lang="en" className={`${inter.variable} antialiased`}>
+      <html
+        lang="en"
+        className={`${inter.variable} ${instrumentSerif.variable} antialiased`}
+      >
         <body className="tracking-tight antialiased">
-          <div className="relative mx-auto flex min-h-svh max-w-screen-sm flex-col justify-between">
-            <main className="flex w-full flex-grow flex-col">{children}</main>
-            <Footer />
-            {/* TODO: Add analytics */}
-            <Analytics />
-          </div>
-          <ProgressiveBlur
-            height="12%"
-            blurLevels={[0.5, 1, 2, 4, 8, 16, 32, 64]}
-          />
+          <EdgeBorderEffect
+            blurSlot={
+              <ProgressiveBlur
+                height="12%"
+                blurLevels={[0.5, 1, 2, 4, 8, 16, 32, 64]}
+              />
+            }
+          >
+            <ObserverProvider>
+              <div className="relative mx-auto flex min-h-svh max-w-screen-sm flex-col justify-between">
+                <main className="relative flex w-full flex-grow flex-col">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+            </ObserverProvider>
+          </EdgeBorderEffect>
         </body>
       </html>
     </ViewTransitions>

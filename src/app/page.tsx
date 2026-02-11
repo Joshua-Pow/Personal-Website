@@ -10,13 +10,13 @@ export default function Home() {
       <div className="my-auto flex flex-col gap-10">
         <div className="space-y-4 text-left leading-relaxed tracking-tighter">
           <p
-            className={`motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-[2000ms] motion-ease-out`}
+            className={`motion-duration-250 motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-ease-out`}
           >
             Hi, my name is <span className="font-medium">Joshua Pow</span>
           </p>
 
           <p
-            className={`motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-[2000ms] motion-delay-[200ms] motion-ease-out`}
+            className={`motion-duration-250 motion-delay-50 motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-ease-out`}
           >
             I&apos;m a computer engineer from the{" "}
             <span className="text-nowrap font-medium">
@@ -27,7 +27,7 @@ export default function Home() {
           </p>
 
           <p
-            className={`flex flex-row flex-wrap justify-start gap-1 motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-[2000ms] motion-delay-[600ms] motion-ease-out`}
+            className={`motion-duration-250 flex flex-row flex-wrap justify-start gap-1 motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-delay-100 motion-ease-out`}
           >
             <span className="flex h-6 items-center text-nowrap sm:h-8">
               I graduated
@@ -39,19 +39,19 @@ export default function Home() {
           </p>
 
           <p
-            className={`motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-duration-[2000ms] motion-delay-[800ms] motion-ease-out`}
+            className={`motion-duration-250 motion-translate-y-in-[20%] motion-opacity-in-[0%] motion-delay-150 motion-ease-out`}
           >
             Since then, I&apos;ve been{" "}
             <Link
               href="/history"
-              className="font-medium text-orange-600 hover:text-orange-500"
+              className="font-medium text-orange-600 transition-all duration-200 ease-out hover:text-orange-500 active:scale-[0.98]"
             >
               working
             </Link>{" "}
             at{" "}
             <Link
               href="https://www.npxinnovation.ca/"
-              className="text-nowrap font-medium text-orange-600 hover:text-orange-500"
+              className="text-nowrap font-medium text-orange-600 transition-all duration-200 ease-out hover:text-orange-500 active:scale-[0.98]"
             >
               Nuclear Promise X
             </Link>
@@ -64,10 +64,10 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="motion-preset-focus-lg motion-duration-700 motion-delay-[1600ms] motion-ease-out">
+        <div className="motion-preset-focus-lg motion-duration-300 motion-delay-200 motion-ease-out">
           <SpotifyWidget />
         </div>
-        <div className="motion-preset-focus-lg mb-4 flex flex-col items-center motion-duration-700 motion-delay-[1600ms] motion-ease-out">
+        <div className="motion-delay-250 motion-preset-focus-lg mb-4 flex flex-col items-center motion-duration-300 motion-ease-out">
           <VisitorGlobe />
         </div>
       </div>
@@ -84,8 +84,8 @@ function NameTransition() {
           {"Joshua Pow".split("").map((letter, index) => (
             <span
               key={index}
-              className="inline-block transition-all duration-300 ease-in-out group-hover:-translate-y-full"
-              style={{ transitionDelay: `${index * 25}ms` }}
+              className="inline-block transition-all duration-200 ease-out active:scale-[0.98] group-hover:-translate-y-full"
+              style={{ transitionDelay: `${index * 20}ms` }}
             >
               {letter === " " ? "\u00A0" : letter}
             </span>
@@ -95,8 +95,8 @@ function NameTransition() {
           {"joshpow".split("").map((letter, index) => (
             <span
               key={index}
-              className="inline-block translate-y-full transition-all duration-300 ease-in-out group-hover:translate-y-0"
-              style={{ transitionDelay: `${index * 25}ms` }}
+              className="inline-block translate-y-full transition-all duration-200 ease-out active:scale-[0.98] group-hover:translate-y-0"
+              style={{ transitionDelay: `${index * 20}ms` }}
             >
               {letter}
             </span>

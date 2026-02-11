@@ -13,10 +13,10 @@ export default {
         foreground: "var(--foreground)",
       },
       fontFamily: {
-        serif: ["var(--font-garamond)"],
+        instrument: ["var(--font-instrument)"],
       },
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  plugins: [require("tailwindcss-motion")],
+  plugins: [require("tailwindcss-motion"), require("tailwindcss-intersect")],
 } satisfies Config;

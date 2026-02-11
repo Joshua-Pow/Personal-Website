@@ -4,6 +4,7 @@ import { formatLocation } from "@/lib/utils/geoUtils";
 
 // Internal type for storage
 type VisitorData = {
+  visitorId?: string;
   location: string;
   latitude?: string;
   longitude?: string;
@@ -28,8 +29,19 @@ const localMemoryStore: { [key: string]: VisitorData } = {};
 const CURRENT_VISITOR_KEY = "current-visitor";
 const PREVIOUS_VISITOR_KEY = "previous-visitor";
 
-export async function POST(): Promise<NextResponse<VisitorLocationResponse>> {
+export async function POST(
+  request: Request
+): Promise<NextResponse<VisitorLocationResponse>> {
   try {
+    // Get visitor ID from request body
+    let visitorId: string | undefined;
+    try {
+      const body = (await request.json()) as { visitorId?: string };
+      visitorId = body.visitorId;
+    } catch {
+      // No body or invalid JSON, continue without visitor ID
+    }
+
     // Get Cloudflare context for geolocation and KV access
     const { env, cf } = getCloudflareContext();
 
@@ -69,24 +81,34 @@ export async function POST(): Promise<NextResponse<VisitorLocationResponse>> {
       // Use in-memory storage for local development
       currentVisitorData = localMemoryStore[CURRENT_VISITOR_KEY] || null;
 
-      // Move current to previous if it exists
-      if (currentVisitorData) {
-        localMemoryStore[PREVIOUS_VISITOR_KEY] = currentVisitorData;
+      // Check if this is the same visitor (don't record twice)
+      const isSameVisitor =
+        visitorId && currentVisitorData?.visitorId === visitorId;
+
+      if (isSameVisitor) {
+        // Same visitor refreshing - just return existing previous visitor data
+        previousVisitorData = localMemoryStore[PREVIOUS_VISITOR_KEY] || null;
+      } else {
+        // New visitor - move current to previous if it exists
+        if (currentVisitorData) {
+          localMemoryStore[PREVIOUS_VISITOR_KEY] = currentVisitorData;
+        }
+
+        // Create new visitor data
+        const newVisitorData: VisitorData = {
+          visitorId,
+          location,
+          latitude,
+          longitude,
+          timestamp: Date.now(),
+        };
+
+        // Update current visitor in memory
+        localMemoryStore[CURRENT_VISITOR_KEY] = newVisitorData;
+
+        // Get previous visitor data
+        previousVisitorData = localMemoryStore[PREVIOUS_VISITOR_KEY] || null;
       }
-
-      // Create new visitor data
-      const newVisitorData: VisitorData = {
-        location,
-        latitude,
-        longitude,
-        timestamp: Date.now(),
-      };
-
-      // Update current visitor in memory
-      localMemoryStore[CURRENT_VISITOR_KEY] = newVisitorData;
-
-      // Get previous visitor data
-      previousVisitorData = localMemoryStore[PREVIOUS_VISITOR_KEY] || null;
     } else {
       // Use Cloudflare KV for production
       const kv = env.VISITOR_LOCATION;
@@ -96,28 +118,39 @@ export async function POST(): Promise<NextResponse<VisitorLocationResponse>> {
         const currentData = await kv.get(CURRENT_VISITOR_KEY, "json");
         currentVisitorData = currentData as VisitorData | null;
 
-        // Move current visitor to previous visitor if it exists
-        if (currentVisitorData) {
-          await kv.put(
-            PREVIOUS_VISITOR_KEY,
-            JSON.stringify(currentVisitorData)
-          );
+        // Check if this is the same visitor (don't record twice)
+        const isSameVisitor =
+          visitorId && currentVisitorData?.visitorId === visitorId;
+
+        if (isSameVisitor) {
+          // Same visitor refreshing - just return existing previous visitor data
+          const previousData = await kv.get(PREVIOUS_VISITOR_KEY, "json");
+          previousVisitorData = previousData as VisitorData | null;
+        } else {
+          // New visitor - move current visitor to previous visitor if it exists
+          if (currentVisitorData) {
+            await kv.put(
+              PREVIOUS_VISITOR_KEY,
+              JSON.stringify(currentVisitorData)
+            );
+          }
+
+          // Create new visitor data with timestamp
+          const newVisitorData: VisitorData = {
+            visitorId,
+            location,
+            latitude,
+            longitude,
+            timestamp: Date.now(),
+          };
+
+          // Update the current visitor data in KV
+          await kv.put(CURRENT_VISITOR_KEY, JSON.stringify(newVisitorData));
+
+          // Get the previous visitor data for the response
+          const previousData = await kv.get(PREVIOUS_VISITOR_KEY, "json");
+          previousVisitorData = previousData as VisitorData | null;
         }
-
-        // Create new visitor data with timestamp
-        const newVisitorData: VisitorData = {
-          location,
-          latitude,
-          longitude,
-          timestamp: Date.now(),
-        };
-
-        // Update the current visitor data in KV
-        await kv.put(CURRENT_VISITOR_KEY, JSON.stringify(newVisitorData));
-
-        // Get the previous visitor data for the response
-        const previousData = await kv.get(PREVIOUS_VISITOR_KEY, "json");
-        previousVisitorData = previousData as VisitorData | null;
       }
     }
 

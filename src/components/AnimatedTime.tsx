@@ -16,7 +16,7 @@ function playTickSequence(
       clearInterval(interval);
       return;
     }
-    audioRef.current?.play().catch(() => {});
+    audioRef.current?.play().catch(() => { });
     tickCount++;
   }, 50); // Play ticks quickly in succession
 }
@@ -33,10 +33,23 @@ function AnimatedTime({ graduationDate }: Props) {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const prevTimeRef = useRef(timeElapsed);
+  const isVisibleRef = useRef(true);
+  const prefersReducedMotionRef = useRef(false);
 
   useEffect(() => {
+    // Check for reduced motion preference
+    prefersReducedMotionRef.current = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
     audioRef.current = new Audio("./click.wav");
-    audioRef.current.volume = 0.05; // Lower volume since we'll play multiple ticks
+    audioRef.current.volume = 0.05;
+
+    // Pause audio when tab is hidden
+    const handleVisibilityChange = () => {
+      isVisibleRef.current = !document.hidden;
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     const timer = setInterval(() => {
       const now = new Date();
@@ -55,15 +68,17 @@ function AnimatedTime({ graduationDate }: Props) {
         seconds: Math.floor((diff % (1000 * 60)) / 1000),
       };
 
-      // Check which values changed and play appropriate tick sequences
-      Object.entries(newTimeElapsed).forEach(([unit, value]) => {
-        const prevValue = prevTimeRef.current[unit as keyof typeof timeElapsed];
-        if (value !== prevValue) {
-          const difference = Math.abs(value - prevValue);
-          // Play more ticks for larger changes
-          playTickSequence(audioRef, Math.min(difference + 2, 8));
-        }
-      });
+      // Only play ticks when tab is visible and motion is not reduced
+      if (isVisibleRef.current && !prefersReducedMotionRef.current) {
+        Object.entries(newTimeElapsed).forEach(([unit, value]) => {
+          const prevValue =
+            prevTimeRef.current[unit as keyof typeof timeElapsed];
+          if (value !== prevValue) {
+            const difference = Math.abs(value - prevValue);
+            playTickSequence(audioRef, Math.min(difference + 2, 8));
+          }
+        });
+      }
 
       prevTimeRef.current = newTimeElapsed;
       setTimeElapsed(newTimeElapsed);
@@ -71,6 +86,7 @@ function AnimatedTime({ graduationDate }: Props) {
 
     return () => {
       clearInterval(timer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       audioRef.current?.remove();
     };
   }, [graduationDate]);
@@ -93,7 +109,7 @@ function AnimatedTime({ graduationDate }: Props) {
                         className="relative h-6 w-3 overflow-hidden sm:h-8 sm:w-4"
                       >
                         <span
-                          className="absolute left-0 -translate-y-[calc(1.5rem*var(--digit))] transition-transform duration-500 ease-in-out sm:-translate-y-[calc(2rem*var(--digit))]"
+                          className="duration-300 absolute left-0 -translate-y-[calc(1.5rem*var(--digit))] transition-transform ease-out sm:-translate-y-[calc(2rem*var(--digit))]"
                           style={
                             {
                               "--digit": parseInt(digit),
