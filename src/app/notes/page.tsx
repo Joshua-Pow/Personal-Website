@@ -13,7 +13,7 @@ const page = () => {
     <div className="flex h-full flex-col px-8">
       <h1 className="pt-12 font-medium">Notes</h1>
       <AnimatedName />
-      <p>A timeline of my thoughts and ideas.</p>
+      <p>A timeline of my thoughts and ideas. test</p>
     </div>
   );
 };
