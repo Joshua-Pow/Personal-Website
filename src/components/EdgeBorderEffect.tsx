@@ -366,11 +366,7 @@ export const EdgeBorderEffect = ({
           {/* Bottom blur overlay - full width, clipped to same rounded content shape */}
           {blurSlot ? (
             <div
-              className="pointer-events-none absolute inset-y-0 left-0 z-[25] overflow-hidden rounded-[calc(var(--intensity,0)*16px)]"
-              style={{
-                // Keep native scrollbar right gutter from blur.
-                right: "14px",
-              }}
+              className="pointer-events-none absolute inset-0 z-[25] overflow-hidden rounded-[calc(var(--intensity,0)*16px)]"
             >
               {blurSlot}
             </div>
