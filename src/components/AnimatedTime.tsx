@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { easeOut } from "@/lib/motion";
 
 interface Props {
   graduationDate: Date;
@@ -16,9 +18,30 @@ function playTickSequence(
       clearInterval(interval);
       return;
     }
-    audioRef.current?.play().catch(() => { });
+    audioRef.current?.play().catch(() => {});
     tickCount++;
-  }, 50); // Play ticks quickly in succession
+  }, 50);
+}
+
+function DigitColumn({ digit }: { digit: number }) {
+  return (
+    <span className="relative h-6 w-3 overflow-hidden sm:h-8 sm:w-4">
+      <motion.span
+        className="absolute left-0 flex flex-col"
+        animate={{ y: `-${digit * 10}%` }}
+        transition={{ duration: 0.3, ease: easeOut }}
+      >
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+          <span
+            key={num}
+            className="flex h-6 w-3 items-center justify-center text-xs sm:h-8 sm:w-4 sm:text-base"
+          >
+            {num}
+          </span>
+        ))}
+      </motion.span>
+    </span>
+  );
 }
 
 function AnimatedTime({ graduationDate }: Props) {
@@ -34,18 +57,12 @@ function AnimatedTime({ graduationDate }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const prevTimeRef = useRef(timeElapsed);
   const isVisibleRef = useRef(true);
-  const prefersReducedMotionRef = useRef(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    // Check for reduced motion preference
-    prefersReducedMotionRef.current = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
     audioRef.current = new Audio("./click.wav");
     audioRef.current.volume = 0.05;
 
-    // Pause audio when tab is hidden
     const handleVisibilityChange = () => {
       isVisibleRef.current = !document.hidden;
     };
@@ -68,8 +85,7 @@ function AnimatedTime({ graduationDate }: Props) {
         seconds: Math.floor((diff % (1000 * 60)) / 1000),
       };
 
-      // Only play ticks when tab is visible and motion is not reduced
-      if (isVisibleRef.current && !prefersReducedMotionRef.current) {
+      if (isVisibleRef.current && !reducedMotion) {
         Object.entries(newTimeElapsed).forEach(([unit, value]) => {
           const prevValue =
             prevTimeRef.current[unit as keyof typeof timeElapsed];
@@ -89,7 +105,7 @@ function AnimatedTime({ graduationDate }: Props) {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       audioRef.current?.remove();
     };
-  }, [graduationDate]);
+  }, [graduationDate, reducedMotion]);
 
   return (
     <span className="inline-flex gap-0.5 font-mono sm:gap-1">
@@ -104,28 +120,10 @@ function AnimatedTime({ graduationDate }: Props) {
                     .padStart(2, "0")
                     .split("")
                     .map((digit, idx) => (
-                      <span
+                      <DigitColumn
                         key={`${unit}-${idx}`}
-                        className="relative h-6 w-3 overflow-hidden sm:h-8 sm:w-4"
-                      >
-                        <span
-                          className="duration-300 absolute left-0 -translate-y-[calc(1.5rem*var(--digit))] transition-transform ease-out sm:-translate-y-[calc(2rem*var(--digit))]"
-                          style={
-                            {
-                              "--digit": parseInt(digit),
-                            } as React.CSSProperties
-                          }
-                        >
-                          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                            <span
-                              key={num}
-                              className="flex h-6 w-3 items-center justify-center text-xs sm:h-8 sm:w-4 sm:text-base"
-                            >
-                              {num}
-                            </span>
-                          ))}
-                        </span>
-                      </span>
+                        digit={parseInt(digit, 10)}
+                      />
                     ))}
                 </span>
               </span>

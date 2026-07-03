@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { RevealOnScroll } from "./motion/RevealOnScroll";
 import { Logos } from "./Logos";
 import { LanguageBadge } from "./LanguageBadge";
 
@@ -23,23 +24,18 @@ function AnimatedParagraphs({
   children: React.ReactNode | React.ReactNode[];
   baseDelay: number;
 }) {
-  // Normalize to array
   const childrenArray = Array.isArray(children) ? children : [children];
 
   return (
     <>
       {childrenArray.map((child, pIndex) => (
-        <div
+        <RevealOnScroll
           key={pIndex}
-          className="intersect-once intersect:motion-translate-y-in-2 motion-safe:intersect:motion-translate-y-in-2 intersect:motion-opacity-in-0 intersect:motion-duration-150 intersect:motion-ease-out motion-safe:intersect:motion-opacity-in-0"
-          style={
-            {
-              "--motion-delay": `${baseDelay + 140 + pIndex * 40}ms`,
-            } as React.CSSProperties
-          }
+          variant="fadeUpSm"
+          delay={baseDelay + 140 + pIndex * 40}
         >
           {child}
-        </div>
+        </RevealOnScroll>
       ))}
     </>
   );
@@ -53,56 +49,43 @@ export function WorkExperience({
   description,
   technologies,
 }: WorkExperienceProps) {
-  const baseDelay = (index - 1) * 30; // Short stagger
+  const baseDelay = (index - 1) * 30;
 
   return (
-    <div
-      className="intersect-once intersect:motion-translate-y-in-4 motion-safe:intersect:motion-translate-y-in-4 mb-8 intersect:motion-blur-in-md intersect:motion-opacity-in-0 intersect:motion-duration-200 intersect:motion-ease-out motion-safe:intersect:motion-blur-in-md motion-safe:intersect:motion-opacity-in-0"
-      style={{ "--motion-delay": `${baseDelay}ms` } as React.CSSProperties}
-    >
-      <h2
-        className="intersect-once intersect:motion-translate-y-in-2 motion-safe:intersect:motion-translate-y-in-2 text-base font-medium intersect:motion-opacity-in-0 intersect:motion-duration-150 intersect:motion-ease-out motion-safe:intersect:motion-opacity-in-0"
-        style={
-          { "--motion-delay": `${baseDelay + 60}ms` } as React.CSSProperties
-        }
-      >
+    <RevealOnScroll variant="blurUp" delay={baseDelay} className="mb-8">
+      <RevealOnScroll variant="fadeUpSm" delay={baseDelay + 60} as="h2" className="text-base font-medium">
         {company}
-      </h2>
-      <p
-        className="intersect-once intersect:motion-translate-y-in-2 motion-safe:intersect:motion-translate-y-in-2 mb-3 text-sm opacity-40 intersect:motion-opacity-in-0 intersect:motion-duration-150 intersect:motion-ease-out motion-safe:intersect:motion-opacity-in-0"
-        style={
-          { "--motion-delay": `${baseDelay + 100}ms` } as React.CSSProperties
-        }
+      </RevealOnScroll>
+      <RevealOnScroll
+        variant="fadeUpSm"
+        delay={baseDelay + 100}
+        as="p"
+        className="mb-3 text-sm opacity-40"
       >
         {role} | {period}
-      </p>
+      </RevealOnScroll>
       <div className="hyphens-auto leading-7">
         <AnimatedParagraphs baseDelay={baseDelay}>
           {description}
         </AnimatedParagraphs>
       </div>
       {technologies && technologies.length > 0 && (
-        <div
-          className="intersect-once intersect:motion-translate-y-in-2 motion-safe:intersect:motion-translate-y-in-2 mt-4 flex flex-wrap gap-2 intersect:motion-opacity-in-0 intersect:motion-duration-150 intersect:motion-ease-out motion-safe:intersect:motion-opacity-in-0"
-          style={
-            { "--motion-delay": `${baseDelay + 180}ms` } as React.CSSProperties
-          }
+        <RevealOnScroll
+          variant="fadeUpSm"
+          delay={baseDelay + 180}
+          className="mt-4 flex flex-wrap gap-2"
         >
           {technologies.map((tech, techIndex) => (
-            <div
+            <RevealOnScroll
               key={tech.name}
-              className="intersect-once intersect:motion-translate-y-in-2 motion-safe:intersect:motion-translate-y-in-2 intersect:motion-opacity-in-0 intersect:motion-duration-150 intersect:motion-ease-out motion-safe:intersect:motion-opacity-in-0"
-              style={
-                {
-                  "--motion-delay": `${baseDelay + 100 + techIndex * 50}ms`,
-                } as React.CSSProperties
-              }
+              variant="fadeUpSm"
+              delay={baseDelay + 100 + techIndex * 50}
             >
               <LanguageBadge logo={tech.logo} name={tech.name} />
-            </div>
+            </RevealOnScroll>
           ))}
-        </div>
+        </RevealOnScroll>
       )}
-    </div>
+    </RevealOnScroll>
   );
 }

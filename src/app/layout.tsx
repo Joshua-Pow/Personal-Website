@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Inter, Instrument_Serif } from "next/font/google";
-import "./globals.css";
 import { ViewTransitions } from "next-view-transitions";
+import "./globals.css";
 import { ProgressiveBlur } from "@/components/ProgressiveBlur";
 import { EdgeBorderEffect } from "@/components/EdgeBorderEffect";
-import ObserverProvider from "@/components/ObserverProvider";
+import { MotionProvider } from "@/components/motion/MotionProvider";
+import { MotionLink } from "@/components/motion/MotionLink";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -16,20 +17,6 @@ const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
   weight: ["400"],
 });
-// export const ebGaramond = EB_Garamond({
-//   variable: "--font-garamond",
-//   subsets: ["latin"],
-// });
-
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://joshuapow.com"),
@@ -59,23 +46,23 @@ export default function RootLayout({
         className={`${inter.variable} ${instrumentSerif.variable} antialiased`}
       >
         <body className="tracking-tight antialiased">
-          <EdgeBorderEffect
-            blurSlot={
-              <ProgressiveBlur
-                height="12%"
-                blurLevels={[0.5, 1, 2, 4, 8, 16, 32, 64]}
-              />
-            }
-          >
-            <ObserverProvider>
+          <MotionProvider>
+            <EdgeBorderEffect
+              blurSlot={
+                <ProgressiveBlur
+                  height="12%"
+                  blurLevels={[0.5, 1, 2, 4, 8, 16, 32, 64]}
+                />
+              }
+            >
               <div className="relative mx-auto flex min-h-svh max-w-screen-sm flex-col justify-between">
                 <main className="relative flex w-full flex-grow flex-col">
                   {children}
                 </main>
                 <Footer />
               </div>
-            </ObserverProvider>
-          </EdgeBorderEffect>
+            </EdgeBorderEffect>
+          </MotionProvider>
         </body>
       </html>
     </ViewTransitions>
@@ -92,15 +79,15 @@ const Footer = () => {
   return (
     <footer className="mb-24 mt-8 flex w-full items-center justify-center gap-6">
       {links.map((link) => (
-        <a
+        <MotionLink
           key={link.href}
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-400 transition-colors duration-200 hover:text-orange-500"
+          className="text-gray-400 hover:text-orange-500"
         >
           {link.label}
-        </a>
+        </MotionLink>
       ))}
     </footer>
   );

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import createGlobe from "cobe";
-import { useSpring } from "@react-spring/web";
+import { useSpring } from "motion/react";
 import { VisitorData } from "./LastVisitor";
 
 interface GlobeProps {
@@ -14,41 +14,33 @@ export default function Globe({ visitorData }: GlobeProps) {
   const pointerInteracting = useRef<number | null>(null);
   const pointerInteractionMovement = useRef(0);
 
-  // Create a spring for smooth rotation
-  const [{ r }, api] = useSpring(() => ({
-    r: 0,
-    config: {
-      mass: 1,
-      tension: 280,
-      friction: 40,
-    },
-  }));
+  const r = useSpring(0, { stiffness: 280, damping: 40 });
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let isDestroyed = false;
     let phi = 0;
     let width = 300;
     let height = 300;
 
-    // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
     const onResize = () => {
-      if (canvasRef.current) {
-        // Use fixed size to match the container
-        width = 300;
-        height = 300;
-        canvasRef.current.width = width * 2; // For higher resolution
-        canvasRef.current.height = height * 2; // For higher resolution
-      }
+      if (isDestroyed) return;
+      width = 300;
+      height = 300;
+      canvas.width = width * 2;
+      canvas.height = height * 2;
     };
 
     window.addEventListener("resize", onResize);
     onResize();
 
-    // Initialize COBE
-    const globe = createGlobe(canvasRef.current!, {
+    const globe = createGlobe(canvas, {
       devicePixelRatio: 2,
       width: width * 2,
       height: height * 2,
@@ -62,8 +54,8 @@ export default function Globe({ visitorData }: GlobeProps) {
       baseColor: [0.3, 0.3, 0.3],
       markerColor: [0.918, 0.345, 0.047],
       glowColor: [0.8, 0.8, 0.8],
-      offset: [0, 0], // Center the globe in the canvas
-      scale: 0.9, // Slightly scale down to ensure it fits
+      offset: [0, 0],
+      scale: 0.9,
       markers: visitorData
         ? [
             {
@@ -76,11 +68,10 @@ export default function Globe({ visitorData }: GlobeProps) {
           ]
         : [],
       onRender: (state) => {
-        // This is called on each animation frame
-        // Add slight automatic rotation (disabled if reduced motion)
+        if (isDestroyed) return;
+
         state.phi = phi + r.get();
 
-        // Only auto-rotate if user doesn't prefer reduced motion
         if (!prefersReducedMotion) {
           phi += 0.005;
         }
@@ -91,43 +82,52 @@ export default function Globe({ visitorData }: GlobeProps) {
     });
 
     const onPointerDown = (e: PointerEvent) => {
+      if (isDestroyed) return;
       pointerInteracting.current =
         e.clientX - pointerInteractionMovement.current;
-      canvasRef.current!.style.cursor = "grabbing";
+      canvas.style.cursor = "grabbing";
+      canvas.setPointerCapture(e.pointerId);
     };
 
-    const onPointerUp = () => {
+    const onPointerUp = (e: PointerEvent) => {
+      if (isDestroyed) return;
       pointerInteracting.current = null;
-      canvasRef.current!.style.cursor = "grab";
-    };
-
-    const onPointerOut = () => {
-      pointerInteracting.current = null;
-      canvasRef.current!.style.cursor = "grab";
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      if (pointerInteracting.current !== null) {
-        const delta = e.clientX - pointerInteracting.current;
-        pointerInteractionMovement.current = delta;
-        api.start({ r: delta / 100 });
+      if (canvas.hasPointerCapture(e.pointerId)) {
+        canvas.releasePointerCapture(e.pointerId);
       }
+      canvas.style.cursor = "grab";
     };
 
-    window.addEventListener("pointerdown", onPointerDown);
-    window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointerout", onPointerOut);
-    window.addEventListener("mousemove", onMouseMove);
+    const onPointerMove = (e: PointerEvent) => {
+      if (isDestroyed || pointerInteracting.current === null) return;
+      const delta = e.clientX - pointerInteracting.current;
+      pointerInteractionMovement.current = delta;
+      r.set(delta / 100);
+    };
+
+    const onPointerLeave = () => {
+      if (isDestroyed) return;
+      pointerInteracting.current = null;
+      canvas.style.cursor = "grab";
+    };
+
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointerup", onPointerUp);
+    canvas.addEventListener("pointercancel", onPointerUp);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerleave", onPointerLeave);
 
     return () => {
-      globe.destroy();
-      window.removeEventListener("pointerdown", onPointerDown);
-      window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointerout", onPointerOut);
-      window.removeEventListener("mousemove", onMouseMove);
+      isDestroyed = true;
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointerup", onPointerUp);
+      canvas.removeEventListener("pointercancel", onPointerUp);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerleave", onPointerLeave);
       window.removeEventListener("resize", onResize);
+      globe.destroy();
     };
-  }, [api, r, visitorData]);
+  }, [r, visitorData]);
 
   return (
     <div className="flex h-full w-full items-center justify-center">

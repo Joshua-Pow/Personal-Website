@@ -2,6 +2,8 @@
 
 import { cn } from "@/lib/utils/cn";
 import React from "react";
+import { motion, useTransform } from "motion/react";
+import { useEdgeIntensity } from "./EdgeBorderEffect";
 
 export interface ProgressiveBlurProps {
   className?: string;
@@ -17,11 +19,23 @@ export function ProgressiveBlur({
   position = "bottom",
   blurLevels = [0.5, 1, 2, 4, 8, 16, 32, 64],
 }: ProgressiveBlurProps) {
-  // Create array with length equal to blurLevels.length - 2 (for before/after pseudo elements)
+  const { intensity } = useEdgeIntensity();
+  const borderRadius = useTransform(intensity, (v) => `${v * 16}px`);
+
+  const radiusStyle =
+    position === "top"
+      ? { borderTopLeftRadius: borderRadius, borderTopRightRadius: borderRadius }
+      : position === "bottom"
+        ? {
+            borderBottomLeftRadius: borderRadius,
+            borderBottomRightRadius: borderRadius,
+          }
+        : { borderRadius };
+
   const divElements = Array(blurLevels.length - 2).fill(null);
 
   return (
-    <div
+    <motion.div
       className={cn(
         "gradient-blur pointer-events-none absolute inset-x-0 z-10",
         className,
@@ -34,26 +48,10 @@ export function ProgressiveBlur({
       style={{
         height: position === "both" ? "100%" : height,
         overflow: "hidden",
-        borderTopLeftRadius:
-          position === "top" || position === "both"
-            ? "calc(var(--intensity, 0) * 16px)"
-            : undefined,
-        borderTopRightRadius:
-          position === "top" || position === "both"
-            ? "calc(var(--intensity, 0) * 16px)"
-            : undefined,
-        borderBottomLeftRadius:
-          position === "bottom" || position === "both"
-            ? "calc(var(--intensity, 0) * 16px)"
-            : undefined,
-        borderBottomRightRadius:
-          position === "bottom" || position === "both"
-            ? "calc(var(--intensity, 0) * 16px)"
-            : undefined,
+        ...radiusStyle,
       }}
     >
       <div className="absolute inset-0">
-        {/* First blur layer (pseudo element) */}
         <div
           className="absolute inset-0"
           style={{
@@ -76,7 +74,6 @@ export function ProgressiveBlur({
           }}
         />
 
-        {/* Middle blur layers */}
         {divElements.map((_, index) => {
           const blurIndex = index + 1;
           const startPercent = blurIndex * 12.5;
@@ -106,7 +103,6 @@ export function ProgressiveBlur({
           );
         })}
 
-        {/* Last blur layer (pseudo element) */}
         <div
           className="absolute inset-0"
           style={{
@@ -129,7 +125,7 @@ export function ProgressiveBlur({
           }}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
 

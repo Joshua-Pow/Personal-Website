@@ -1,0 +1,101 @@
+import type { TargetAndTransition, Transition } from "motion/react";
+
+export const easeOut = [0.23, 1, 0.32, 1] as const;
+
+export const durations = {
+  fast: 0.15,
+  ui: 0.2,
+  reveal: 0.25,
+  page: 0.35,
+  nameLetter: 0.32,
+  nameFade: 0.35,
+  pageTitle: 0.45,
+  sharedElement: 0.75,
+} as const;
+
+export const nameLetterStagger = 0.035;
+
+type MotionVariant = {
+  initial: TargetAndTransition;
+  animate: TargetAndTransition;
+};
+
+export const fadeUp: MotionVariant = {
+  initial: { opacity: 0, y: "20%" },
+  animate: { opacity: 1, y: 0 },
+};
+
+export const fadeUpSm: MotionVariant = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+};
+
+export const fadeIn: MotionVariant = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+};
+
+export const blurIn: MotionVariant = {
+  initial: { opacity: 0, filter: "blur(8px)" },
+  animate: { opacity: 1, filter: "blur(0px)" },
+};
+
+export const blurUp: MotionVariant = {
+  initial: { opacity: 0, y: 12, filter: "blur(8px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+};
+
+export const blurUpLg: MotionVariant = {
+  initial: { opacity: 0, y: 16, filter: "blur(12px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+};
+
+export const focusIn: MotionVariant = {
+  initial: { opacity: 0, scale: 0.96, filter: "blur(4px)" },
+  animate: { opacity: 1, scale: 1, filter: "blur(0px)" },
+};
+
+export const variants = {
+  fadeUp,
+  fadeUpSm,
+  fadeIn,
+  blurIn,
+  blurUp,
+  blurUpLg,
+  focusIn,
+} as const;
+
+export type VariantName = keyof typeof variants;
+
+const variantDurations: Record<VariantName, number> = {
+  fadeUp: durations.reveal,
+  fadeUpSm: durations.ui,
+  fadeIn: durations.ui,
+  blurIn: durations.pageTitle,
+  blurUp: durations.reveal,
+  blurUpLg: durations.reveal,
+  focusIn: durations.page,
+};
+
+export function getTransition(
+  duration: number,
+  reduced?: boolean,
+  delay = 0
+): Transition {
+  if (reduced) {
+    return { duration: 0, delay: 0 };
+  }
+  return {
+    duration,
+    ease: easeOut,
+    delay: delay / 1000,
+  };
+}
+
+export function getVariantTransition(
+  variant: VariantName,
+  delay = 0,
+  reduced?: boolean
+): Transition {
+  return getTransition(variantDurations[variant], reduced, delay);
+}

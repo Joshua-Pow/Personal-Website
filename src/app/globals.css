@@ -7,26 +7,15 @@
 }
 
 :root {
-  --background: linear-gradient(
-    to bottom right,
-    theme("colors.orange.50"),
-    theme("colors.orange.100"),
-    theme("colors.yellow.50")
-  );
+  --background: #000000;
   --foreground: #171717;
+  --page-bg: #000000;
   scrollbar-gutter: stable;
 }
 
-html::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  color: var(--foreground);
-  background: var(--background);
-  z-index: -1;
+html {
+  min-height: 100%;
+  background-color: var(--page-bg);
 }
 
 body {
@@ -38,108 +27,43 @@ code {
   @apply rounded bg-slate-50/50 px-1 py-0.5 text-neutral-950 shadow-sm;
 }
 
-.transition-element {
-  view-transition-name: pow;
-}
-
-::view-transition-old(pow) {
-  animation: fade-out 0.2s ease-out;
-}
-
-::view-transition-new(pow) {
-  animation: fade-in-up 0.2s ease-out;
-}
-
-.digit-scroll {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.digit-container {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-}
-
-@keyframes number-scroll {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-100%);
-  }
-}
-
-@keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes fade-in-up {
-  0% {
-    transform: translateY(12px);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fade-out {
-  0% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateY(12px);
-    opacity: 0;
-  }
-}
-
+/* Shared element: Joshua Pow morphs between home header and subpage back link */
 @supports (view-transition-name: none) {
-  .fade-in {
-    animation: fade-in 0.2s ease-out forwards;
-    opacity: 0;
+  ::view-transition {
+    background-color: var(--page-bg);
   }
-}
 
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
+  .vt-pow {
+    view-transition-name: pow;
+  }
+
+  ::view-transition-group(pow) {
+    animation-duration: 0.75s;
+    animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
   ::view-transition-old(pow),
   ::view-transition-new(pow) {
-    animation: none;
+    mix-blend-mode: normal;
+    width: auto;
+    height: auto;
+    object-fit: none;
   }
 
-  .fade-in {
+  /* Keep root static — only the shared name morphs */
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
     animation: none;
-    opacity: 1;
-  }
-
-  .animate-pulse {
-    animation: none;
-  }
-
-  .digit-scroll {
-    transition: none;
+    background-color: var(--page-bg);
   }
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

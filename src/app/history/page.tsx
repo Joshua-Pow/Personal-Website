@@ -1,6 +1,7 @@
 import { AnimatedName } from "@/components/AnimatedName";
 import { WorkExperience } from "@/components/WorkExperience";
-
+import { Reveal } from "@/components/motion/Reveal";
+import { MotionLink } from "@/components/motion/MotionLink";
 export const metadata = {
   title: "Work History",
   alternates: {
@@ -13,10 +14,12 @@ const page = () => {
     <div className="flex h-full flex-col px-8">
       <h1 className="pt-12 font-medium">History</h1>
       <AnimatedName />
-      <p className="motion-preset-blur-up-md mb-8">
-        I&apos;m a software engineer with a passion for building products that
-        make a difference.
-      </p>
+      <Reveal variant="blurIn" className="mb-8">
+        <p>
+          I&apos;m a software engineer with a passion for building products that
+          make a difference.
+        </p>
+      </Reveal>
 
       <WorkExperience
         index={1}
@@ -35,12 +38,12 @@ const page = () => {
             <p className="mt-6">
               I also designed, developed and deployed an internal Equipment
               Stats Log for{" "}
-              <a
+              <MotionLink
                 href="https://www.brucepower.com/"
-                className="font-medium text-blue-500 transition-all duration-200 ease-out hover:underline active:scale-[0.98]"
+                className="font-medium text-blue-500 hover:underline"
               >
                 Bruce Power
-              </a>
+              </MotionLink>
               . Specifically, a dashboard for tracking the live status of
               components and their sensors accross nuclear facilities. The sole
               purpose was to aid Nuclear Operators in recording and hand off
@@ -51,12 +54,12 @@ const page = () => {
             </p>
             <p className="mt-6">
               Additionally, I worked on our nuclear AI product{" "}
-              <a
+              <MotionLink
                 href="https://npxai.com"
-                className="font-medium text-blue-500 transition-all duration-200 ease-outhover:underline active:scale-[0.98]"
+                className="font-medium text-blue-500 hover:underline"
               >
                 NPX AI
-              </a>{" "}
+              </MotionLink>{" "}
               building a custom translation feature which is an Azure hosted AI
               translation service trained on nuclear documents to learn specific
               nuclear terminology.
@@ -92,12 +95,12 @@ const page = () => {
               I created an interactive calendar in <code>typescript</code> which
               was the main interface to schedule shipments and deliveries with a
               drag and drop interface using{" "}
-              <a
+              <MotionLink
                 href="https://fullcalendar.io/"
-                className="font-medium text-blue-500 transition-all duration-200 ease-out hover:underline active:scale-[0.98]"
+                className="font-medium text-blue-500 hover:underline"
               >
                 FullCalendar
-              </a>
+              </MotionLink>
               .
             </p>
             <p className="mt-6">

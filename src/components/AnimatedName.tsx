@@ -1,9 +1,9 @@
-import { Link } from "next-view-transitions";
+import { SharedPowName } from "@/components/SharedPowName";
 
 export function AnimatedName() {
   return (
-    <Link href="/" className="flex mb-8 font-medium text-gray-400 fade-in">
-      Joshua Pow
-    </Link>
+    <div className="mb-8">
+      <SharedPowName variant="back-link" />
+    </div>
   );
 }
