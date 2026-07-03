@@ -32,4 +32,11 @@
       "preview_id": "12903b1ce969400281ef34d6f5946b41",
     },
   ],
+  "r2_buckets": [
+    {
+      "binding": "ADAGES_IMAGES",
+      "bucket_name": "adages-images",
+      "preview_bucket_name": "adages-images",
+    },
+  ],
 }
