@@ -55,7 +55,7 @@ export default function RootLayout({
                 />
               }
             >
-              <div className="relative mx-auto flex min-h-svh max-w-screen-sm flex-col justify-between">
+              <div className="relative mx-auto flex min-h-full max-w-screen-sm flex-col justify-between">
                 <main className="relative flex w-full flex-grow flex-col">
                   {children}
                 </main>

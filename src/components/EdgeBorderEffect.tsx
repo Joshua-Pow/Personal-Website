@@ -92,10 +92,11 @@ export const EdgeBorderEffect = ({
     intensity,
     (v) => `${v * CONFIG.maxBorderWidth}px`
   );
-  const scale = useTransform(
+  const cardScale = useTransform(
     intensity,
     (v) => CONFIG.maxScale - v * (CONFIG.maxScale - CONFIG.minScale)
   );
+  const cardSize = useTransform(cardScale, (v) => `${v * 100}%`);
   const borderRadius = useTransform(
     intensity,
     (v) => v * CONFIG.maxBorderRadius
@@ -323,13 +324,14 @@ export const EdgeBorderEffect = ({
         </motion.div>
 
         <motion.div
-          className="absolute inset-0 z-[20] overflow-hidden bg-black"
+          className="absolute inset-0 z-[20] flex items-center justify-center overflow-hidden bg-black"
           style={{ padding: borderWidth }}
         >
           <motion.div
-            className="relative isolate h-full w-full overflow-hidden shadow-2xl"
+            className="relative isolate overflow-hidden shadow-2xl"
             style={{
-              scale,
+              width: cardSize,
+              height: cardSize,
               borderRadius,
               boxShadow,
             }}
