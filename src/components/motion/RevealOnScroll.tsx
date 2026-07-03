@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
+import { useRef } from "react";
 import {
   getVariantTransition,
   variants,
@@ -22,15 +23,18 @@ export function RevealOnScroll({
   className,
   as = "div",
 }: RevealOnScrollProps) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
   const reducedMotion = useReducedMotion();
   const Component = motion[as];
   const v = variants[variant];
+  const shouldReveal = reducedMotion || isInView;
 
   return (
     <Component
-      initial={v.initial}
-      whileInView={v.animate}
-      viewport={{ once: true }}
+      ref={ref}
+      initial={reducedMotion ? false : v.initial}
+      animate={shouldReveal ? v.animate : v.initial}
       transition={getVariantTransition(variant, delay, reducedMotion ?? false)}
       className={className}
     >

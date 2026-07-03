@@ -54,6 +54,22 @@ export function HomeIntro() {
           at a time.
         </p>
       </Reveal>
+
+      <Reveal variant="fadeUp" delay={175}>
+        <p>
+          Off the clock, I indulge a mildly obsessive autodidacticism—tinkering
+          with AI tooling, stress-testing whatever frontier LLM just shipped,
+          and hoarding bibliophilic wisdom on craft and comportment. The lines
+          that survive the curation end up in my{" "}
+          <Link
+            href="/adages"
+            className="font-medium text-orange-600 hover:text-orange-500"
+          >
+            adages
+          </Link>
+          .
+        </p>
+      </Reveal>
     </div>
   );
 }
