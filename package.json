@@ -10,7 +10,7 @@
     "prepare": "husky",
     "preview": "node scripts/generate-adages-manifest.mjs && opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "node scripts/generate-adages-manifest.mjs && opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "node scripts/generate-adages-manifest.mjs && opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "upload": "node scripts/sync-adage-images.mjs && node scripts/generate-adages-manifest.mjs && opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv worker-configuration.d.ts",
     "adages:upload": "node scripts/upload-adage-image.mjs"
   },
