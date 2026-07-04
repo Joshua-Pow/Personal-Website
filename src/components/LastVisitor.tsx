@@ -2,25 +2,13 @@
 
 import { useEffect, useState } from "react";
 import type { VisitorLocationResponse } from "@/app/api/visitor-location/route";
+import { getOrCreateVisitorId } from "@/lib/visitor-id";
 
 export type VisitorData = {
   location: string;
   latitude: string;
   longitude: string;
 };
-
-const VISITOR_ID_KEY = "visitor-id";
-
-function getOrCreateVisitorId(): string {
-  if (typeof window === "undefined") return "";
-
-  let visitorId = localStorage.getItem(VISITOR_ID_KEY);
-  if (!visitorId) {
-    visitorId = crypto.randomUUID();
-    localStorage.setItem(VISITOR_ID_KEY, visitorId);
-  }
-  return visitorId;
-}
 
 export default function LastVisitor() {
   const [previousVisitorData, setPreviousVisitorData] =
@@ -32,7 +20,6 @@ export default function LastVisitor() {
       try {
         const visitorId = getOrCreateVisitorId();
 
-        // Record the current visitor's location, which will return previous visitor info
         const recordResponse = await fetch("/api/visitor-location", {
           method: "POST",
           headers: {
@@ -47,7 +34,6 @@ export default function LastVisitor() {
 
         const data: VisitorLocationResponse = await recordResponse.json();
 
-        // Extract data for previous visitor if available
         if (
           data.previousLocation &&
           data.previousLatitude &&
@@ -59,12 +45,10 @@ export default function LastVisitor() {
             longitude: data.previousLongitude,
           });
         } else {
-          // No previous visitor data available
           setPreviousVisitorData(null);
         }
       } catch (error) {
         console.error("Error fetching visitor location:", error);
-        // Set null to hide the component on error
         setPreviousVisitorData(null);
       } finally {
         setIsLoading(false);
@@ -75,11 +59,11 @@ export default function LastVisitor() {
   }, []);
 
   if (isLoading || !previousVisitorData) {
-    return null; // Don't show anything while loading or if there's no previous visitor
+    return null;
   }
 
   return (
-    <div className="mt-4 text-xs text-neutral-400 opacity-50 transition-opacity hover:opacity-100">
+    <div className="mt-4 text-xs text-subtle motion-reduce:transition-none transition-opacity hover:text-accent">
       <p>Last visitor was from {previousVisitorData.location}</p>
     </div>
   );

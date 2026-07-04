@@ -40,7 +40,7 @@ function LetterScrollName() {
           return (
             <span
               key={`display-${index}`}
-              className="inline-block transition-transform ease-out [transition-delay:var(--delay-reverse)] group-hover:-translate-y-full group-hover:[transition-delay:var(--delay-forward)]"
+              className="inline-block transition-transform ease-out motion-reduce:transition-none [transition-delay:var(--delay-reverse)] group-hover:-translate-y-full group-hover:[transition-delay:var(--delay-forward)]"
               style={
                 {
                   transitionDuration: `${letterDurationMs}ms`,
@@ -61,7 +61,7 @@ function LetterScrollName() {
           return (
             <span
               key={`hover-${index}`}
-              className="inline-block translate-y-full transition-transform ease-out [transition-delay:var(--delay-reverse)] group-hover:translate-y-0 group-hover:[transition-delay:var(--delay-forward)]"
+              className="inline-block translate-y-full transition-transform ease-out motion-reduce:transition-none [transition-delay:var(--delay-reverse)] group-hover:translate-y-0 group-hover:[transition-delay:var(--delay-forward)]"
               style={
                 {
                   transitionDuration: `${letterDurationMs}ms`,
@@ -95,7 +95,7 @@ function HeaderName() {
 
 function BackLinkName() {
   return (
-    <Link href="/" className="inline-block">
+    <Link href="/" className="inline-block rounded-sm">
       <PowNameLabel color={NAME_COLORS.backLink} />
     </Link>
   );

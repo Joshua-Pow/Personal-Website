@@ -46,7 +46,7 @@ function PreviewHeader({
   title: string;
 }) {
   return (
-    <div className="flex h-7 shrink-0 items-center gap-1 border-b border-orange-200/50 px-2">
+    <div className="flex h-7 shrink-0 items-center gap-1 border-b border-[var(--popover-border)] px-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={favicon}
@@ -57,7 +57,7 @@ function PreviewHeader({
         loading="lazy"
         decoding="async"
       />
-      <Popover.Title className="truncate text-[10px] font-medium tracking-tight text-neutral-600">
+      <Popover.Title className="truncate text-[10px] font-medium tracking-tight text-on-surface-muted">
         {title}
       </Popover.Title>
     </div>
@@ -66,8 +66,8 @@ function PreviewHeader({
 
 function PreviewFooter({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-7 shrink-0 items-center border-t border-orange-200/50 px-2">
-      <Popover.Description className="truncate text-[9px] tracking-tight text-neutral-400">
+    <div className="flex h-7 shrink-0 items-center border-t border-[var(--popover-border)] px-2">
+      <Popover.Description className="truncate text-[9px] tracking-tight text-subtle">
         {children}
       </Popover.Description>
     </div>
@@ -83,23 +83,23 @@ function PreviewLoadingBody({
 }) {
   return (
     <div
-      className="relative shrink-0 overflow-hidden bg-gradient-to-br from-orange-100/55 to-orange-50/25"
+      className="relative shrink-0 overflow-hidden bg-gradient-to-br from-[var(--surface-inset-from)] to-[var(--surface-inset-to)]"
       style={{ height }}
     >
       <div
-        className="preview-shimmer pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/45 to-transparent"
+        className="preview-shimmer pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
         aria-hidden
       />
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
         <div
-          className="size-3 animate-spin rounded-full border-2 border-orange-300/35 border-t-orange-500/80 motion-reduce:animate-none"
+          className="size-3 animate-spin rounded-full border-2 border-accent-bright/25 border-t-accent motion-reduce:animate-none"
           aria-hidden
         />
-        <span className="text-[9px] font-medium tracking-tight text-neutral-500">
+        <span className="text-[9px] font-medium tracking-tight text-subtle">
           Loading preview…
         </span>
         {hostname && (
-          <span className="max-w-[85%] truncate text-[9px] tracking-tight text-neutral-400">
+          <span className="max-w-[85%] truncate text-[9px] tracking-tight text-subtle">
             {hostname}
           </span>
         )}
@@ -116,21 +116,21 @@ function PreviewSkeleton({ href }: { href: string }) {
 
   return (
     <PreviewShell layout={layout}>
-      <div className="flex h-7 shrink-0 items-center gap-1 border-b border-orange-200/50 px-2">
+      <div className="flex h-7 shrink-0 items-center gap-1 border-b border-[var(--popover-border)] px-2">
         <div className="flex shrink-0 gap-1" aria-hidden>
-          <span className="size-1.5 rounded-full bg-orange-400/50" />
-          <span className="size-1.5 rounded-full bg-orange-300/45" />
-          <span className="size-1.5 rounded-full bg-orange-200/55" />
+          <span className="size-1.5 rounded-full bg-accent-bright/50" />
+          <span className="size-1.5 rounded-full bg-accent/45" />
+          <span className="size-1.5 rounded-full bg-accent-hover/40" />
         </div>
-        <div className="min-w-0 flex-1 overflow-hidden rounded border border-orange-200/40 bg-white/50 px-1.5 py-0.5">
-          <span className="block truncate text-[9px] tracking-tight text-neutral-500/90">
+        <div className="min-w-0 flex-1 overflow-hidden rounded border border-[var(--popover-border)] bg-elevated px-1.5 py-0.5">
+          <span className="block truncate text-[9px] tracking-tight text-subtle">
             {hostname}
           </span>
         </div>
       </div>
       <PreviewLoadingBody hostname={hostname} height={bodyHeight} />
       <div className="flex h-7 shrink-0 items-center px-2">
-        <div className="h-1.5 w-10 animate-pulse rounded bg-orange-200/35 motion-reduce:animate-none" />
+        <div className="h-1.5 w-10 animate-pulse rounded bg-accent-bright/20 motion-reduce:animate-none" />
       </div>
     </PreviewShell>
   );
@@ -160,7 +160,7 @@ function IframePreview({ href, preview }: { href: string; preview: LinkPreviewDa
             title={`Preview of ${preview.title}`}
             width={embedConfig.width}
             height={embedConfig.height}
-            className={`block border-0 transition-opacity duration-200 ${loaded ? "opacity-100" : "opacity-0"}`}
+            className={`block border-0 transition-opacity duration-200 motion-reduce:transition-none ${loaded ? "opacity-100" : "opacity-0"}`}
             allow={embedConfig.allow}
             loading="lazy"
             onLoad={() => setLoaded(true)}
@@ -170,7 +170,7 @@ function IframePreview({ href, preview }: { href: string; preview: LinkPreviewDa
           <iframe
             src={iframeSrc}
             title={`Preview of ${preview.title}`}
-            className={`pointer-events-none absolute left-0 top-0 border-0 transition-opacity duration-200 ${loaded ? "opacity-100" : "opacity-0"}`}
+            className={`pointer-events-none absolute left-0 top-0 border-0 transition-opacity duration-200 motion-reduce:transition-none ${loaded ? "opacity-100" : "opacity-0"}`}
             style={{
               width: IFRAME_WIDTH,
               height: IFRAME_HEIGHT,
@@ -194,7 +194,7 @@ function MetadataPreview({ preview }: { preview: LinkPreviewData }) {
     <PreviewShell layout="default">
       <PreviewHeader favicon={preview.favicon} title={preview.title} />
       <div
-        className="relative shrink-0 overflow-hidden bg-neutral-100"
+        className="relative shrink-0 overflow-hidden bg-[var(--surface-inset-via)]"
         style={{ height: PREVIEW_HEIGHT }}
       >
         {preview.image ? (
@@ -202,18 +202,20 @@ function MetadataPreview({ preview }: { preview: LinkPreviewData }) {
           <img
             src={preview.image}
             alt=""
+            width={192}
+            height={108}
             className="size-full object-cover"
             loading="eager"
             decoding="async"
             fetchPriority="high"
           />
         ) : (
-          <div className="flex size-full flex-col items-center justify-center gap-1.5 bg-orange-100/30 px-4 text-center">
-            <span className="line-clamp-2 font-instrument text-sm leading-[1.2] tracking-[0.01em] text-neutral-900">
+          <div className="flex size-full flex-col items-center justify-center gap-1.5 bg-elevated px-4 text-center">
+            <span className="line-clamp-2 font-instrument text-sm leading-[1.2] tracking-[0.01em] text-on-surface">
               {preview.title}
             </span>
             {preview.description && (
-              <span className="line-clamp-3 text-[10px] leading-[1.35] tracking-tight text-neutral-600/90">
+              <span className="line-clamp-3 text-[10px] leading-[1.35] tracking-tight text-on-surface-muted">
                 {preview.description}
               </span>
             )}

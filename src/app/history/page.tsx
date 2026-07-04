@@ -40,7 +40,6 @@ const page = () => {
               Stats Log for{" "}
               <MotionLink
                 href="https://www.brucepower.com/"
-                className="font-medium text-blue-500 hover:underline"
               >
                 Bruce Power
               </MotionLink>
@@ -54,10 +53,7 @@ const page = () => {
             </p>
             <p className="mt-6">
               Additionally, I worked on our nuclear AI product{" "}
-              <MotionLink
-                href="https://npxai.com"
-                className="font-medium text-blue-500 hover:underline"
-              >
+              <MotionLink href="https://npxai.com">
                 NPX AI
               </MotionLink>{" "}
               building a custom translation feature which is an Azure hosted AI
@@ -95,10 +91,7 @@ const page = () => {
               I created an interactive calendar in <code>typescript</code> which
               was the main interface to schedule shipments and deliveries with a
               drag and drop interface using{" "}
-              <MotionLink
-                href="https://fullcalendar.io/"
-                className="font-medium text-blue-500 hover:underline"
-              >
+              <MotionLink href="https://fullcalendar.io/">
                 FullCalendar
               </MotionLink>
               .

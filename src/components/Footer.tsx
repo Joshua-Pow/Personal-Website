@@ -12,6 +12,7 @@ import {
   footerPreviewViewportSwipeClassName,
   prefetchPreview,
 } from "@/components/link-preview/shared";
+import { interactiveMuted } from "@/lib/interactive";
 
 type FooterLink = {
   href: string;
@@ -42,6 +43,7 @@ export function Footer() {
   const activeLinkRef = useRef<FooterLink | null>(null);
   const openTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const prefetchedLinksRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     activeLinkRef.current = activeLink;
@@ -68,8 +70,15 @@ export function Footer() {
     }, HOVER_CLOSE_DELAY);
   }, [clearCloseTimer]);
 
+  const prefetchLink = useCallback((href: string) => {
+    if (prefetchedLinksRef.current.has(href)) return;
+    prefetchedLinksRef.current.add(href);
+    void prefetchPreview(href);
+  }, []);
+
   const handleLinkEnter = useCallback(
     (link: FooterLink) => {
+      prefetchLink(link.href);
       clearCloseTimer();
 
       if (activeLinkRef.current !== null) {
@@ -83,19 +92,13 @@ export function Footer() {
         setActiveLink(link);
       }, HOVER_OPEN_DELAY);
     },
-    [clearCloseTimer, clearOpenTimer]
+    [clearCloseTimer, clearOpenTimer, prefetchLink]
   );
 
   const handlePreviewEnter = useCallback(() => {
     clearCloseTimer();
     clearOpenTimer();
   }, [clearCloseTimer, clearOpenTimer]);
-
-  useEffect(() => {
-    links.forEach((link) => {
-      void prefetchPreview(link.href);
-    });
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -124,8 +127,9 @@ export function Footer() {
                 rel="noopener noreferrer"
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: durations.fast }}
-                className="rounded-sm px-2 py-1 text-gray-400 hover:text-orange-500"
+                className={interactiveMuted("rounded-sm px-2 py-1")}
                 onMouseEnter={() => handleLinkEnter(link)}
+                onFocus={() => prefetchLink(link.href)}
               />
             }
           >

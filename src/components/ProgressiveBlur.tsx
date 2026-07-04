@@ -58,7 +58,6 @@ export function ProgressiveBlur({
             zIndex: 1,
             backdropFilter: `blur(${blurLevels[0]}px)`,
             WebkitBackdropFilter: `blur(${blurLevels[0]}px)`,
-            willChange: "backdrop-filter",
             maskImage:
               position === "bottom"
                 ? `linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 12.5%, rgba(0,0,0,1) 25%, rgba(0,0,0,0) 37.5%)`
@@ -97,7 +96,6 @@ export function ProgressiveBlur({
                 WebkitBackdropFilter: `blur(${blurLevels[blurIndex]}px)`,
                 maskImage: maskGradient,
                 WebkitMaskImage: maskGradient,
-                willChange: "backdrop-filter",
               }}
             />
           );
@@ -109,7 +107,6 @@ export function ProgressiveBlur({
             zIndex: blurLevels.length,
             backdropFilter: `blur(${blurLevels[blurLevels.length - 1]}px)`,
             WebkitBackdropFilter: `blur(${blurLevels[blurLevels.length - 1]}px)`,
-            willChange: "backdrop-filter",
             maskImage:
               position === "bottom"
                 ? `linear-gradient(to bottom, rgba(0,0,0,0) 87.5%, rgba(0,0,0,1) 100%)`

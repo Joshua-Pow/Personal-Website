@@ -53,16 +53,18 @@ export function WorkExperience({
 
   return (
     <RevealOnScroll variant="blurUp" delay={baseDelay} className="mb-8">
-      <RevealOnScroll variant="fadeUpSm" delay={baseDelay + 60} as="h2" className="text-base font-medium">
+      <RevealOnScroll variant="fadeUpSm" delay={baseDelay + 60} as="h2" className="text-balance text-base font-medium">
         {company}
       </RevealOnScroll>
       <RevealOnScroll
         variant="fadeUpSm"
         delay={baseDelay + 100}
         as="p"
-        className="mb-3 text-sm opacity-40"
+        className="mb-3 text-sm text-subtle"
       >
-        {role} | {period}
+        {role}
+        <span aria-hidden="true"> | </span>
+        {period}
       </RevealOnScroll>
       <div className="hyphens-auto leading-7">
         <AnimatedParagraphs baseDelay={baseDelay}>

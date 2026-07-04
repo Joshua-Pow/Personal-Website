@@ -12,11 +12,11 @@ export const PREVIEW_FOOTER_HEIGHT = 28;
 export const PREVIEW_PANEL_HEIGHT =
   PREVIEW_HEADER_HEIGHT + PREVIEW_HEIGHT + PREVIEW_FOOTER_HEIGHT;
 
-export const SPOTIFY_EMBED_WIDTH = 300;
+export const SPOTIFY_EMBED_WIDTH = 520;
 export const SPOTIFY_EMBED_HEIGHT = 152;
 
 const previewPopupBaseClassName =
-  "flex origin-[var(--transform-origin)] flex-col overflow-hidden rounded-xl border border-orange-200/60 bg-orange-50/75 shadow-[0_10px_30px_rgba(234,88,12,0.1),0_2px_8px_rgba(0,0,0,0.04)] backdrop-blur-md focus:outline-none supports-[backdrop-filter]:bg-orange-50/65";
+  "flex origin-[var(--transform-origin)] flex-col overflow-hidden rounded-xl border border-[var(--popover-border)] bg-[var(--popover-bg)] shadow-[0_10px_30px_rgba(0,0,0,0.35),0_2px_8px_rgba(0,0,0,0.2)] backdrop-blur-md focus:outline-none supports-[backdrop-filter]:bg-[var(--popover-bg)]";
 
 export const previewPanelSizeClassName =
   "h-[var(--preview-panel-height)] w-[min(12rem,calc(100vw-3rem))]";
@@ -42,7 +42,7 @@ export const morphingPreviewPositionerClassName = [
 ].join(" ");
 
 export const bareEmbedPopupClassName =
-  "z-50 w-fit overflow-visible border-0 bg-transparent p-0 shadow-none outline-none focus:outline-none";
+  "z-50 w-fit overflow-visible border-0 bg-transparent p-0 shadow-none focus-visible:outline-none";
 
 export const bareEmbedPositionerClassName =
   "z-50 h-fit w-fit max-w-[calc(100vw-3rem)] overflow-visible";
@@ -50,7 +50,7 @@ export const bareEmbedPositionerClassName =
 export const bareMorphingPreviewPopupClassName = [
   morphingPreviewPopupClassName,
   "min-h-0 min-w-0 overflow-visible border-0 bg-transparent p-0 shadow-none backdrop-blur-none",
-  "supports-[backdrop-filter]:bg-transparent outline-none focus:outline-none",
+  "supports-[backdrop-filter]:bg-transparent focus-visible:outline-none",
 ].join(" ");
 
 export const bareMorphingPreviewPositionerClassName = [

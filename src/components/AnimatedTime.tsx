@@ -69,6 +69,8 @@ function AnimatedTime({ graduationDate }: Props) {
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     const timer = setInterval(() => {
+      if (document.hidden) return;
+
       const now = new Date();
       const diff = now.getTime() - graduationDate.getTime();
 
@@ -108,28 +110,32 @@ function AnimatedTime({ graduationDate }: Props) {
   }, [graduationDate, reducedMotion]);
 
   return (
-    <span className="inline-flex gap-0.5 font-mono sm:gap-1">
-      {Object.entries(timeElapsed).map(
-        ([unit, value]) =>
-          !(unit === "years" && value === 0) && (
-            <span key={unit} className="flex flex-col items-center">
-              <span className="relative flex items-center justify-center rounded-md bg-slate-50 px-1 shadow-sm">
-                <span className="flex h-full items-center">
-                  {value
-                    .toString()
-                    .padStart(2, "0")
-                    .split("")
-                    .map((digit, idx) => (
-                      <DigitColumn
-                        key={`${unit}-${idx}`}
-                        digit={parseInt(digit, 10)}
-                      />
-                    ))}
-                </span>
+    <span
+      suppressHydrationWarning
+      aria-live="polite"
+      aria-atomic="true"
+      className="inline-flex gap-0.5 font-mono tabular-nums sm:gap-1"
+    >
+      {Object.entries(timeElapsed).map(([unit, value]) =>
+        unit === "years" && value === 0 ? null : (
+          <span key={unit} className="flex flex-col items-center">
+            <span className="relative flex items-center justify-center rounded-md bg-elevated px-1 shadow-sm">
+              <span className="flex h-full items-center">
+                {value
+                  .toString()
+                  .padStart(2, "0")
+                  .split("")
+                  .map((digit, idx) => (
+                    <DigitColumn
+                      key={`${unit}-${idx}`}
+                      digit={parseInt(digit, 10)}
+                    />
+                  ))}
               </span>
-              <span className="mt-1 text-[8px] sm:text-xs">{unit}</span>
             </span>
-          )
+            <span className="mt-1 text-[8px] sm:text-xs">{unit}</span>
+          </span>
+        )
       )}
     </span>
   );

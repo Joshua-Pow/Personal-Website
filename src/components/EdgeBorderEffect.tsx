@@ -122,7 +122,12 @@ export const EdgeBorderEffect = ({
   const touchStartEdgeRef = useRef<"left" | "right" | "top" | "bottom" | null>(
     null
   );
+  const isMobileActiveRef = useRef(false);
   const [isMobileActive, setIsMobileActive] = useState(false);
+
+  useEffect(() => {
+    isMobileActiveRef.current = isMobileActive;
+  }, [isMobileActive]);
 
   const setIntensity = useCallback(
     (target: number) => {
@@ -159,7 +164,7 @@ export const EdgeBorderEffect = ({
   );
 
   const handleMouseLeave = useCallback(() => {
-    setIntensity(1);
+    setIntensity(0);
   }, [setIntensity]);
 
   const detectEdge = (
@@ -242,13 +247,13 @@ export const EdgeBorderEffect = ({
 
   const handleTap = useCallback(
     (e: TouchEvent) => {
-      if (isMobileActive) {
+      if (isMobileActiveRef.current) {
         e.preventDefault();
         setIntensity(0);
         setIsMobileActive(false);
       }
     },
-    [isMobileActive, setIntensity]
+    [setIntensity]
   );
 
   useEffect(() => {
@@ -270,47 +275,70 @@ export const EdgeBorderEffect = ({
       window.addEventListener("touchend", handleTouchEnd);
       window.addEventListener("touchcancel", handleTouchEnd);
 
-      if (isMobileActive) {
-        window.addEventListener("touchstart", handleTap);
-      }
-
       return () => {
         window.removeEventListener("touchstart", handleTouchStart);
         window.removeEventListener("touchmove", handleTouchMove);
         window.removeEventListener("touchend", handleTouchEnd);
         window.removeEventListener("touchcancel", handleTouchEnd);
-        window.removeEventListener("touchstart", handleTap);
       };
     }
 
-    window.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseleave", handleMouseLeave);
+    const attachDesktopListeners = () => {
+      window.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseleave", handleMouseLeave);
+    };
 
-    return () => {
+    const removeDesktopListeners = () => {
       window.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseleave", handleMouseLeave);
       if (rafIdRef.current) {
         cancelAnimationFrame(rafIdRef.current);
       }
     };
+
+    if ("requestIdleCallback" in window) {
+      const idleId = window.requestIdleCallback(attachDesktopListeners);
+
+      return () => {
+        window.cancelIdleCallback(idleId);
+        removeDesktopListeners();
+      };
+    }
+
+    attachDesktopListeners();
+    return removeDesktopListeners;
   }, [
     handleMouseMove,
     handleMouseLeave,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
-    handleTap,
-    isMobileActive,
   ]);
+
+  useEffect(() => {
+    if (!isMobileActive) return;
+
+    window.addEventListener("touchstart", handleTap);
+
+    return () => {
+      window.removeEventListener("touchstart", handleTap);
+    };
+  }, [isMobileActive, handleTap]);
 
   return (
     <EdgeIntensityContext.Provider value={{ intensity }}>
-      <div className="fixed inset-0 overflow-hidden bg-black">
+      <div
+        className="fixed inset-0 overflow-hidden"
+        style={{
+          backgroundColor: "var(--page-bg)",
+          backgroundImage: "var(--page-bg-gradient)",
+        }}
+      >
         <motion.div
           className="pointer-events-none absolute inset-0 z-0"
           style={{
             opacity: backgroundOpacity,
-            background: `radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 100%)`,
+            backgroundColor: "var(--page-edge-color)",
           }}
         />
 
@@ -318,13 +346,13 @@ export const EdgeBorderEffect = ({
           className="pointer-events-none absolute inset-x-0 bottom-0 z-[30] flex items-center justify-center"
           style={{ opacity: textOpacity, height: `${CONFIG.maxBorderWidth}px` }}
         >
-          <p className="text-center font-instrument text-base text-neutral-200">
+          <p className="text-center font-instrument text-base text-neutral-300">
             Made with love in Canada 🍁
           </p>
         </motion.div>
 
         <motion.div
-          className="absolute inset-0 z-[20] flex items-center justify-center overflow-hidden bg-black"
+          className="absolute inset-0 z-[20] flex items-center justify-center overflow-hidden"
           style={{ padding: borderWidth }}
         >
           <motion.div
@@ -337,11 +365,23 @@ export const EdgeBorderEffect = ({
             }}
           >
             <motion.div
-              className="absolute inset-0 border border-black/5 bg-gradient-to-br from-orange-50 via-orange-100 to-yellow-50"
+              className="absolute inset-0 border border-black/5 bg-gradient-to-br from-[var(--surface-card-from)] via-[var(--surface-card-via)] to-[var(--surface-card-to)]"
               style={{ borderRadius }}
             />
 
-            <div className="relative z-10 h-full overflow-auto">{children}</div>
+            <motion.div
+              className="pointer-events-none absolute inset-0 mix-blend-overlay"
+              style={{
+                borderRadius,
+                opacity: "var(--page-noise-opacity)",
+                backgroundImage: "var(--page-noise-image)",
+                backgroundSize: "200px 200px",
+              }}
+            />
+
+            <div className="relative z-10 h-full overflow-auto text-on-surface">
+              {children}
+            </div>
 
             {blurSlot ? (
               <motion.div

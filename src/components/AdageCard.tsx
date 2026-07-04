@@ -21,6 +21,8 @@ export function AdageCard({ adage, index }: AdageCardProps) {
           src={adage.imageUrl}
           alt=""
           aria-hidden
+          width={800}
+          height={420}
           className="absolute inset-0 size-full object-cover"
           loading={index === 0 ? "eager" : "lazy"}
           fetchPriority={index === 0 ? "high" : "auto"}
@@ -50,16 +52,16 @@ export function AdageCard({ adage, index }: AdageCardProps) {
 
       <div className="flex flex-col gap-3 px-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-400">
+          <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-subtle">
             Heard from
           </span>
-          <span className="text-sm font-medium tracking-tight text-neutral-700">
+          <span className="text-sm font-medium tracking-tight text-on-surface">
             {adage.heardFrom}
           </span>
         </div>
         <time
           dateTime={adage.addedAt}
-          className="text-xs tracking-wide text-neutral-400"
+          className="text-xs tracking-wide text-subtle"
         >
           {formatAdageDate(adage.addedAt)}
         </time>
@@ -67,7 +69,7 @@ export function AdageCard({ adage, index }: AdageCardProps) {
           variant="fadeUpSm"
           delay={baseDelay + 80}
           as="div"
-          className="text-sm leading-[1.57] tracking-tight text-neutral-600"
+          className="text-sm leading-[1.57] tracking-tight text-on-surface-muted"
         >
           {adage.content}
         </RevealOnScroll>

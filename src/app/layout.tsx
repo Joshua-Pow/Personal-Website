@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Serif } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 import "./globals.css";
@@ -34,6 +34,10 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#FFF8F4",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -44,8 +48,12 @@ export default function RootLayout({
       <html
         lang="en"
         className={`${inter.variable} ${instrumentSerif.variable} antialiased`}
+        style={{ colorScheme: "light" }}
       >
         <body className="tracking-tight antialiased">
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
           <MotionProvider>
             <EdgeBorderEffect
               blurSlot={
@@ -56,7 +64,10 @@ export default function RootLayout({
               }
             >
               <div className="relative mx-auto flex min-h-full max-w-screen-sm flex-col justify-between">
-                <main className="relative flex w-full flex-grow flex-col">
+                <main
+                  id="main-content"
+                  className="relative flex w-full flex-grow flex-col scroll-mt-4"
+                >
                   {children}
                 </main>
                 <Footer />
@@ -68,4 +79,3 @@ export default function RootLayout({
     </ViewTransitions>
   );
 }
-

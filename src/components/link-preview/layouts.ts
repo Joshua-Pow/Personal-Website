@@ -13,5 +13,5 @@ export function isBareEmbedPreview(href: string): boolean {
 
 export const previewShellWidthClass: Record<PreviewLayout, string> = {
   default: "w-[min(12rem,calc(100vw-3rem))]",
-  spotify: "w-[min(300px,calc(100vw-3rem))]",
+  spotify: "w-[min(400px,calc(100vw-3rem))]",
 };

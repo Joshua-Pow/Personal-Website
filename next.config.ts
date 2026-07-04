@@ -1,5 +1,15 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import bundleAnalyzer from "@next/bundle-analyzer";
+import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
+const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: ["motion", "@base-ui/react", "swr"],
+  },
   images: {
     remotePatterns: [
       {
@@ -11,7 +21,6 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
-
-import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 initOpenNextCloudflareForDev();
+
+export default withBundleAnalyzer(nextConfig);

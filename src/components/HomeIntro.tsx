@@ -3,18 +3,17 @@ import AnimatedTime from "@/components/AnimatedTime";
 import { Reveal } from "@/components/motion/Reveal";
 import { MotionLink } from "@/components/motion/MotionLink";
 import { WordPopover } from "@/components/WordPopover";
+import { interactiveLink } from "@/lib/interactive";
 
 export function HomeIntro() {
   return (
     <div className="space-y-4 text-left leading-relaxed tracking-tighter">
-      <Reveal variant="fadeUp">
-        <p>
-          Hi, my name is <span className="font-medium">Joshua Pow</span>
-        </p>
-      </Reveal>
+      <p className="text-pretty">
+        Hi, my name is <span className="font-medium">Joshua Pow</span>
+      </p>
 
       <Reveal variant="fadeUp" delay={50}>
-        <p>
+        <p className="text-pretty">
           I&apos;m a computer engineer from the{" "}
           <span className="text-nowrap font-medium">University of Toronto </span>
           and an aspiring{" "}
@@ -23,7 +22,7 @@ export function HomeIntro() {
       </Reveal>
 
       <Reveal variant="fadeUp" delay={100}>
-        <p className="flex flex-row flex-wrap justify-start gap-1">
+        <p className="flex flex-row flex-wrap justify-start gap-1 text-pretty">
           <span className="flex h-6 items-center text-nowrap sm:h-8">
             I graduated
           </span>
@@ -33,23 +32,20 @@ export function HomeIntro() {
       </Reveal>
 
       <Reveal variant="fadeUp" delay={150}>
-        <p>
+        <p className="text-pretty">
           Since then, I&apos;ve been{" "}
-          <Link
-            href="/history"
-            className="font-medium text-orange-600 hover:text-orange-500"
-          >
+          <Link href="/history" className={interactiveLink()}>
             working
           </Link>{" "}
           at{" "}
           <MotionLink
             href="https://www.npxinnovation.ca/"
-            className="text-nowrap font-medium text-orange-600 hover:text-orange-500"
+            className="text-nowrap"
           >
             Nuclear Promise X
           </MotionLink>
           , a nuclear innovation company, helping to modernize the industry one{" "}
-          <code className="rounded bg-slate-50/50 px-1 py-0.5 text-neutral-950 shadow-sm">
+          <code className="rounded px-1 py-0.5 shadow-sm">
             {"<div/>"}
           </code>{" "}
           at a time.
@@ -57,7 +53,7 @@ export function HomeIntro() {
       </Reveal>
 
       <Reveal variant="fadeUp" delay={175}>
-        <p>
+        <p className="text-pretty">
           Off the clock, I pursue a mild recreational{" "}
           <WordPopover
             term="technophilia"
@@ -79,10 +75,7 @@ export function HomeIntro() {
             definition="Short, memorable statements of truth or wisdom, often passed down rather than authored."
           />{" "}
           that survive scrutiny end up in my{" "}
-          <Link
-            href="/adages"
-            className="font-medium text-orange-600 hover:text-orange-500"
-          >
+          <Link href="/adages" className={interactiveLink()}>
             adages
           </Link>
           .

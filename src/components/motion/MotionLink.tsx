@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { durations } from "@/lib/motion";
+import { interactiveLink } from "@/lib/interactive";
+import { cn } from "@/lib/utils/cn";
 import { LinkPreviewPopover } from "@/components/LinkPreviewPopover";
 
 const MotionNextLink = motion.create(Link);
@@ -14,6 +16,8 @@ type MotionLinkProps = {
   target?: string;
   rel?: string;
   preview?: boolean;
+  /** When false, skips default orange link text color */
+  accent?: boolean;
 };
 
 export function MotionLink({
@@ -23,13 +27,17 @@ export function MotionLink({
   target,
   rel,
   preview = true,
+  accent = true,
 }: MotionLinkProps) {
   const isExternal = href.startsWith("http");
+  const resolvedRel =
+    rel ?? (target === "_blank" ? "noopener noreferrer" : undefined);
+  const mergedClassName = cn(accent && interactiveLink(), className);
 
   const motionProps = {
     whileTap: { scale: 0.98 },
     transition: { duration: durations.fast },
-    className,
+    className: mergedClassName,
   };
 
   if (isExternal) {
@@ -37,9 +45,9 @@ export function MotionLink({
       return (
         <LinkPreviewPopover
           href={href}
-          className={className}
+          className={mergedClassName}
           target={target}
-          rel={rel}
+          rel={resolvedRel}
         >
           {children}
         </LinkPreviewPopover>
@@ -47,7 +55,12 @@ export function MotionLink({
     }
 
     return (
-      <motion.a href={href} target={target} rel={rel} {...motionProps}>
+      <motion.a
+        href={href}
+        target={target}
+        rel={resolvedRel}
+        {...motionProps}
+      >
         {children}
       </motion.a>
     );

@@ -1,31 +1,104 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@source "../**/*.{js,ts,jsx,tsx,mdx}";
+@source inline(
+  "text-accent hover:text-accent hover:text-accent-hover hover:text-accent-bright decoration-accent hover:decoration-accent bg-accent/80 bg-accent-bright/80 ring-accent ring-accent-bright ring-offset-surface-offset"
+);
 
 @theme {
   --font-instrument: "Instrument Serif", serif;
+
+  --color-background: oklch(98.5% 0.012 62);
+  --color-foreground: oklch(22% 0.02 50);
+  --color-accent: oklch(60% 0.23 36);
+  --color-accent-bright: oklch(60% 0.23 36);
+  --color-accent-hover: oklch(54% 0.24 36);
+  --color-surface: oklch(97.5% 0.008 65);
+  --color-surface-offset: oklch(100% 0 0);
+  --color-elevated: oklch(0% 0 0 / 4%);
+  --color-on-surface: oklch(22% 0.02 50);
+  --color-on-surface-muted: oklch(45% 0.02 55);
+  --color-subtle: oklch(52% 0.025 55);
 }
 
 :root {
-  --background: #000000;
-  --foreground: #171717;
-  --page-bg: #000000;
+  --page-bg: oklch(98.5% 0.012 62);
+  --page-bg-gradient: linear-gradient(
+    155deg,
+    oklch(100% 0 0) 0%,
+    oklch(98.8% 0.014 64) 42%,
+    oklch(96.5% 0.038 54) 100%
+  );
+  --page-edge-color: #202124;
+  --page-noise-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --page-noise-opacity: 0.24;
   --preview-panel-height: 164px;
+
+  --surface-card-from: oklch(100% 0 0);
+  --surface-card-via: oklch(100% 0.002 70);
+  --surface-card-to: oklch(99.5% 0.006 62);
+  --surface-inset-from: oklch(98% 0.01 65);
+  --surface-inset-via: oklch(97% 0.014 60);
+  --surface-inset-to: oklch(96% 0.02 55);
+  --popover-bg: oklch(100% 0 0 / 96%);
+  --popover-border: oklch(60% 0.23 36 / 18%);
+  --code-bg: oklch(22% 0.02 50 / 5%);
+  --code-fg: var(--color-on-surface);
+  --selection-bg: color-mix(in oklch, var(--color-accent-bright) 22%, transparent);
+  --selection-fg: var(--color-on-surface);
   scrollbar-gutter: stable;
+  color-scheme: light;
 }
 
 html {
   min-height: 100%;
   background-color: var(--page-bg);
+  background-image: var(--page-bg-gradient);
+  background-attachment: fixed;
+  -webkit-tap-highlight-color: color-mix(
+    in oklch,
+    var(--color-accent-bright) 15%,
+    transparent
+  );
 }
 
 body {
   text-rendering: optimizeLegibility;
+  touch-action: manipulation;
 }
 
 code {
   font-family: "Menlo", "Monaco", "Courier New", monospace;
-  @apply rounded bg-slate-50/50 px-1 py-0.5 text-neutral-950 shadow-sm;
+  @apply rounded-sm px-1 py-0.5 shadow-xs;
+  background-color: var(--code-bg);
+  color: var(--code-fg);
+}
+
+@layer base {
+  ::selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-fg);
+  }
+
+  :where(
+    a[href],
+    button,
+    summary,
+    input,
+    textarea,
+    select,
+    [role="button"],
+    [role="link"],
+    [tabindex]:not([tabindex="-1"])
+  ):focus-visible {
+    @apply outline-hidden rounded-xs ring-2 ring-accent-bright ring-offset-2 ring-offset-surface-offset;
+  }
+}
+
+@layer utilities {
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-100 focus:rounded-md focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-on-surface focus:shadow-lg;
+  }
 }
 
 /* Shared element: Joshua Pow morphs between home header and subpage back link */
