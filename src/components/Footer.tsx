@@ -63,12 +63,21 @@ export function Footer() {
     }
   }, []);
 
+  const blurFocusedFooterTrigger = useCallback(() => {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return;
+    if (active.closest("footer")) {
+      active.blur();
+    }
+  }, []);
+
   const scheduleClose = useCallback(() => {
     clearCloseTimer();
     closeTimerRef.current = setTimeout(() => {
       setActiveLink(null);
+      blurFocusedFooterTrigger();
     }, HOVER_CLOSE_DELAY);
-  }, [clearCloseTimer]);
+  }, [clearCloseTimer, blurFocusedFooterTrigger]);
 
   const prefetchLink = useCallback((href: string) => {
     if (prefetchedLinksRef.current.has(href)) return;
@@ -110,7 +119,10 @@ export function Footer() {
   return (
     <footer
       className="mb-24 mt-8 flex w-full items-center justify-center"
-      onMouseLeave={scheduleClose}
+      onMouseLeave={() => {
+        scheduleClose();
+        blurFocusedFooterTrigger();
+      }}
     >
       <div className="flex items-center gap-2">
         {links.map((link) => (
@@ -129,6 +141,7 @@ export function Footer() {
                 transition={{ duration: durations.fast }}
                 className={interactiveMuted("rounded-sm px-2 py-1")}
                 onMouseEnter={() => handleLinkEnter(link)}
+                onMouseLeave={(event) => event.currentTarget.blur()}
                 onFocus={() => prefetchLink(link.href)}
               />
             }
@@ -147,6 +160,7 @@ export function Footer() {
             clearOpenTimer();
             clearCloseTimer();
             setActiveLink(null);
+            blurFocusedFooterTrigger();
           }
         }}
       >
