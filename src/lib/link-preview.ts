@@ -44,15 +44,22 @@ export function validatePreviewUrl(urlString: string): URL {
   return url;
 }
 
+const regexCache = new Map<string, RegExp>();
+
 function extractMetaContent(
   html: string,
   attribute: "property" | "name",
   value: string
 ): string | undefined {
-  const pattern = new RegExp(
-    `<meta[^>]*${attribute}=["']${value}["'][^>]*content=["']([^"']*)["'][^>]*>|<meta[^>]*content=["']([^"']*)["'][^>]*${attribute}=["']${value}["'][^>]*>`,
-    "i"
-  );
+  const cacheKey = `${attribute}:${value}`;
+  let pattern = regexCache.get(cacheKey);
+  if (!pattern) {
+    pattern = new RegExp(
+      `<meta[^>]*${attribute}=["']${value}["'][^>]*content=["']([^"']*)["'][^>]*>|<meta[^>]*content=["']([^"']*)["'][^>]*${attribute}=["']${value}["'][^>]*>`,
+      "i"
+    );
+    regexCache.set(cacheKey, pattern);
+  }
   const match = html.match(pattern);
   return match?.[1] || match?.[2] || undefined;
 }

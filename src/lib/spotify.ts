@@ -95,10 +95,11 @@ async function fetchLastPlayed(
 
 export const getSpotifyData = cache(async () => {
   const token = await getAccessToken();
-  const currentlyPlaying = await fetchCurrentlyPlaying(token);
-  const lastPlayed = !currentlyPlaying?.is_playing
-    ? await fetchLastPlayed(token)
-    : null;
+  const [currentlyPlaying, lastPlayedRaw] = await Promise.all([
+    fetchCurrentlyPlaying(token),
+    fetchLastPlayed(token),
+  ]);
+  const lastPlayed = currentlyPlaying?.is_playing ? null : lastPlayedRaw;
 
   return { currentlyPlaying, lastPlayed };
 });

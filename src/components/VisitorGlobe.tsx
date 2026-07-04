@@ -1,11 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
-import Globe from "./Globe";
 import { VisitorData } from "./LastVisitor";
-import { durations } from "@/lib/motion";
+import { getOrCreateVisitorId } from "@/lib/visitor-id";
 import type { VisitorLocationResponse } from "@/app/api/visitor-location/route";
+
+const Globe = dynamic(() => import("./Globe"), { ssr: false });
 
 export default function VisitorGlobe() {
   const [visitorData, setVisitorData] = useState<VisitorData | undefined>();
@@ -14,8 +15,14 @@ export default function VisitorGlobe() {
   useEffect(() => {
     async function fetchVisitorInfo() {
       try {
+        const visitorId = getOrCreateVisitorId();
+
         const recordResponse = await fetch("/api/visitor-location", {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ visitorId }),
         });
 
         if (!recordResponse.ok) {
@@ -53,15 +60,11 @@ export default function VisitorGlobe() {
       <div className="flex h-[300px] w-[300px] items-center justify-center">
         <Globe visitorData={visitorData} />
       </div>
-      {!isLoading && visitorData && (
-        <motion.p
-          className="mt-2 text-center text-xs text-neutral-400 opacity-50 hover:opacity-100"
-          whileTap={{ scale: 0.98 }}
-          transition={{ duration: durations.fast }}
-        >
+      {!isLoading && visitorData ? (
+        <p className="mt-2 text-center text-xs text-subtle">
           Last visitor was from {visitorData.location}
-        </motion.p>
-      )}
+        </p>
+      ) : null}
     </div>
   );
 }

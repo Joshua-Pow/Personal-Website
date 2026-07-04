@@ -114,28 +114,18 @@ export async function POST(
       const kv = env.VISITOR_LOCATION;
 
       if (kv) {
-        // Get current visitor data
-        const currentData = await kv.get(CURRENT_VISITOR_KEY, "json");
+        const [currentData, previousData] = await Promise.all([
+          kv.get(CURRENT_VISITOR_KEY, "json"),
+          kv.get(PREVIOUS_VISITOR_KEY, "json"),
+        ]);
         currentVisitorData = currentData as VisitorData | null;
 
-        // Check if this is the same visitor (don't record twice)
         const isSameVisitor =
           visitorId && currentVisitorData?.visitorId === visitorId;
 
         if (isSameVisitor) {
-          // Same visitor refreshing - just return existing previous visitor data
-          const previousData = await kv.get(PREVIOUS_VISITOR_KEY, "json");
           previousVisitorData = previousData as VisitorData | null;
         } else {
-          // New visitor - move current visitor to previous visitor if it exists
-          if (currentVisitorData) {
-            await kv.put(
-              PREVIOUS_VISITOR_KEY,
-              JSON.stringify(currentVisitorData)
-            );
-          }
-
-          // Create new visitor data with timestamp
           const newVisitorData: VisitorData = {
             visitorId,
             location,
@@ -144,12 +134,17 @@ export async function POST(
             timestamp: Date.now(),
           };
 
-          // Update the current visitor data in KV
-          await kv.put(CURRENT_VISITOR_KEY, JSON.stringify(newVisitorData));
+          await Promise.all([
+            currentVisitorData
+              ? kv.put(
+                  PREVIOUS_VISITOR_KEY,
+                  JSON.stringify(currentVisitorData)
+                )
+              : Promise.resolve(),
+            kv.put(CURRENT_VISITOR_KEY, JSON.stringify(newVisitorData)),
+          ]);
 
-          // Get the previous visitor data for the response
-          const previousData = await kv.get(PREVIOUS_VISITOR_KEY, "json");
-          previousVisitorData = previousData as VisitorData | null;
+          previousVisitorData = currentVisitorData;
         }
       }
     }

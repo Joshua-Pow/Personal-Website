@@ -13,6 +13,8 @@ export default function Globe({ visitorData }: GlobeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointerInteracting = useRef<number | null>(null);
   const pointerInteractionMovement = useRef(0);
+  const latitude = visitorData?.latitude;
+  const longitude = visitorData?.longitude;
 
   const r = useSpring(0, { stiffness: 280, damping: 40 });
 
@@ -56,13 +58,10 @@ export default function Globe({ visitorData }: GlobeProps) {
       glowColor: [0.8, 0.8, 0.8],
       offset: [0, 0],
       scale: 0.9,
-      markers: visitorData
+      markers: latitude && longitude
         ? [
             {
-              location: [
-                parseFloat(visitorData.latitude),
-                parseFloat(visitorData.longitude),
-              ],
+              location: [parseFloat(latitude), parseFloat(longitude)],
               size: 0.1,
             },
           ]
@@ -127,12 +126,14 @@ export default function Globe({ visitorData }: GlobeProps) {
       window.removeEventListener("resize", onResize);
       globe.destroy();
     };
-  }, [r, visitorData]);
+  }, [r, latitude, longitude]);
 
   return (
     <div className="flex h-full w-full items-center justify-center">
       <canvas
         ref={canvasRef}
+        role="img"
+        aria-label="Interactive globe showing last visitor location"
         style={{
           width: "300px",
           height: "300px",

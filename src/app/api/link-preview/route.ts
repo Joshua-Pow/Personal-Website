@@ -13,7 +13,11 @@ export async function GET(request: Request) {
 
   try {
     const preview = await fetchLinkPreview(url);
-    return NextResponse.json(preview);
+    return NextResponse.json(preview, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to fetch preview";
 
@@ -22,7 +26,11 @@ export async function GET(request: Request) {
     }
 
     try {
-      return NextResponse.json(buildFallbackPreview(url));
+      return NextResponse.json(buildFallbackPreview(url), {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        },
+      });
     } catch {
       return NextResponse.json({ error: message }, { status: 502 });
     }
