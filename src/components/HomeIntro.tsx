@@ -15,7 +15,7 @@ export function HomeIntro() {
   return (
     <div className="space-y-4 text-left leading-relaxed tracking-tighter">
       <p className="text-pretty">
-        Hi, my name is <span className="font-medium">Joshua Pow</span>
+        Hi — I&apos;m <span className="font-medium">Joshua Pow</span>.
       </p>
 
       <RevealStagger className="space-y-4">
