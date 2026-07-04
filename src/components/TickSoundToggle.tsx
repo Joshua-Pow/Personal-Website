@@ -9,7 +9,6 @@ import {
   useReducedMotion,
   useTransform,
 } from "motion/react";
-import { useWebHaptics } from "web-haptics/react";
 import { cn } from "@/lib/utils/cn";
 import { easeOut } from "@/lib/motion";
 import {
@@ -87,7 +86,6 @@ function PendulumArm({ isStill }: { isStill: boolean }) {
 }
 
 export function TickSoundToggle() {
-  const { trigger } = useWebHaptics();
   const reducedMotion = useReducedMotion();
   const muted = useSyncExternalStore(
     subscribeTickSoundMuted,
@@ -97,15 +95,10 @@ export function TickSoundToggle() {
 
   const isStill = Boolean(muted || reducedMotion);
 
-  const handleToggle = () => {
-    void trigger([{ duration: 12, intensity: 0.55 }]);
-    toggleTickSoundMuted();
-  };
-
   return (
     <button
       type="button"
-      onClick={handleToggle}
+      onClick={toggleTickSoundMuted}
       aria-label={muted ? "Unmute counter ticking" : "Mute counter ticking"}
       aria-pressed={muted}
       className={cn(
