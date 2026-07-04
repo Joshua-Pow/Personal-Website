@@ -46,7 +46,7 @@ export function AdageCard({ adage, index }: AdageCardProps) {
           &ldquo;{adage.quote.replace(/^"|"$/g, "")}&rdquo;
         </blockquote>
         <p className="relative z-10 mt-6 text-center font-instrument text-lg italic leading-7 tracking-[0.01em] text-[#F5F0E8]/75">
-          &mdash; {adage.attribution}
+          {adage.attribution}
         </p>
       </div>
 

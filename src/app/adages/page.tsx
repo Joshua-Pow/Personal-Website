@@ -19,7 +19,7 @@ export default async function AdagesPage() {
       <AnimatedName />
       <Reveal variant="blurIn" className="mb-12">
         <p>
-          A collection of words worth keeping — short truths, borrowed wisdom,
+          A collection of words worth keeping: short truths, borrowed wisdom,
           and lines that stuck.
         </p>
       </Reveal>
