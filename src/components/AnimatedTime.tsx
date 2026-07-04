@@ -6,6 +6,7 @@ import { easeOut } from "@/lib/motion";
 import {
   getTickSoundMutedServerSnapshot,
   getTickSoundMutedSnapshot,
+  subscribeAlignedSecondTick,
   subscribeTickSoundMuted,
 } from "@/lib/tick-sound";
 
@@ -95,7 +96,7 @@ function AnimatedTime({ graduationDate }: Props) {
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    const timer = setInterval(() => {
+    const tick = () => {
       if (document.hidden) return;
 
       const now = new Date();
@@ -127,10 +128,13 @@ function AnimatedTime({ graduationDate }: Props) {
 
       prevTimeRef.current = newTimeElapsed;
       setTimeElapsed(newTimeElapsed);
-    }, 1000);
+    };
+
+    tick();
+    const stopAlignedTicks = subscribeAlignedSecondTick(tick);
 
     return () => {
-      clearInterval(timer);
+      stopAlignedTicks();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       audioRef.current?.remove();
     };

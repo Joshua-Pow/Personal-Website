@@ -9,55 +9,52 @@ import {
   useReducedMotion,
   useTransform,
 } from "motion/react";
+import { useWebHaptics } from "web-haptics/react";
 import { cn } from "@/lib/utils/cn";
 import { easeOut } from "@/lib/motion";
 import {
+  getMetronomeAngle,
   getTickSoundMutedServerSnapshot,
   getTickSoundMutedSnapshot,
+  PIVOT,
   subscribeTickSoundMuted,
   toggleTickSoundMuted,
 } from "@/lib/tick-sound";
 
-const PIVOT = { x: 12, y: 17.75 };
 const ARM_LENGTH = 10.3;
-const PENDULUM_SWING = 22;
-
-const pendulumKeyframes = Array.from({ length: 13 }, (_, index) => {
-  const phase = (index / 12) * Math.PI * 2;
-  return Number((-PENDULUM_SWING * Math.cos(phase)).toFixed(2));
-});
-
-const pendulumTimes = pendulumKeyframes.map((_, index) => index / 12);
 
 function PendulumArm({ isStill }: { isStill: boolean }) {
-  const angle = useMotionValue(pendulumKeyframes[0]);
+  const angle = useMotionValue(getMetronomeAngle());
 
   useEffect(() => {
-    const controls = animate(
-      angle,
-      isStill ? -11 : pendulumKeyframes,
-      isStill
-        ? { type: "spring", stiffness: 220, damping: 16, mass: 0.7 }
-        : {
-            duration: 2,
-            repeat: Infinity,
-            ease: "linear",
-            times: pendulumTimes,
-          }
-    );
+    if (isStill) {
+      const controls = animate(angle, -11, {
+        type: "spring",
+        stiffness: 220,
+        damping: 16,
+        mass: 0.7,
+      });
+      return () => controls.stop();
+    }
 
-    return () => controls.stop();
+    let frameId = 0;
+    const update = () => {
+      angle.set(getMetronomeAngle());
+      frameId = requestAnimationFrame(update);
+    };
+
+    angle.set(getMetronomeAngle());
+    frameId = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(frameId);
   }, [angle, isStill]);
 
   const tipX = useTransform(
     angle,
-    (degrees) =>
-      PIVOT.x + ARM_LENGTH * Math.sin((degrees * Math.PI) / 180)
+    (degrees) => PIVOT.x + ARM_LENGTH * Math.sin((degrees * Math.PI) / 180)
   );
   const tipY = useTransform(
     angle,
-    (degrees) =>
-      PIVOT.y - ARM_LENGTH * Math.cos((degrees * Math.PI) / 180)
+    (degrees) => PIVOT.y - ARM_LENGTH * Math.cos((degrees * Math.PI) / 180)
   );
 
   return (
@@ -90,6 +87,7 @@ function PendulumArm({ isStill }: { isStill: boolean }) {
 }
 
 export function TickSoundToggle() {
+  const { trigger } = useWebHaptics();
   const reducedMotion = useReducedMotion();
   const muted = useSyncExternalStore(
     subscribeTickSoundMuted,
@@ -97,12 +95,17 @@ export function TickSoundToggle() {
     getTickSoundMutedServerSnapshot
   );
 
-  const isStill = muted || reducedMotion;
+  const isStill = Boolean(muted || reducedMotion);
+
+  const handleToggle = () => {
+    void trigger([{ duration: 12, intensity: 0.55 }]);
+    toggleTickSoundMuted();
+  };
 
   return (
     <button
       type="button"
-      onClick={toggleTickSoundMuted}
+      onClick={handleToggle}
       aria-label={muted ? "Unmute counter ticking" : "Mute counter ticking"}
       aria-pressed={muted}
       className={cn(
@@ -126,7 +129,7 @@ export function TickSoundToggle() {
         <path d="M7.75 19.5h8.5l-1.65-11.25H9.4L7.75 19.5z" />
         <path d="M9.4 8.25h5.2" opacity="0.4" />
 
-        <PendulumArm isStill={isStill ?? false} />
+        <PendulumArm isStill={isStill} />
 
         <motion.g
           initial={false}

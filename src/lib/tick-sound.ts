@@ -1,6 +1,34 @@
 const TICK_SOUND_MUTED_KEY = "counter-tick-muted";
 const tickSoundListeners = new Set<() => void>();
 
+export const METRONOME_SWING = 22;
+export const PIVOT = { x: 12, y: 17.75 };
+
+export function getMetronomeAngle(timestamp = Date.now()) {
+  return -METRONOME_SWING * Math.cos((Math.PI * timestamp) / 1000);
+}
+
+export function subscribeAlignedSecondTick(listener: () => void) {
+  if (typeof window === "undefined") {
+    return () => {};
+  }
+
+  let intervalId: number | undefined;
+  const msUntilNextSecond = 1000 - (Date.now() % 1000);
+
+  const timeoutId = window.setTimeout(() => {
+    listener();
+    intervalId = window.setInterval(listener, 1000);
+  }, msUntilNextSecond);
+
+  return () => {
+    window.clearTimeout(timeoutId);
+    if (intervalId !== undefined) {
+      window.clearInterval(intervalId);
+    }
+  };
+}
+
 export function subscribeTickSoundMuted(onStoreChange: () => void) {
   tickSoundListeners.add(onStoreChange);
   return () => {
