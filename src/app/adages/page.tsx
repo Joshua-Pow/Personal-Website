@@ -1,7 +1,6 @@
-import { AnimatedName } from "@/components/AnimatedName";
-import { AdageCard } from "@/components/AdageCard";
-import { Reveal } from "@/components/motion/Reveal";
-import { getAdages } from "@/lib/adages";
+import { Suspense } from "react";
+import { AdageFeed } from "@/components/AdageFeed";
+import { SubpageLayout } from "@/components/SubpageLayout";
 
 export const metadata = {
   title: "Adages",
@@ -10,25 +9,22 @@ export const metadata = {
   },
 };
 
-export default async function AdagesPage() {
-  const adages = await getAdages();
-
+const page = () => {
   return (
-    <div className="flex h-full flex-col px-8">
-      <h1 className="pt-12 font-medium">Adages</h1>
-      <AnimatedName />
-      <Reveal variant="blurIn" className="mb-12">
+    <SubpageLayout
+      title="Adages"
+      intro={
         <p>
           A collection of words worth keeping: short truths, borrowed wisdom,
           and lines that stuck.
         </p>
-      </Reveal>
-
-      <div className="flex flex-col gap-16 pb-24">
-        {adages.map((adage, index) => (
-          <AdageCard key={adage.slug} adage={adage} index={index} />
-        ))}
-      </div>
-    </div>
+      }
+    >
+      <Suspense fallback={null}>
+        <AdageFeed />
+      </Suspense>
+    </SubpageLayout>
   );
-}
+};
+
+export default page;

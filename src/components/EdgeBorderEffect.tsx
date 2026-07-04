@@ -11,12 +11,11 @@ import {
 import {
   animate,
   motion,
-  useMotionTemplate,
   useMotionValue,
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { easeOut, durations } from "@/lib/motion";
+import { easeIn, easeOut, durations } from "@/lib/motion";
 
 interface EdgeBorderEffectProps {
   children: React.ReactNode;
@@ -24,13 +23,21 @@ interface EdgeBorderEffectProps {
 }
 
 const CONFIG = {
-  maxBorderWidth: 24,
+  maxBorderWidth: 28,
   maxScale: 1,
   minScale: 0.985,
   maxBorderRadius: 16,
   edgeThresholdPx: 40,
   minSwipeDistance: 60,
 } as const;
+
+const CARD_GLOW_SHADOW = `
+  0 -25px 50px -12px rgba(251, 146, 60, 0.12),
+  0 25px 50px -12px rgba(251, 146, 60, 0.12),
+  -25px 0 50px -12px rgba(251, 191, 36, 0.1),
+  25px 0 50px -12px rgba(251, 191, 36, 0.1),
+  inset 0 1px 0 rgba(255, 255, 255, 0.15)
+`;
 
 type EdgeIntensityContextValue = {
   intensity: MotionValue<number>;
@@ -53,14 +60,9 @@ function calculateDesktopIntensity(
   mouseY: number,
   screenWidth: number,
   screenHeight: number,
-  thresholdRem: number,
+  thresholdPx: number,
   maxBorderWidth: number
 ): number {
-  const rootFontSize = parseFloat(
-    getComputedStyle(document.documentElement).fontSize || "16"
-  );
-  const thresholdPx = thresholdRem * rootFontSize;
-
   const distances = {
     left: mouseX,
     right: screenWidth - mouseX,
@@ -88,6 +90,7 @@ export const EdgeBorderEffect = ({
   blurSlot,
 }: EdgeBorderEffectProps) => {
   const intensity = useMotionValue(0);
+  const rootFontSizeRef = useRef(16);
   const borderWidth = useTransform(
     intensity,
     (v) => `${v * CONFIG.maxBorderWidth}px`
@@ -103,16 +106,7 @@ export const EdgeBorderEffect = ({
   );
   const textOpacity = useTransform(intensity, (v) => Math.max(0, (v - 0.5) * 2));
   const backgroundOpacity = intensity;
-  const shadowOrange = useTransform(intensity, (v) => v * 0.12);
-  const shadowYellow = useTransform(intensity, (v) => v * 0.1);
-  const shadowHighlight = useTransform(intensity, (v) => v * 0.15);
-  const boxShadow = useMotionTemplate`
-    0 -25px 50px -12px rgba(251, 146, 60, ${shadowOrange}),
-    0 25px 50px -12px rgba(251, 146, 60, ${shadowOrange}),
-    -25px 0 50px -12px rgba(251, 191, 36, ${shadowYellow}),
-    25px 0 50px -12px rgba(251, 191, 36, ${shadowYellow}),
-    inset 0 1px 0 rgba(255, 255, 255, ${shadowHighlight})
-  `;
+  const glowOpacity = intensity;
 
   const rafIdRef = useRef<number | null>(null);
   const currentIntensityRef = useRef(0);
@@ -126,17 +120,33 @@ export const EdgeBorderEffect = ({
   const [isMobileActive, setIsMobileActive] = useState(false);
 
   useEffect(() => {
+    const updateRootFontSize = () => {
+      rootFontSizeRef.current = parseFloat(
+        getComputedStyle(document.documentElement).fontSize || "16"
+      );
+    };
+
+    updateRootFontSize();
+    window.addEventListener("resize", updateRootFontSize);
+
+    return () => {
+      window.removeEventListener("resize", updateRootFontSize);
+    };
+  }, []);
+
+  useEffect(() => {
     isMobileActiveRef.current = isMobileActive;
   }, [isMobileActive]);
 
   const setIntensity = useCallback(
     (target: number) => {
       if (target === currentIntensityRef.current) return;
+      const previous = currentIntensityRef.current;
       currentIntensityRef.current = target;
       animationRef.current?.stop();
       animationRef.current = animate(intensity, target, {
         duration: durations.ui,
-        ease: easeOut,
+        ease: target < previous ? easeIn : easeOut,
       });
     },
     [intensity]
@@ -149,12 +159,13 @@ export const EdgeBorderEffect = ({
       }
 
       rafIdRef.current = requestAnimationFrame(() => {
+        const thresholdPx = 3 * rootFontSizeRef.current;
         const nextIntensity = calculateDesktopIntensity(
           e.clientX,
           e.clientY,
           window.innerWidth,
           window.innerHeight,
-          3,
+          thresholdPx,
           CONFIG.maxBorderWidth
         );
         setIntensity(nextIntensity);
@@ -343,10 +354,13 @@ export const EdgeBorderEffect = ({
         />
 
         <motion.div
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-[30] flex items-center justify-center"
-          style={{ opacity: textOpacity, height: `${CONFIG.maxBorderWidth}px` }}
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[30] flex items-center justify-center px-4"
+          style={{
+            opacity: textOpacity,
+            height: borderWidth,
+          }}
         >
-          <p className="text-center font-instrument text-base text-neutral-300">
+          <p className="text-center font-instrument text-sm leading-none text-neutral-300">
             Made with love in Canada 🍁
           </p>
         </motion.div>
@@ -361,9 +375,16 @@ export const EdgeBorderEffect = ({
               width: cardSize,
               height: cardSize,
               borderRadius,
-              boxShadow,
             }}
           >
+            <motion.div
+              className="pointer-events-none absolute -inset-8 rounded-[inherit]"
+              style={{
+                opacity: glowOpacity,
+                boxShadow: CARD_GLOW_SHADOW,
+              }}
+            />
+
             <motion.div
               className="absolute inset-0 border border-black/5 bg-gradient-to-br from-[var(--surface-card-from)] via-[var(--surface-card-via)] to-[var(--surface-card-to)]"
               style={{ borderRadius }}

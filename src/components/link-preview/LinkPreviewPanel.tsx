@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Popover } from "@base-ui/react/popover";
 import useSWR from "swr";
 import type { LinkPreviewData } from "@/lib/link-preview";
@@ -138,11 +138,27 @@ function PreviewSkeleton({ href }: { href: string }) {
 
 function IframePreview({ href, preview }: { href: string; preview: LinkPreviewData }) {
   const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const loadedRef = useRef(false);
   const hostname = new URL(href).hostname.replace(/^www\./, "");
   const embedConfig = getPreviewEmbedConfig(href);
   const iframeSrc = embedConfig?.src ?? href;
   const layout = getPreviewLayout(href);
   const bodyHeight = embedConfig?.height ?? PREVIEW_HEIGHT;
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      if (!loadedRef.current) {
+        setFailed(true);
+      }
+    }, 4000);
+
+    return () => window.clearTimeout(timeout);
+  }, [href, iframeSrc]);
+
+  if (failed && !loaded) {
+    return <MetadataPreview preview={preview} />;
+  }
 
   return (
     <PreviewShell layout={layout}>
@@ -163,7 +179,11 @@ function IframePreview({ href, preview }: { href: string; preview: LinkPreviewDa
             className={`block border-0 transition-opacity duration-200 motion-reduce:transition-none ${loaded ? "opacity-100" : "opacity-0"}`}
             allow={embedConfig.allow}
             loading="lazy"
-            onLoad={() => setLoaded(true)}
+            onLoad={() => {
+              loadedRef.current = true;
+              setLoaded(true);
+            }}
+            onError={() => setFailed(true)}
             tabIndex={-1}
           />
         ) : (
@@ -177,7 +197,11 @@ function IframePreview({ href, preview }: { href: string; preview: LinkPreviewDa
               transform: `scale(${PREVIEW_SCALE})`,
               transformOrigin: "top left",
             }}
-            onLoad={() => setLoaded(true)}
+            onLoad={() => {
+              loadedRef.current = true;
+              setLoaded(true);
+            }}
+            onError={() => setFailed(true)}
             tabIndex={-1}
           />
         )}
@@ -248,7 +272,7 @@ export function LinkPreviewPanel({ href }: { href: string }) {
   }
 
   if (shouldShowIframePreview(href, data.embeddable)) {
-    return <IframePreview href={href} preview={data} />;
+    return <IframePreview key={href} href={href} preview={data} />;
   }
 
   return <MetadataPreview preview={data} />;

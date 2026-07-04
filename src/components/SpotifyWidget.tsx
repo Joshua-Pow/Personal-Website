@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import useSWR from "swr";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { MotionLink } from "@/components/motion/MotionLink";
-import { durations, easeOut } from "@/lib/motion";
+import { durations, easeOut, getExitTransition, getTransition } from "@/lib/motion";
 import type {
   SpotifyApiResponse,
   CurrentlyPlayingResponse,
@@ -55,10 +55,16 @@ const fetcher = async (url: string): Promise<SpotifyApiResponse> => {
 };
 
 function NowPlayingDot() {
+  const reducedMotion = useReducedMotion();
+
+  if (reducedMotion) {
+    return <span className="inline-flex size-2 rounded-full bg-green-500" />;
+  }
+
   return (
     <motion.span
       className="relative inline-flex size-2 rounded-full bg-green-500"
-      animate={{ scale: [1, 1.4, 1], opacity: [1, 0.75, 1] }}
+      animate={{ scale: [1, 1.08, 1], opacity: [1, 0.75, 1] }}
       transition={NOW_PLAYING_TRANSITION}
     />
   );
@@ -71,11 +77,14 @@ function SpotifyContent({
   currentlyPlaying: CurrentlyPlayingResponse | null;
   lastPlayed: RecentlyPlayedResponse["items"][0] | null;
 }) {
+  const reducedMotion = useReducedMotion();
   const track = currentlyPlaying?.item ?? lastPlayed?.track;
 
   if (!track) return null;
 
   const trackKey = `${track.name}-${track.artists.map((artist) => artist.name).join(",")}`;
+  const enterTransition = getTransition(durations.ui, reducedMotion ?? false);
+  const exitTransition = getExitTransition(durations.ui, reducedMotion ?? false);
 
   return (
     <div aria-live="polite" aria-atomic="true">
@@ -84,8 +93,8 @@ function SpotifyContent({
           key={trackKey}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: durations.ui, ease: easeOut }}
+          exit={{ opacity: 0, transition: exitTransition }}
+          transition={enterTransition}
           className="group relative h-fit shrink-0 rounded-lg bg-elevated p-1"
         >
           <div className="relative mb-1 flex items-center gap-4 rounded-md bg-gradient-to-br from-[var(--surface-inset-from)] via-[var(--surface-inset-via)] to-[var(--surface-inset-to)] p-1 shadow-[inset_0_1px_2px_rgba(26,18,16,0.08)]">
@@ -138,6 +147,12 @@ function SpotifyContent({
 }
 
 function PulseBlock({ className }: { className?: string }) {
+  const reducedMotion = useReducedMotion();
+
+  if (reducedMotion) {
+    return <div className={className} />;
+  }
+
   return (
     <motion.div
       className={className}

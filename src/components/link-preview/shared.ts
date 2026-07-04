@@ -30,14 +30,14 @@ export const morphingPreviewPopupClassName = [
   previewPopupBaseClassName,
   "h-[var(--popup-height,auto)] w-[var(--popup-width)]",
   "min-h-[var(--preview-panel-height)] min-w-[12rem]",
-  "transition-[width,height,opacity,scale] duration-[350ms] ease-[cubic-bezier(0.23,1,0.32,1)]",
+  "transition-[opacity,transform] duration-[280ms] ease-[cubic-bezier(0.23,1,0.32,1)]",
   "data-instant:transition-none",
 ].join(" ");
 
 export const morphingPreviewPositionerClassName = [
   "z-50 h-[var(--positioner-height)] w-[var(--positioner-width)] max-w-[var(--available-width)]",
   "min-h-[var(--preview-panel-height)] min-w-[12rem]",
-  "transition-[top,left,right,bottom,transform,width,height] duration-[350ms] ease-[cubic-bezier(0.23,1,0.32,1)]",
+  "transition-[transform,opacity] duration-[280ms] ease-[cubic-bezier(0.23,1,0.32,1)]",
   "data-instant:transition-none",
 ].join(" ");
 
@@ -62,7 +62,7 @@ export const footerPreviewPopupClassName = [
   previewPopupBaseClassName,
   "h-[var(--popup-height,auto)] w-[var(--popup-width)]",
   "min-h-[var(--preview-panel-height)] min-w-[12rem]",
-  "transition-[width,height,border-color,background-color,box-shadow,backdrop-filter] duration-[350ms] ease-[cubic-bezier(0.23,1,0.32,1)]",
+  "transition-[width,height,opacity,transform,border-color,background-color,box-shadow] duration-[280ms] ease-[cubic-bezier(0.23,1,0.32,1)]",
   "data-instant:transition-none",
   "data-[bare]:min-h-0 data-[bare]:min-w-0 data-[bare]:overflow-visible data-[bare]:border-0 data-[bare]:bg-transparent data-[bare]:p-0 data-[bare]:shadow-none data-[bare]:backdrop-blur-none",
   "data-[bare]:supports-[backdrop-filter]:bg-transparent",
@@ -70,21 +70,21 @@ export const footerPreviewPopupClassName = [
 
 export const footerMorphingPreviewPositionerClassName = [
   "z-50 h-[var(--positioner-height)] w-[var(--positioner-width)] max-w-[var(--available-width)]",
-  "transition-[top,left,right,bottom,transform,width,height] duration-[350ms] ease-[cubic-bezier(0.23,1,0.32,1)]",
+  "transition-[top,left,right,bottom,transform,width,height,opacity] duration-[280ms] ease-[cubic-bezier(0.23,1,0.32,1)]",
   "data-instant:transition-none",
 ].join(" ");
 
 export const footerPreviewViewportSwipeClassName = [
   "relative h-full w-full overflow-clip",
   "[&_[data-current]]:w-full [&_[data-current]]:translate-x-0 [&_[data-current]]:opacity-100",
-  "[&_[data-current]]:transition-[transform,opacity] [&_[data-current]]:duration-[350ms,175ms]",
+  "[&_[data-current]]:transition-[transform,opacity] [&_[data-current]]:duration-[280ms,140ms]",
   "[&_[data-current]]:ease-[cubic-bezier(0.23,1,0.32,1)]",
   "data-[activation-direction~='left']:[&_[data-current][data-starting-style]]:-translate-x-1/2",
   "data-[activation-direction~='left']:[&_[data-current][data-starting-style]]:opacity-0",
   "data-[activation-direction~='right']:[&_[data-current][data-starting-style]]:translate-x-1/2",
   "data-[activation-direction~='right']:[&_[data-current][data-starting-style]]:opacity-0",
   "[&_[data-previous]]:w-full [&_[data-previous]]:translate-x-0 [&_[data-previous]]:opacity-100",
-  "[&_[data-previous]]:transition-[transform,opacity] [&_[data-previous]]:duration-[350ms,175ms]",
+  "[&_[data-previous]]:transition-[transform,opacity] [&_[data-previous]]:duration-[280ms,140ms]",
   "[&_[data-previous]]:ease-[cubic-bezier(0.23,1,0.32,1)]",
   "data-[activation-direction~='left']:[&_[data-previous][data-ending-style]]:translate-x-1/2",
   "data-[activation-direction~='left']:[&_[data-previous][data-ending-style]]:opacity-0",
@@ -95,14 +95,14 @@ export const footerPreviewViewportSwipeClassName = [
 export const previewViewportSwipeClassName = [
   "relative h-full w-full overflow-clip",
   "[&_[data-current]]:w-full [&_[data-current]]:translate-x-0 [&_[data-current]]:opacity-100",
-  "[&_[data-current]]:transition-[translate,opacity] [&_[data-current]]:duration-[350ms,175ms]",
+  "[&_[data-current]]:transition-[translate,opacity] [&_[data-current]]:duration-[280ms,140ms]",
   "[&_[data-current]]:ease-[cubic-bezier(0.23,1,0.32,1)]",
   "data-[activation-direction~='left']:[&_[data-current][data-starting-style]]:-translate-x-1/2",
   "data-[activation-direction~='left']:[&_[data-current][data-starting-style]]:opacity-0",
   "data-[activation-direction~='right']:[&_[data-current][data-starting-style]]:translate-x-1/2",
   "data-[activation-direction~='right']:[&_[data-current][data-starting-style]]:opacity-0",
   "[&_[data-previous]]:w-full [&_[data-previous]]:translate-x-0 [&_[data-previous]]:opacity-100",
-  "[&_[data-previous]]:transition-[translate,opacity] [&_[data-previous]]:duration-[350ms,175ms]",
+  "[&_[data-previous]]:transition-[translate,opacity] [&_[data-previous]]:duration-[280ms,140ms]",
   "[&_[data-previous]]:ease-[cubic-bezier(0.23,1,0.32,1)]",
   "data-[activation-direction~='left']:[&_[data-previous][data-ending-style]]:translate-x-1/2",
   "data-[activation-direction~='left']:[&_[data-previous][data-ending-style]]:opacity-0",

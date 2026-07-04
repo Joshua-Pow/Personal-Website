@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Popover } from "@base-ui/react/popover";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { durations, getTransition } from "@/lib/motion";
+import { AnimatePresence, useReducedMotion } from "motion/react";
+import { PopoverSurface } from "@/components/motion/PopoverSurface";
 import { wordTrigger } from "@/lib/interactive";
 
 type WordPopoverProps = {
@@ -14,13 +14,9 @@ type WordPopoverProps = {
 const popupClassName =
   "z-50 flex w-[min(18rem,calc(100vw-4rem))] origin-[var(--transform-origin)] gap-3 rounded-xl border border-[var(--popover-border)] bg-[var(--popover-bg)] px-4 py-3.5 shadow-[0_10px_30px_rgba(26,18,16,0.08),0_2px_8px_rgba(26,18,16,0.05)] backdrop-blur-md supports-[backdrop-filter]:bg-[var(--popover-bg)]";
 
-const popupHidden = { opacity: 0, y: 4, filter: "blur(2px)" };
-const popupVisible = { opacity: 1, y: 0, filter: "blur(0px)" };
-
 export function WordPopover({ term, definition }: WordPopoverProps) {
   const [open, setOpen] = useState(false);
   const reducedMotion = useReducedMotion();
-  const popupTransition = getTransition(durations.ui, reducedMotion ?? false);
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
@@ -34,11 +30,8 @@ export function WordPopover({ term, definition }: WordPopoverProps) {
               <Popover.Popup
                 className={popupClassName}
                 render={
-                  <motion.div
-                    initial={popupHidden}
-                    animate={popupVisible}
-                    exit={popupHidden}
-                    transition={popupTransition}
+                  <PopoverSurface
+                    reducedMotion={reducedMotion ?? false}
                   />
                 }
               >

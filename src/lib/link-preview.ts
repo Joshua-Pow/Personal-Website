@@ -93,12 +93,20 @@ const NON_IFRAME_HOSTS = new Set([
   "open.spotify.com",
   "spotify.com",
   "linkedin.com",
-  "www.linkedin.com",
+  "github.com",
+  "x.com",
+  "twitter.com",
 ]);
 
+function normalizeHost(hostname: string): string {
+  return hostname.toLowerCase().replace(/^www\./, "");
+}
+
 function canEmbedHost(hostname: string): boolean {
-  const normalized = hostname.toLowerCase();
-  return !NON_IFRAME_HOSTS.has(normalized) && !normalized.endsWith(".linkedin.com");
+  const host = normalizeHost(hostname);
+  if (NON_IFRAME_HOSTS.has(host)) return false;
+  if (host.endsWith(".linkedin.com")) return false;
+  return true;
 }
 
 export function isEmbeddable(headers: Headers, hostname: string): boolean {

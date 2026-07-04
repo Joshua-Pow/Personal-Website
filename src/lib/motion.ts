@@ -1,19 +1,33 @@
 import type { TargetAndTransition, Transition } from "motion/react";
 
 export const easeOut = [0.23, 1, 0.32, 1] as const;
+export const easeIn = [0.4, 0, 1, 1] as const;
 
 export const durations = {
   fast: 0.15,
   ui: 0.2,
   reveal: 0.25,
   page: 0.35,
-  nameLetter: 0.32,
+  nameLetter: 0.28,
   nameFade: 0.35,
   pageTitle: 0.45,
   sharedElement: 0.75,
+  previewMorph: 0.28,
 } as const;
 
 export const nameLetterStagger = 0.035;
+
+export const popupHidden = {
+  opacity: 0,
+  y: 4,
+  filter: "blur(2px)",
+} as const;
+
+export const popupVisible = {
+  opacity: 1,
+  y: 0,
+  filter: "blur(0px)",
+} as const;
 
 type MotionVariant = {
   initial: TargetAndTransition;
@@ -88,6 +102,21 @@ export function getTransition(
   return {
     duration,
     ease: easeOut,
+    delay: delay / 1000,
+  };
+}
+
+export function getExitTransition(
+  duration: number,
+  reduced?: boolean,
+  delay = 0
+): Transition {
+  if (reduced) {
+    return { duration: 0, delay: 0 };
+  }
+  return {
+    duration,
+    ease: easeIn,
     delay: delay / 1000,
   };
 }

@@ -32,7 +32,7 @@ function AnimatedParagraphs({
         <RevealOnScroll
           key={pIndex}
           variant="fadeUpSm"
-          delay={baseDelay + 140 + pIndex * 40}
+          delay={baseDelay + 80 + pIndex * 30}
         >
           {child}
         </RevealOnScroll>
@@ -53,40 +53,23 @@ export function WorkExperience({
 
   return (
     <RevealOnScroll variant="blurUp" delay={baseDelay} className="mb-8">
-      <RevealOnScroll variant="fadeUpSm" delay={baseDelay + 60} as="h2" className="text-balance text-base font-medium">
-        {company}
-      </RevealOnScroll>
-      <RevealOnScroll
-        variant="fadeUpSm"
-        delay={baseDelay + 100}
-        as="p"
-        className="mb-3 text-sm text-subtle"
-      >
+      <h2 className="text-balance text-base font-medium">{company}</h2>
+      <p className="mb-3 text-sm text-subtle">
         {role}
         <span aria-hidden="true"> | </span>
         {period}
-      </RevealOnScroll>
+      </p>
       <div className="hyphens-auto leading-7">
         <AnimatedParagraphs baseDelay={baseDelay}>
           {description}
         </AnimatedParagraphs>
       </div>
       {technologies && technologies.length > 0 && (
-        <RevealOnScroll
-          variant="fadeUpSm"
-          delay={baseDelay + 180}
-          className="mt-4 flex flex-wrap gap-2"
-        >
-          {technologies.map((tech, techIndex) => (
-            <RevealOnScroll
-              key={tech.name}
-              variant="fadeUpSm"
-              delay={baseDelay + 100 + techIndex * 50}
-            >
-              <LanguageBadge logo={tech.logo} name={tech.name} />
-            </RevealOnScroll>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {technologies.map((tech) => (
+            <LanguageBadge key={tech.name} logo={tech.logo} name={tech.name} />
           ))}
-        </RevealOnScroll>
+        </div>
       )}
     </RevealOnScroll>
   );

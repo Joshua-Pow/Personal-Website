@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Popover } from "@base-ui/react/popover";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { durations, getTransition } from "@/lib/motion";
+import { PopoverSurface } from "@/components/motion/PopoverSurface";
 import { LinkPreviewPanel } from "@/components/link-preview/LinkPreviewPanel";
 import { isBareEmbedPreview } from "@/components/link-preview/layouts";
 import {
@@ -12,6 +12,7 @@ import {
   morphingPreviewPopupClassName,
   morphingPreviewPositionerClassName,
 } from "@/components/link-preview/shared";
+import { durations } from "@/lib/motion";
 
 type LinkPreviewPopoverProps = {
   href: string;
@@ -20,9 +21,6 @@ type LinkPreviewPopoverProps = {
   target?: string;
   rel?: string;
 };
-
-const popupHidden = { opacity: 0, y: 4, filter: "blur(2px)" };
-const popupVisible = { opacity: 1, y: 0, filter: "blur(0px)" };
 
 export function LinkPreviewPopover({
   href,
@@ -33,7 +31,6 @@ export function LinkPreviewPopover({
 }: LinkPreviewPopoverProps) {
   const [open, setOpen] = useState(false);
   const reducedMotion = useReducedMotion();
-  const popupTransition = getTransition(durations.ui, reducedMotion ?? false);
   const isBare = isBareEmbedPreview(href);
 
   return (
@@ -66,25 +63,14 @@ export function LinkPreviewPopover({
                 isBare ? bareEmbedPositionerClassName : morphingPreviewPositionerClassName
               }
             >
-              {isBare ? (
-                <Popover.Popup className={bareEmbedPopupClassName}>
-                  <LinkPreviewPanel href={href} />
-                </Popover.Popup>
-              ) : (
-                <Popover.Popup
-                  className={morphingPreviewPopupClassName}
-                  render={
-                    <motion.div
-                      initial={popupHidden}
-                      animate={popupVisible}
-                      exit={popupHidden}
-                      transition={popupTransition}
-                    />
-                  }
-                >
-                  <LinkPreviewPanel href={href} />
-                </Popover.Popup>
-              )}
+              <Popover.Popup
+                className={isBare ? bareEmbedPopupClassName : morphingPreviewPopupClassName}
+                render={
+                  <PopoverSurface reducedMotion={reducedMotion ?? false} />
+                }
+              >
+                <LinkPreviewPanel href={href} />
+              </Popover.Popup>
             </Popover.Positioner>
           </Popover.Portal>
         )}

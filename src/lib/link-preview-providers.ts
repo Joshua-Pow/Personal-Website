@@ -37,7 +37,9 @@ function isUselessPreviewTitle(title: string): boolean {
   );
 }
 
-async function fetchPreviewHtml(url: URL): Promise<string | null> {
+async function fetchPreviewHtml(
+  url: URL
+): Promise<{ html: string; headers: Headers } | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
@@ -55,7 +57,10 @@ async function fetchPreviewHtml(url: URL): Promise<string | null> {
       return null;
     }
 
-    return (await response.text()).slice(0, 100_000);
+    return {
+      html: (await response.text()).slice(0, 100_000),
+      headers: response.headers,
+    };
   } catch {
     return null;
   } finally {
@@ -78,10 +83,10 @@ function buildLinkedInPreview(url: URL): LinkPreviewData {
 }
 
 async function tryParseFetchedPreview(url: URL): Promise<LinkPreviewData | null> {
-  const html = await fetchPreviewHtml(url);
-  if (!html) return null;
+  const result = await fetchPreviewHtml(url);
+  if (!result) return null;
 
-  const preview = parseLinkPreview(html, url, new Headers());
+  const preview = parseLinkPreview(result.html, url, result.headers);
   if (isUselessPreviewTitle(preview.title)) {
     return null;
   }
@@ -103,11 +108,11 @@ export async function fetchHostAwarePreview(url: URL): Promise<LinkPreviewData |
 }
 
 export async function fetchGenericPreview(url: URL): Promise<LinkPreviewData> {
-  const html = await fetchPreviewHtml(url);
+  const result = await fetchPreviewHtml(url);
 
-  if (!html) {
+  if (!result) {
     return buildFallbackPreview(url.href);
   }
 
-  return parseLinkPreview(html, url, new Headers());
+  return parseLinkPreview(result.html, url, result.headers);
 }

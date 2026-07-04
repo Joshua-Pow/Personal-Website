@@ -23,23 +23,35 @@ function playTickSequence(
   }, 50);
 }
 
-function DigitColumn({ digit }: { digit: number }) {
+function DigitColumn({
+  digit,
+  reducedMotion,
+}: {
+  digit: number;
+  reducedMotion: boolean;
+}) {
   return (
     <span className="relative h-6 w-3 overflow-hidden sm:h-8 sm:w-4">
-      <motion.span
-        className="absolute left-0 flex flex-col"
-        animate={{ y: `-${digit * 10}%` }}
-        transition={{ duration: 0.3, ease: easeOut }}
-      >
-        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-          <span
-            key={num}
-            className="flex h-6 w-3 items-center justify-center text-xs sm:h-8 sm:w-4 sm:text-base"
-          >
-            {num}
-          </span>
-        ))}
-      </motion.span>
+      {reducedMotion ? (
+        <span className="flex h-6 w-3 items-center justify-center text-xs sm:h-8 sm:w-4 sm:text-base">
+          {digit}
+        </span>
+      ) : (
+        <motion.span
+          className="absolute left-0 flex flex-col"
+          animate={{ y: `-${digit * 10}%` }}
+          transition={{ duration: 0.28, ease: easeOut }}
+        >
+          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+            <span
+              key={num}
+              className="flex h-6 w-3 items-center justify-center text-xs sm:h-8 sm:w-4 sm:text-base"
+            >
+              {num}
+            </span>
+          ))}
+        </motion.span>
+      )}
     </span>
   );
 }
@@ -129,6 +141,7 @@ function AnimatedTime({ graduationDate }: Props) {
                     <DigitColumn
                       key={`${unit}-${idx}`}
                       digit={parseInt(digit, 10)}
+                      reducedMotion={reducedMotion ?? false}
                     />
                   ))}
               </span>

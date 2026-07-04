@@ -1,6 +1,5 @@
-import { AnimatedName } from "@/components/AnimatedName";
 import { WorkExperience } from "@/components/WorkExperience";
-import { Reveal } from "@/components/motion/Reveal";
+import { SubpageLayout } from "@/components/SubpageLayout";
 import { MotionLink } from "@/components/motion/MotionLink";
 export const metadata = {
   title: "Work History",
@@ -11,16 +10,15 @@ export const metadata = {
 
 const page = () => {
   return (
-    <div className="flex h-full flex-col px-8">
-      <h1 className="pt-12 font-medium">History</h1>
-      <AnimatedName />
-      <Reveal variant="blurIn" className="mb-8">
+    <SubpageLayout
+      title="History"
+      intro={
         <p>
           I&apos;m a software engineer with a passion for building products that
           make a difference.
         </p>
-      </Reveal>
-
+      }
+    >
       <WorkExperience
         index={1}
         company="Nuclear Promise X"
@@ -234,7 +232,7 @@ const page = () => {
           { logo: "Flask", name: "Flask" },
         ]}
       />
-    </div>
+    </SubpageLayout>
   );
 };
 
