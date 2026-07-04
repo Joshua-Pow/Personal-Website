@@ -2,6 +2,7 @@ import { Link } from "next-view-transitions";
 import AnimatedTime from "@/components/AnimatedTime";
 import { Reveal } from "@/components/motion/Reveal";
 import { MotionLink } from "@/components/motion/MotionLink";
+import { WordPopover } from "@/components/WordPopover";
 
 export function HomeIntro() {
   return (
@@ -57,10 +58,27 @@ export function HomeIntro() {
 
       <Reveal variant="fadeUp" delay={175}>
         <p>
-          Off the clock, I indulge a mildly obsessive autodidacticism—tinkering
-          with AI tooling, stress-testing whatever frontier LLM just shipped,
-          and hoarding bibliophilic wisdom on craft and comportment. The lines
-          that survive the curation end up in my{" "}
+          Off the clock, I pursue a mild recreational{" "}
+          <WordPopover
+            term="technophilia"
+            definition="A fondness for experimenting with new technology, often for the sheer pleasure of it."
+          />
+          , tinkering with AI tooling, stress-testing{" "}
+          <WordPopover
+            term="frontier LLMs"
+            definition="The newest large language models at the leading edge of what’s shipping."
+          />
+          , and reading{" "}
+          <WordPopover
+            term="voraciously"
+            definition="With an eager, almost insatiable appetite for books."
+          />{" "}
+          across self-improvement and software craft. The{" "}
+          <WordPopover
+            term="aphorisms"
+            definition="Short, memorable statements of truth or wisdom, often passed down rather than authored."
+          />{" "}
+          that survive scrutiny end up in my{" "}
           <Link
             href="/adages"
             className="font-medium text-orange-600 hover:text-orange-500"
