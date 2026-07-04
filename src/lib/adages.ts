@@ -36,7 +36,7 @@ export async function getAdages(): Promise<Adage[]> {
       imageUrl: adageImageUrl(entry.slug),
       content: renderBody(entry.body),
     }))
-    .sort(
+    .toSorted(
       (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime(),
     );
 }
