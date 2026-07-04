@@ -12,6 +12,7 @@ import {
 } from "@/lib/tick-sound";
 
 const PIVOT = { x: 12, y: 17.75 };
+const ARM_LENGTH = 10.3;
 const PENDULUM_SWING = 22;
 
 const pendulumKeyframes = Array.from({ length: 13 }, (_, index) => {
@@ -56,41 +57,37 @@ export function TickSoundToggle() {
         <path d="M7.75 19.5h8.5l-1.65-11.25H9.4L7.75 19.5z" />
         <path d="M9.4 8.25h5.2" opacity="0.4" />
 
-        <circle
-          cx={PIVOT.x}
-          cy={PIVOT.y}
-          r="0.95"
-          fill="currentColor"
-          stroke="none"
-        />
+        <g transform={`translate(${PIVOT.x} ${PIVOT.y})`}>
+          <circle cx="0" cy="0" r="0.95" fill="currentColor" stroke="none" />
 
-        <motion.g
-          style={{ transformOrigin: `${PIVOT.x}px ${PIVOT.y}px` }}
-          animate={
-            isStill
-              ? { rotate: -11 }
-              : { rotate: pendulumKeyframes }
-          }
-          transition={
-            isStill
-              ? { type: "spring", stiffness: 220, damping: 16, mass: 0.7 }
-              : {
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "linear",
-                  times: pendulumKeyframes.map((_, index) => index / 12),
-                }
-          }
-        >
-          <line x1={PIVOT.x} y1={PIVOT.y} x2={PIVOT.x} y2="8.35" />
-          <circle
-            cx={PIVOT.x}
-            cy="7.45"
-            r="1.55"
-            fill="currentColor"
-            stroke="none"
-          />
-        </motion.g>
+          <motion.g
+            style={{ transformOrigin: "0px 0px" }}
+            animate={
+              isStill
+                ? { rotate: -11 }
+                : { rotate: pendulumKeyframes }
+            }
+            transition={
+              isStill
+                ? { type: "spring", stiffness: 220, damping: 16, mass: 0.7 }
+                : {
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "linear",
+                    times: pendulumKeyframes.map((_, index) => index / 12),
+                  }
+            }
+          >
+            <line x1="0" y1="0" x2="0" y2={-ARM_LENGTH} />
+            <circle
+              cx="0"
+              cy={-ARM_LENGTH}
+              r="1.55"
+              fill="currentColor"
+              stroke="none"
+            />
+          </motion.g>
+        </g>
 
         <motion.g
           initial={false}
