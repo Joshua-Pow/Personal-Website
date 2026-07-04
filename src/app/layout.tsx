@@ -6,6 +6,11 @@ import { ProgressiveBlur } from "@/components/ProgressiveBlur";
 import { EdgeBorderEffect } from "@/components/EdgeBorderEffect";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { Footer } from "@/components/Footer";
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/site-metadata";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,15 +24,35 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://joshuapow.com"),
+  metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: "/",
   },
   title: {
-    default: "Joshua Pow",
-    template: "%s | Joshua Pow",
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
   },
-  description: "Joshua Pow is a computer engineer and web developer.",
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: "/icon.png",
+        alt: SITE_NAME,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: ["/icon.png"],
+  },
   icons: {
     icon: "/icon.png",
     apple: "/icon.png",
