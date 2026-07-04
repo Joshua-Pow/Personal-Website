@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { durations } from "@/lib/motion";
+import { LinkPreviewPopover } from "@/components/LinkPreviewPopover";
 
 const MotionNextLink = motion.create(Link);
 
@@ -12,6 +13,7 @@ type MotionLinkProps = {
   className?: string;
   target?: string;
   rel?: string;
+  preview?: boolean;
 };
 
 export function MotionLink({
@@ -20,6 +22,7 @@ export function MotionLink({
   className,
   target,
   rel,
+  preview = true,
 }: MotionLinkProps) {
   const isExternal = href.startsWith("http");
 
@@ -30,6 +33,19 @@ export function MotionLink({
   };
 
   if (isExternal) {
+    if (preview) {
+      return (
+        <LinkPreviewPopover
+          href={href}
+          className={className}
+          target={target}
+          rel={rel}
+        >
+          {children}
+        </LinkPreviewPopover>
+      );
+    }
+
     return (
       <motion.a href={href} target={target} rel={rel} {...motionProps}>
         {children}

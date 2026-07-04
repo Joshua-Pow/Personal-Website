@@ -5,7 +5,7 @@ import "./globals.css";
 import { ProgressiveBlur } from "@/components/ProgressiveBlur";
 import { EdgeBorderEffect } from "@/components/EdgeBorderEffect";
 import { MotionProvider } from "@/components/motion/MotionProvider";
-import { MotionLink } from "@/components/motion/MotionLink";
+import { Footer } from "@/components/Footer";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -69,26 +69,3 @@ export default function RootLayout({
   );
 }
 
-const Footer = () => {
-  const links = [
-    { href: "https://x.com/joshpow_", label: "@JoshPow" },
-    { href: "https://github.com/joshua-pow", label: "github" },
-    { href: "https://linkedin.com/in/joshuapow", label: "linkedin" },
-  ];
-
-  return (
-    <footer className="mb-24 mt-8 flex w-full items-center justify-center gap-6">
-      {links.map((link) => (
-        <MotionLink
-          key={link.href}
-          href={link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-400 hover:text-orange-500"
-        >
-          {link.label}
-        </MotionLink>
-      ))}
-    </footer>
-  );
-};

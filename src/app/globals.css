@@ -10,6 +10,7 @@
   --background: #000000;
   --foreground: #171717;
   --page-bg: #000000;
+  --preview-panel-height: 164px;
   scrollbar-gutter: stable;
 }
 
@@ -66,4 +67,21 @@ code {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
   }
+
+  .preview-shimmer {
+    animation: none !important;
+  }
+}
+
+@keyframes preview-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.preview-shimmer {
+  animation: preview-shimmer 1.4s ease-in-out infinite;
 }
