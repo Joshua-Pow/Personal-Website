@@ -1,7 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
 import { useSyncExternalStore } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+} from "motion/react";
 import { cn } from "@/lib/utils/cn";
 import { easeOut } from "@/lib/motion";
 import {
@@ -19,6 +26,68 @@ const pendulumKeyframes = Array.from({ length: 13 }, (_, index) => {
   const phase = (index / 12) * Math.PI * 2;
   return Number((-PENDULUM_SWING * Math.cos(phase)).toFixed(2));
 });
+
+const pendulumTimes = pendulumKeyframes.map((_, index) => index / 12);
+
+function PendulumArm({ isStill }: { isStill: boolean }) {
+  const angle = useMotionValue(pendulumKeyframes[0]);
+
+  useEffect(() => {
+    const controls = animate(
+      angle,
+      isStill ? -11 : pendulumKeyframes,
+      isStill
+        ? { type: "spring", stiffness: 220, damping: 16, mass: 0.7 }
+        : {
+            duration: 2,
+            repeat: Infinity,
+            ease: "linear",
+            times: pendulumTimes,
+          }
+    );
+
+    return () => controls.stop();
+  }, [angle, isStill]);
+
+  const tipX = useTransform(
+    angle,
+    (degrees) =>
+      PIVOT.x + ARM_LENGTH * Math.sin((degrees * Math.PI) / 180)
+  );
+  const tipY = useTransform(
+    angle,
+    (degrees) =>
+      PIVOT.y - ARM_LENGTH * Math.cos((degrees * Math.PI) / 180)
+  );
+
+  return (
+    <>
+      <circle
+        cx={PIVOT.x}
+        cy={PIVOT.y}
+        r="0.95"
+        fill="currentColor"
+        stroke="none"
+      />
+      <motion.line
+        x1={PIVOT.x}
+        y1={PIVOT.y}
+        x2={tipX}
+        y2={tipY}
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <motion.circle
+        cx={tipX}
+        cy={tipY}
+        r="1.55"
+        fill="currentColor"
+        stroke="none"
+      />
+    </>
+  );
+}
 
 export function TickSoundToggle() {
   const reducedMotion = useReducedMotion();
@@ -57,37 +126,7 @@ export function TickSoundToggle() {
         <path d="M7.75 19.5h8.5l-1.65-11.25H9.4L7.75 19.5z" />
         <path d="M9.4 8.25h5.2" opacity="0.4" />
 
-        <g transform={`translate(${PIVOT.x} ${PIVOT.y})`}>
-          <circle cx="0" cy="0" r="0.95" fill="currentColor" stroke="none" />
-
-          <motion.g
-            style={{ transformOrigin: "0px 0px" }}
-            animate={
-              isStill
-                ? { rotate: -11 }
-                : { rotate: pendulumKeyframes }
-            }
-            transition={
-              isStill
-                ? { type: "spring", stiffness: 220, damping: 16, mass: 0.7 }
-                : {
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "linear",
-                    times: pendulumKeyframes.map((_, index) => index / 12),
-                  }
-            }
-          >
-            <line x1="0" y1="0" x2="0" y2={-ARM_LENGTH} />
-            <circle
-              cx="0"
-              cy={-ARM_LENGTH}
-              r="1.55"
-              fill="currentColor"
-              stroke="none"
-            />
-          </motion.g>
-        </g>
+        <PendulumArm isStill={isStill ?? false} />
 
         <motion.g
           initial={false}
