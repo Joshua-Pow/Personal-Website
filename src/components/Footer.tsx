@@ -44,10 +44,29 @@ export function Footer() {
   const openTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const prefetchedLinksRef = useRef<Set<string>>(new Set());
+  const openedByPointerRef = useRef(false);
 
   useEffect(() => {
     activeLinkRef.current = activeLink;
   }, [activeLink]);
+
+  useEffect(() => {
+    const markPointerOpen = () => {
+      openedByPointerRef.current = true;
+    };
+    const markKeyboardOpen = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        openedByPointerRef.current = false;
+      }
+    };
+
+    window.addEventListener("pointerdown", markPointerOpen, true);
+    window.addEventListener("keydown", markKeyboardOpen, true);
+    return () => {
+      window.removeEventListener("pointerdown", markPointerOpen, true);
+      window.removeEventListener("keydown", markKeyboardOpen, true);
+    };
+  }, []);
 
   const clearOpenTimer = useCallback(() => {
     if (openTimerRef.current) {
@@ -79,6 +98,13 @@ export function Footer() {
     }, HOVER_CLOSE_DELAY);
   }, [clearCloseTimer, blurFocusedFooterTrigger]);
 
+  useEffect(() => {
+    if (!activeLink || !openedByPointerRef.current) return;
+    requestAnimationFrame(() => {
+      blurFocusedFooterTrigger();
+    });
+  }, [activeLink, blurFocusedFooterTrigger]);
+
   const prefetchLink = useCallback((href: string) => {
     if (prefetchedLinksRef.current.has(href)) return;
     prefetchedLinksRef.current.add(href);
@@ -87,6 +113,7 @@ export function Footer() {
 
   const handleLinkEnter = useCallback(
     (link: FooterLink) => {
+      openedByPointerRef.current = true;
       prefetchLink(link.href);
       clearCloseTimer();
 
@@ -139,10 +166,24 @@ export function Footer() {
                 rel="noopener noreferrer"
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: durations.fast }}
-                className={interactiveMuted("rounded-sm px-2 py-1")}
+                className={interactiveMuted(
+                  "rounded-sm px-2 py-1",
+                  "focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  "data-kbd-focus:focus-visible:ring-2 data-kbd-focus:focus-visible:ring-accent-bright data-kbd-focus:focus-visible:ring-offset-2 data-kbd-focus:focus-visible:ring-offset-surface-offset"
+                )}
                 onMouseEnter={() => handleLinkEnter(link)}
                 onMouseLeave={(event) => event.currentTarget.blur()}
-                onFocus={() => prefetchLink(link.href)}
+                onFocus={(event) => {
+                  prefetchLink(link.href);
+                  if (openedByPointerRef.current) {
+                    event.currentTarget.blur();
+                    return;
+                  }
+                  event.currentTarget.setAttribute("data-kbd-focus", "");
+                }}
+                onBlur={(event) => {
+                  event.currentTarget.removeAttribute("data-kbd-focus");
+                }}
               />
             }
           >
