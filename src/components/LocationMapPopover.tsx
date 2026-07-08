@@ -63,7 +63,7 @@ function OntarioQuebecMap() {
           y="30"
           textAnchor="middle"
           fill="oklch(45% 0.02 55)"
-          style={{ fontSize: "8px", fontFamily: "var(--font-instrument), serif" }}
+          style={{ fontSize: "8px" }}
         >
           Kitigan Zibi
         </text>
@@ -86,7 +86,7 @@ function OntarioQuebecMap() {
           y="96"
           textAnchor="middle"
           fill="oklch(45% 0.02 55)"
-          style={{ fontSize: "8px", fontFamily: "var(--font-instrument), serif" }}
+          style={{ fontSize: "8px" }}
         >
           Toronto
         </text>
@@ -133,7 +133,7 @@ export function LocationMapPopover({
               >
                 <OntarioQuebecMap />
                 <p className="border-t border-[var(--popover-border)] px-3.5 py-2.5 text-xs leading-[1.45] tracking-tight text-on-surface-muted">
-                  From the Ottawa Valley to the city — about 450 km south.
+                  From the Ottawa Valley to the city, about 450 km south.
                 </p>
               </Popover.Popup>
             </Popover.Positioner>

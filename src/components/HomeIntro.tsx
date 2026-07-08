@@ -20,18 +20,20 @@ export function HomeIntro() {
         Hi, I&apos;m <span className="font-medium">Joshua Pow</span>.
       </p>
 
-      <p className="max-w-[38ch] text-pretty font-instrument text-[1.0625rem] leading-[1.55] tracking-[0.01em] text-on-surface sm:text-lg">
-        I&apos;m{" "}
+      <p className="text-pretty">
+        My background is Aboriginal, specifically{" "}
         <PronunciationPopover
           term="Anishinaabe"
+          ipa="əˌnɪʃɪˈnɑːbeɪ"
           pronunciation="uh-nish-ih-NAH-bay"
-          meaning="A member of the Anishinaabe nations — the Ojibwe, Odawa, and Algonquin peoples of the Great Lakes."
-        />
-        , from{" "}
+          meaning="A member of the Anishinaabe nations, including the Ojibwe, Odawa, and Algonquin peoples of the Great Lakes."
+        />{" "}
+        from{" "}
         <PronunciationPopover
-          term="Kitigan Zibi Anishinabeg"
-          pronunciation="kih-TIH-gun ZEE-bee uh-nish-ih-NAH-beg"
-          meaning='A First Nation community on the Gatineau River in Quebec — Kitigan Zibi means "Garden River" in Algonquin.'
+          term="Kitigan Zibi"
+          ipa="kɪˈtɪɡən ˈziːbiː"
+          pronunciation="kih-TIH-gun ZEE-bee"
+          meaning='A First Nation community on the Gatineau River in Quebec. Kitigan Zibi means "Garden River" in Algonquin.'
         />
         , though I live in{" "}
         <LocationMapPopover>Toronto</LocationMapPopover> these days.

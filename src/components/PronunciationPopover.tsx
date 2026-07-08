@@ -8,6 +8,7 @@ import { wordTrigger } from "@/lib/interactive";
 
 type PronunciationPopoverProps = {
   term: string;
+  ipa: string;
   pronunciation: string;
   meaning?: string;
 };
@@ -17,6 +18,7 @@ const popupClassName =
 
 export function PronunciationPopover({
   term,
+  ipa,
   pronunciation,
   meaning,
 }: PronunciationPopoverProps) {
@@ -41,10 +43,17 @@ export function PronunciationPopover({
                   aria-hidden
                 />
                 <span className="flex min-w-0 flex-col gap-1.5">
-                  <Popover.Title className="font-instrument text-[1.0625rem] leading-[1.25] tracking-[0.01em] text-on-surface">
+                  <Popover.Title className="text-[1.0625rem] font-medium leading-[1.25] tracking-tight text-on-surface">
                     {term}
                   </Popover.Title>
-                  <p className="font-instrument text-base leading-[1.35] tracking-[0.01em] text-accent-bright">
+                  <p
+                    className="text-[1.0625rem] leading-[1.35] tracking-wide text-on-surface"
+                    lang="und-Latn-fonipa"
+                    aria-label={`IPA pronunciation: ${ipa}`}
+                  >
+                    /{ipa}/
+                  </p>
+                  <p className="text-sm leading-[1.45] tracking-tight text-on-surface-muted">
                     {pronunciation}
                   </p>
                   {meaning ? (
