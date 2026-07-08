@@ -16,30 +16,30 @@ const tapLinkClassName = cn(
 export function HomeIntro() {
   return (
     <div className="space-y-4 text-left leading-relaxed tracking-tighter">
-      <p className="text-pretty">
-        Hi, I&apos;m <span className="font-medium">Joshua Pow</span>.
-      </p>
-
-      <p className="text-pretty">
-        My background is Aboriginal, specifically{" "}
-        <PronunciationPopover
-          term="Anishinaabe"
-          ipa="əˌnɪʃɪˈnɑːbeɪ"
-          pronunciation="uh-nish-ih-NAH-bay"
-          meaning="A member of the Anishinaabe nations, including the Ojibwe, Odawa, and Algonquin peoples of the Great Lakes."
-        />{" "}
-        from{" "}
-        <PronunciationPopover
-          term="Kitigan Zibi"
-          ipa="kɪˈtɪɡən ˈziːbiː"
-          pronunciation="kih-TIH-gun ZEE-bee"
-          meaning='A First Nation community on the Gatineau River in Quebec. Kitigan Zibi means "Garden River" in Algonquin.'
-        />
-        , though I live in{" "}
-        <LocationMapPopover>Toronto</LocationMapPopover> these days.
-      </p>
-
       <RevealStagger className="space-y-4">
+        <p className="text-pretty">
+          Hi, I&apos;m <span className="font-medium">Joshua Pow</span>.
+        </p>
+
+        <p className="text-pretty">
+          My background is Aboriginal, specifically{" "}
+          <PronunciationPopover
+            term="Anishinaabe"
+            ipa="əˌnɪʃɪˈnɑːbeɪ"
+            pronunciation="uh-nish-ih-NAH-bay"
+            meaning="A member of the Anishinaabe nations, including the Ojibwe, Odawa, and Algonquin peoples of the Great Lakes."
+          />{" "}
+          from{" "}
+          <PronunciationPopover
+            term="Kitigan Zibi"
+            ipa="kɪˈtɪɡən ˈziːbiː"
+            pronunciation="kih-TIH-gun ZEE-bee"
+            meaning='A First Nation community on the Gatineau River in Quebec. Kitigan Zibi means "Garden River" in Algonquin.'
+          />
+          , though I live in{" "}
+          <LocationMapPopover>Toronto</LocationMapPopover> these days.
+        </p>
+
         <p className="text-pretty">
           I&apos;m a computer engineer from the{" "}
           <span className="text-nowrap font-medium">University of Toronto </span>

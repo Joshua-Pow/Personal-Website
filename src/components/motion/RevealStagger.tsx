@@ -2,16 +2,33 @@
 
 import { Children, isValidElement } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { durations, fadeUp, getTransition } from "@/lib/motion";
+import {
+  getVariantTransition,
+  variants,
+  type VariantName,
+} from "@/lib/motion";
 
 type RevealStaggerProps = {
   children: React.ReactNode;
   className?: string;
+  /** Delay between each child reveal, in seconds. */
+  stagger?: number;
+  variant?: VariantName;
 };
 
-export function RevealStagger({ children, className }: RevealStaggerProps) {
+export function RevealStagger({
+  children,
+  className,
+  stagger = 0.08,
+  variant = "blurUp",
+}: RevealStaggerProps) {
   const reducedMotion = useReducedMotion();
-  const itemTransition = getTransition(durations.reveal, reducedMotion ?? false);
+  const v = variants[variant];
+  const itemTransition = getVariantTransition(
+    variant,
+    0,
+    reducedMotion ?? false
+  );
 
   return (
     <motion.div
@@ -22,7 +39,7 @@ export function RevealStagger({ children, className }: RevealStaggerProps) {
         hidden: {},
         visible: {
           transition: {
-            staggerChildren: reducedMotion ? 0 : 0.03,
+            staggerChildren: reducedMotion ? 0 : stagger,
           },
         },
       }}
@@ -34,9 +51,9 @@ export function RevealStagger({ children, className }: RevealStaggerProps) {
           <motion.div
             key={child.key ?? index}
             variants={{
-              hidden: fadeUp.initial,
+              hidden: v.initial,
               visible: {
-                ...fadeUp.animate,
+                ...v.animate,
                 transition: itemTransition,
               },
             }}
