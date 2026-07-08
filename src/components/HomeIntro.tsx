@@ -1,5 +1,7 @@
 import { Link } from "next-view-transitions";
 import AnimatedTime from "@/components/AnimatedTime";
+import { LocationMapPopover } from "@/components/LocationMapPopover";
+import { PronunciationPopover } from "@/components/PronunciationPopover";
 import { RevealStagger } from "@/components/motion/RevealStagger";
 import { MotionLink } from "@/components/motion/MotionLink";
 import { WordPopover } from "@/components/WordPopover";
@@ -16,6 +18,23 @@ export function HomeIntro() {
     <div className="space-y-4 text-left leading-relaxed tracking-tighter">
       <p className="text-pretty">
         Hi, I&apos;m <span className="font-medium">Joshua Pow</span>.
+      </p>
+
+      <p className="max-w-[38ch] text-pretty font-instrument text-[1.0625rem] leading-[1.55] tracking-[0.01em] text-on-surface sm:text-lg">
+        I&apos;m{" "}
+        <PronunciationPopover
+          term="Anishinaabe"
+          pronunciation="uh-nish-ih-NAH-bay"
+          meaning="A member of the Anishinaabe nations — the Ojibwe, Odawa, and Algonquin peoples of the Great Lakes."
+        />
+        , from{" "}
+        <PronunciationPopover
+          term="Kitigan Zibi Anishinabeg"
+          pronunciation="kih-TIH-gun ZEE-bee uh-nish-ih-NAH-beg"
+          meaning='A First Nation community on the Gatineau River in Quebec — Kitigan Zibi means "Garden River" in Algonquin.'
+        />
+        , though I live in{" "}
+        <LocationMapPopover>Toronto</LocationMapPopover> these days.
       </p>
 
       <RevealStagger className="space-y-4">
