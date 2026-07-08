@@ -22,29 +22,51 @@ import {
 
 const ARM_LENGTH = 10.3;
 
+const pendulumSpring = {
+  type: "spring" as const,
+  stiffness: 220,
+  damping: 16,
+  mass: 0.7,
+};
+
 function PendulumArm({ isStill }: { isStill: boolean }) {
   const angle = useMotionValue(getMetronomeAngle());
 
   useEffect(() => {
+    let frameId = 0;
+    let cancelled = false;
+
     if (isStill) {
-      const controls = animate(angle, -11, {
-        type: "spring",
-        stiffness: 220,
-        damping: 16,
-        mass: 0.7,
-      });
-      return () => controls.stop();
+      const controls = animate(angle, -11, pendulumSpring);
+      return () => {
+        cancelled = true;
+        controls.stop();
+        cancelAnimationFrame(frameId);
+      };
     }
 
-    let frameId = 0;
-    const update = () => {
-      angle.set(getMetronomeAngle());
+    const startClock = () => {
+      if (cancelled) return;
+
+      const update = () => {
+        if (cancelled) return;
+        angle.set(getMetronomeAngle());
+        frameId = requestAnimationFrame(update);
+      };
+
       frameId = requestAnimationFrame(update);
     };
 
-    angle.set(getMetronomeAngle());
-    frameId = requestAnimationFrame(update);
-    return () => cancelAnimationFrame(frameId);
+    const controls = animate(angle, getMetronomeAngle(), {
+      ...pendulumSpring,
+      onComplete: startClock,
+    });
+
+    return () => {
+      cancelled = true;
+      controls.stop();
+      cancelAnimationFrame(frameId);
+    };
   }, [angle, isStill]);
 
   const tipX = useTransform(
