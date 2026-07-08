@@ -43,3 +43,6 @@ yarn-error.log*
 next-env.d.ts
 .env*.local
 src/lib/adages-manifest.ts
+
+# adage hero images (stored in R2; use npm run adages:upload or adages-images/web/ locally)
+/adages-images/
