@@ -1,8 +1,14 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useSyncExternalStore, useState, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { easeOut } from "@/lib/motion";
+import {
+  getTickSoundMutedServerSnapshot,
+  getTickSoundMutedSnapshot,
+  subscribeAlignedSecondTick,
+  subscribeTickSoundMuted,
+} from "@/lib/tick-sound";
 
 interface Props {
   graduationDate: Date;
@@ -69,7 +75,17 @@ function AnimatedTime({ graduationDate }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const prevTimeRef = useRef(timeElapsed);
   const isVisibleRef = useRef(true);
+  const isMuted = useSyncExternalStore(
+    subscribeTickSoundMuted,
+    getTickSoundMutedSnapshot,
+    getTickSoundMutedServerSnapshot
+  );
+  const isMutedRef = useRef(isMuted);
   const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
 
   useEffect(() => {
     audioRef.current = new Audio("./click.wav");
@@ -80,7 +96,7 @@ function AnimatedTime({ graduationDate }: Props) {
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    const timer = setInterval(() => {
+    const tick = () => {
       if (document.hidden) return;
 
       const now = new Date();
@@ -99,7 +115,7 @@ function AnimatedTime({ graduationDate }: Props) {
         seconds: Math.floor((diff % (1000 * 60)) / 1000),
       };
 
-      if (isVisibleRef.current && !reducedMotion) {
+      if (isVisibleRef.current && !reducedMotion && !isMutedRef.current) {
         Object.entries(newTimeElapsed).forEach(([unit, value]) => {
           const prevValue =
             prevTimeRef.current[unit as keyof typeof timeElapsed];
@@ -112,10 +128,13 @@ function AnimatedTime({ graduationDate }: Props) {
 
       prevTimeRef.current = newTimeElapsed;
       setTimeElapsed(newTimeElapsed);
-    }, 1000);
+    };
+
+    tick();
+    const stopAlignedTicks = subscribeAlignedSecondTick(tick);
 
     return () => {
-      clearInterval(timer);
+      stopAlignedTicks();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       audioRef.current?.remove();
     };
