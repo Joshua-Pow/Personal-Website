@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSyncExternalStore } from "react";
 import {
   animate,
@@ -21,6 +21,8 @@ import {
 } from "@/lib/tick-sound";
 
 const ARM_LENGTH = 10.3;
+const REST_ANGLE = -11;
+const RESUME_MS = 380;
 
 const pendulumSpring = {
   type: "spring" as const,
@@ -31,13 +33,16 @@ const pendulumSpring = {
 
 function PendulumArm({ isStill }: { isStill: boolean }) {
   const angle = useMotionValue(getMetronomeAngle());
+  const wasStillRef = useRef(isStill);
 
   useEffect(() => {
     let frameId = 0;
     let cancelled = false;
+    const resuming = wasStillRef.current && !isStill;
+    wasStillRef.current = isStill;
 
     if (isStill) {
-      const controls = animate(angle, -11, pendulumSpring);
+      const controls = animate(angle, REST_ANGLE, pendulumSpring);
       return () => {
         cancelled = true;
         controls.stop();
@@ -45,26 +50,31 @@ function PendulumArm({ isStill }: { isStill: boolean }) {
       };
     }
 
-    const startClock = () => {
+    const resumeStart = resuming ? performance.now() : null;
+
+    const update = () => {
       if (cancelled) return;
 
-      const update = () => {
-        if (cancelled) return;
-        angle.set(getMetronomeAngle());
-        frameId = requestAnimationFrame(update);
-      };
+      const target = getMetronomeAngle();
+
+      if (resumeStart !== null) {
+        const elapsed = performance.now() - resumeStart;
+        const blend = Math.min(elapsed / RESUME_MS, 1);
+        const easedBlend = 1 - (1 - blend) ** 3;
+        const followStrength = 0.1 + easedBlend * 0.9;
+        const current = angle.get();
+        angle.set(current + (target - current) * followStrength);
+      } else {
+        angle.set(target);
+      }
 
       frameId = requestAnimationFrame(update);
     };
 
-    const controls = animate(angle, getMetronomeAngle(), {
-      ...pendulumSpring,
-      onComplete: startClock,
-    });
+    frameId = requestAnimationFrame(update);
 
     return () => {
       cancelled = true;
-      controls.stop();
       cancelAnimationFrame(frameId);
     };
   }, [angle, isStill]);
