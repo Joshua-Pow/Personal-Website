@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 
-export type StaggerGranularity = "char" | "word";
+export type StaggerGranularity = "char" | "sentence";
 
 const DESKTOP_FINE_POINTER_QUERY = "(min-width: 768px) and (pointer: fine)";
 
@@ -13,13 +13,24 @@ function subscribe(onStoreChange: () => void) {
 }
 
 function getSnapshot(): StaggerGranularity {
-  return window.matchMedia(DESKTOP_FINE_POINTER_QUERY).matches ? "char" : "word";
+  return window.matchMedia(DESKTOP_FINE_POINTER_QUERY).matches
+    ? "char"
+    : "sentence";
 }
 
 function getServerSnapshot(): StaggerGranularity {
-  return "word";
+  return "sentence";
 }
 
 export function useStaggerGranularity(): StaggerGranularity {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+function subscribeClient(onStoreChange: () => void) {
+  onStoreChange();
+  return () => {};
+}
+
+export function useIsClientMounted(): boolean {
+  return useSyncExternalStore(subscribeClient, () => true, () => false);
 }

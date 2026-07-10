@@ -2,7 +2,11 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { useStaggerGranularity, type StaggerGranularity } from "@/hooks/useStaggerGranularity";
+import {
+  useIsClientMounted,
+  useStaggerGranularity,
+  type StaggerGranularity,
+} from "@/hooks/useStaggerGranularity";
 import {
   charStaggerBy,
   charStaggerStartDelay,
@@ -11,9 +15,9 @@ import {
   getVariantTransition,
   revealStaggerBy,
   revealStaggerStartDelay,
+  sentenceStaggerBy,
+  sentenceStaggerStartDelay,
   variants,
-  wordStaggerBy,
-  wordStaggerStartDelay,
   type VariantName,
 } from "@/lib/motion";
 
@@ -41,8 +45,8 @@ export function useStaggerItem() {
     useStaggerContext();
   const index = getIndex();
   const v =
-    variant === "textReveal" && granularity === "word"
-      ? variants.textRevealWord
+    variant === "textReveal" && granularity === "sentence"
+      ? variants.textRevealSentence
       : variants[variant];
   const delay = reducedMotion ? 0 : startDelay + index * staggerBy;
   const transition =
@@ -83,13 +87,17 @@ export function StaggerGroup({
   const resolvedVariant = adaptive ? "textReveal" : variant;
   const resolvedStaggerBy =
     staggerBy ??
-    (adaptive ? (isCharMode ? charStaggerBy : wordStaggerBy) : revealStaggerBy);
+    (adaptive
+      ? isCharMode
+        ? charStaggerBy
+        : sentenceStaggerBy
+      : revealStaggerBy);
   const resolvedStartDelay =
     startDelay ??
     (adaptive
       ? isCharMode
         ? charStaggerStartDelay
-        : wordStaggerStartDelay
+        : sentenceStaggerStartDelay
       : revealStaggerStartDelay);
 
   let index = 0;
@@ -118,8 +126,9 @@ type StaggerBlockProps = {
 
 export function StaggerBlock({ children, className }: StaggerBlockProps) {
   const { v, transition, reducedMotion } = useStaggerItem();
+  const isClient = useIsClientMounted();
 
-  if (reducedMotion) {
+  if (reducedMotion || !isClient) {
     return <div className={className}>{children}</div>;
   }
 

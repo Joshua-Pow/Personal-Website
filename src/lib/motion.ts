@@ -22,8 +22,8 @@ export const revealStaggerBy = 0.1;
 export const revealStaggerStartDelay = 0.2;
 export const charStaggerBy = 0.018;
 export const charStaggerStartDelay = 0.3;
-export const wordStaggerBy = 0.1;
-export const wordStaggerStartDelay = 0.45;
+export const sentenceStaggerBy = 0.2;
+export const sentenceStaggerStartDelay = 0.5;
 export const revealStaggerDuration = 0.65;
 
 export const textRevealBlur = 4;
@@ -60,7 +60,7 @@ export const textReveal: MotionVariant = {
   animate: { opacity: 1, y: 0 },
 };
 
-export const textRevealWord: MotionVariant = {
+export const textRevealSentence: MotionVariant = {
   initial: { opacity: 0, y: 10 },
   animate: { opacity: 1, y: 0 },
 };
@@ -112,7 +112,7 @@ export const variants = {
   fadeUp,
   fadeScaleUp,
   textReveal,
-  textRevealWord,
+  textRevealSentence,
   textRevealSoft,
   fadeUpSm,
   fadeIn,
@@ -128,7 +128,7 @@ const variantDurations: Record<VariantName, number> = {
   fadeUp: durations.reveal,
   fadeScaleUp: revealStaggerDuration,
   textReveal: durations.page,
-  textRevealWord: durations.pageTitle,
+  textRevealSentence: durations.pageTitle,
   textRevealSoft: revealStaggerDuration,
   fadeUpSm: durations.ui,
   fadeIn: durations.ui,
@@ -179,17 +179,17 @@ export function getVariantTransition(
 export function getTextRevealTransition(
   reduced?: boolean,
   delay = 0,
-  granularity: "char" | "word" = "char"
+  granularity: "char" | "sentence" = "char"
 ): Transition {
   if (reduced) {
     return { duration: 0, delay: 0 };
   }
 
-  if (granularity === "word") {
+  if (granularity === "sentence") {
     return {
       delay,
-      opacity: { duration: 0.75, ease: easeOutExpo },
-      y: { duration: 0.8, ease: easeOutExpo },
+      opacity: { duration: 0.8, ease: easeOutExpo },
+      y: { duration: 0.85, ease: easeOutExpo },
     };
   }
 
