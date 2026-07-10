@@ -16,7 +16,10 @@ const VisitorGlobe = dynamic(() => import("@/components/VisitorGlobe"), {
 
 export function HomeMain() {
   return (
-    <RevealStagger className="space-y-4 text-left leading-relaxed tracking-tighter">
+    <RevealStagger
+      variant="fadeScaleUp"
+      className="space-y-4 text-left leading-relaxed tracking-tighter"
+    >
       <HomeIntro />
       <div className="!mt-10">
         <SpotifyWidget />

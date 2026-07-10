@@ -42,6 +42,11 @@ export const fadeUp: MotionVariant = {
   animate: { opacity: 1, y: 0 },
 };
 
+export const fadeScaleUp: MotionVariant = {
+  initial: { opacity: 0, y: "20%", scale: 0.96 },
+  animate: { opacity: 1, y: 0, scale: 1 },
+};
+
 export const fadeUpSm: MotionVariant = {
   initial: { opacity: 0, y: 8 },
   animate: { opacity: 1, y: 0 },
@@ -74,6 +79,7 @@ export const focusIn: MotionVariant = {
 
 export const variants = {
   fadeUp,
+  fadeScaleUp,
   fadeUpSm,
   fadeIn,
   blurIn,
@@ -86,6 +92,7 @@ export type VariantName = keyof typeof variants;
 
 const variantDurations: Record<VariantName, number> = {
   fadeUp: durations.reveal,
+  fadeScaleUp: durations.page,
   fadeUpSm: durations.ui,
   fadeIn: durations.ui,
   blurIn: durations.pageTitle,
