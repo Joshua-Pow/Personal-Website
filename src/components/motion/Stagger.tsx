@@ -41,15 +41,9 @@ function useStaggerContext() {
 export function useStaggerItem() {
   const { reducedMotion, staggerBy, startDelay, getIndex, granularity } =
     useStaggerContext();
-  const indexRef = useRef<number | null>(null);
+  const [index] = useState(() => getIndex());
 
-  if (indexRef.current === null) {
-    indexRef.current = getIndex();
-  }
-
-  const delay = reducedMotion
-    ? 0
-    : startDelay + indexRef.current * staggerBy;
+  const delay = reducedMotion ? 0 : startDelay + index * staggerBy;
   const duration =
     granularity === "word" ? wordRevealDuration : charRevealDuration;
 
