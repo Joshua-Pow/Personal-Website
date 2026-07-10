@@ -1,27 +1,7 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-
-export type StaggerGranularity = "char" | "sentence";
-
-const DESKTOP_FINE_POINTER_QUERY = "(min-width: 768px) and (pointer: fine)";
-
-function subscribe(onStoreChange: () => void) {
-  const media = window.matchMedia(DESKTOP_FINE_POINTER_QUERY);
-  media.addEventListener("change", onStoreChange);
-  return () => media.removeEventListener("change", onStoreChange);
-}
-
-function getSnapshot(): StaggerGranularity {
-  return window.matchMedia(DESKTOP_FINE_POINTER_QUERY).matches
-    ? "char"
-    : "sentence";
-}
-
-function getServerSnapshot(): StaggerGranularity {
-  return "sentence";
-}
+export type StaggerGranularity = "char";
 
 export function useStaggerGranularity(): StaggerGranularity {
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return "char";
 }

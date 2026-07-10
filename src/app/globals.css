@@ -183,13 +183,13 @@ code {
 }
 
 .stagger-reveal {
-  animation: stagger-reveal var(--stagger-duration, 0.8s)
+  animation: stagger-reveal var(--stagger-duration, 0.42s)
     cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: var(--stagger-delay, 0s);
 }
 
 .stagger-reveal-reduced {
-  animation: stagger-reveal-reduced var(--stagger-duration, 0.8s)
+  animation: stagger-reveal-reduced var(--stagger-duration, 0.42s)
     cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: var(--stagger-delay, 0s);
 }

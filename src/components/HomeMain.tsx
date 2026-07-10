@@ -20,7 +20,7 @@ const VisitorGlobe = dynamic(() => import("@/components/VisitorGlobe"), {
   ),
 });
 
-const MOBILE_WIDGET_DELAY_MS = 1200;
+const MOBILE_WIDGET_DELAY_MS = 900;
 
 export function HomeMain() {
   const granularity = useStaggerGranularity();

@@ -7,12 +7,11 @@ import {
   type StaggerGranularity,
 } from "@/hooks/useStaggerGranularity";
 import {
+  charRevealDuration,
   charStaggerBy,
   charStaggerStartDelay,
   revealStaggerBy,
   revealStaggerStartDelay,
-  sentenceStaggerBy,
-  sentenceStaggerStartDelay,
 } from "@/lib/motion";
 import { cn } from "@/lib/utils/cn";
 
@@ -39,9 +38,8 @@ export function useStaggerItem() {
     useStaggerContext();
   const index = getIndex();
   const delay = reducedMotion ? 0 : startDelay + index * staggerBy;
-  const duration = granularity === "sentence" ? 0.8 : 0.55;
 
-  return { delay, duration, reducedMotion, granularity };
+  return { delay, duration: charRevealDuration, reducedMotion, granularity };
 }
 
 export function useStaggerGranularityContext(): StaggerGranularity {
@@ -65,22 +63,11 @@ export function StaggerGroup({
 }: StaggerGroupProps) {
   const reducedMotion = useReducedMotion() ?? false;
   const granularity = useStaggerGranularity();
-  const isCharMode = granularity === "char";
 
   const resolvedStaggerBy =
-    staggerBy ??
-    (adaptive
-      ? isCharMode
-        ? charStaggerBy
-        : sentenceStaggerBy
-      : revealStaggerBy);
+    staggerBy ?? (adaptive ? charStaggerBy : revealStaggerBy);
   const resolvedStartDelay =
-    startDelay ??
-    (adaptive
-      ? isCharMode
-        ? charStaggerStartDelay
-        : sentenceStaggerStartDelay
-      : revealStaggerStartDelay);
+    startDelay ?? (adaptive ? charStaggerStartDelay : revealStaggerStartDelay);
 
   let index = 0;
   const getIndex = () => index++;
