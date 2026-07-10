@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, type CSSProperties, type ReactNode } from "react";
+import { createContext, useContext, useState, type CSSProperties, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 import {
   useStaggerGranularity,
@@ -13,6 +13,7 @@ import {
   revealStaggerBy,
   revealStaggerDuration,
   revealStaggerStartDelay,
+  timeUnitStaggerBy,
   wordRevealDuration,
   wordStaggerBy,
   wordStaggerStartDelay,
@@ -40,8 +41,15 @@ function useStaggerContext() {
 export function useStaggerItem() {
   const { reducedMotion, staggerBy, startDelay, getIndex, granularity } =
     useStaggerContext();
-  const index = getIndex();
-  const delay = reducedMotion ? 0 : startDelay + index * staggerBy;
+  const indexRef = useRef<number | null>(null);
+
+  if (indexRef.current === null) {
+    indexRef.current = getIndex();
+  }
+
+  const delay = reducedMotion
+    ? 0
+    : startDelay + indexRef.current * staggerBy;
   const duration =
     granularity === "word" ? wordRevealDuration : charRevealDuration;
 
@@ -50,6 +58,17 @@ export function useStaggerItem() {
 
 export function useStaggerGranularityContext(): StaggerGranularity {
   return useStaggerContext().granularity;
+}
+
+export function useStaggerEntrance() {
+  const { delay, duration, reducedMotion } = useStaggerItem();
+
+  return {
+    delay,
+    duration,
+    reducedMotion,
+    unitStaggerBy: timeUnitStaggerBy,
+  };
 }
 
 type StaggerGroupProps = {

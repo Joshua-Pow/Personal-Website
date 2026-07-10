@@ -1,7 +1,11 @@
 "use client";
 
 import AnimatedTime from "@/components/AnimatedTime";
-import { useStaggerGranularityContext, useStaggerItem } from "@/components/motion/Stagger";
+import {
+  useStaggerEntrance,
+  useStaggerGranularityContext,
+  useStaggerItem,
+} from "@/components/motion/Stagger";
 import { WordPopover } from "@/components/WordPopover";
 import type { StaggerGranularity } from "@/hooks/useStaggerGranularity";
 import {
@@ -55,6 +59,14 @@ function StaggerChar({ children }: { children: string }) {
       {children}
     </span>
   );
+}
+
+function StaggerAnimatedTime(
+  props: React.ComponentProps<typeof AnimatedTime>
+) {
+  const entrance = useStaggerEntrance();
+
+  return <AnimatedTime {...props} entrance={entrance} />;
 }
 
 function processTextString(
@@ -111,10 +123,12 @@ function processStaggerNode(
   }
 
   if (node.type === AnimatedTime) {
-    return cloneElement(node as ReactElement<{ staggerEntrance?: boolean }>, {
-      key: node.key ?? keyPrefix,
-      staggerEntrance: true,
-    });
+    return (
+      <StaggerAnimatedTime
+        key={node.key ?? keyPrefix}
+        {...(node.props as React.ComponentProps<typeof AnimatedTime>)}
+      />
+    );
   }
 
   if (isAtomicElement(node)) {

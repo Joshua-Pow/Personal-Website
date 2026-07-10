@@ -27,6 +27,7 @@ export const charStaggerBy = 0.028;
 export const charStaggerStartDelay = 0.2;
 export const charRevealDuration = 0.65;
 export const revealStaggerDuration = 0.75;
+export const timeUnitStaggerBy = 0.03;
 
 export const textRevealBlur = 4;
 

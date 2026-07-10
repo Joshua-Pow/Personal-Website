@@ -2,7 +2,6 @@
 
 import React, { useEffect, useSyncExternalStore, useState, useRef, type CSSProperties, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { useStaggerItem } from "@/components/motion/Stagger";
 import { easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -12,9 +11,16 @@ import {
   subscribeTickSoundMuted,
 } from "@/lib/tick-sound";
 
+type TimeEntrance = {
+  delay: number;
+  duration: number;
+  reducedMotion: boolean;
+  unitStaggerBy: number;
+};
+
 interface Props {
   graduationDate: Date;
-  staggerEntrance?: boolean;
+  entrance?: TimeEntrance;
 }
 
 function playTickSequence(
@@ -65,28 +71,7 @@ function DigitColumn({
   );
 }
 
-function TimeUnitReveal({ children }: { children: ReactNode }) {
-  const { delay, duration, reducedMotion } = useStaggerItem();
-
-  return (
-    <span
-      className={cn(
-        "inline-flex flex-col items-center",
-        reducedMotion ? "stagger-reveal-reduced" : "stagger-reveal-soft"
-      )}
-      style={
-        {
-          "--stagger-delay": `${delay}s`,
-          "--stagger-duration": `${duration}s`,
-        } as CSSProperties
-      }
-    >
-      {children}
-    </span>
-  );
-}
-
-function AnimatedTime({ graduationDate, staggerEntrance = false }: Props) {
+function AnimatedTime({ graduationDate, entrance }: Props) {
   const [timeElapsed, setTimeElapsed] = useState({
     years: 0,
     months: 0,
@@ -164,9 +149,33 @@ function AnimatedTime({ graduationDate, staggerEntrance = false }: Props) {
     };
   }, [graduationDate, reducedMotion]);
 
-  const renderUnit = (unit: string, content: ReactNode) => {
-    if (staggerEntrance) {
-      return <TimeUnitReveal key={unit}>{content}</TimeUnitReveal>;
+  const renderUnit = (
+    unit: string,
+    content: ReactNode,
+    unitIndex: number
+  ) => {
+    if (entrance) {
+      const unitDelay = entrance.delay + unitIndex * entrance.unitStaggerBy;
+
+      return (
+        <span
+          key={unit}
+          className={cn(
+            "inline-flex flex-col items-center",
+            entrance.reducedMotion
+              ? "stagger-reveal-reduced"
+              : "stagger-reveal-soft"
+          )}
+          style={
+            {
+              "--stagger-delay": `${unitDelay}s`,
+              "--stagger-duration": `${entrance.duration}s`,
+            } as CSSProperties
+          }
+        >
+          {content}
+        </span>
+      );
     }
 
     return (
@@ -176,6 +185,8 @@ function AnimatedTime({ graduationDate, staggerEntrance = false }: Props) {
     );
   };
 
+  let unitIndex = 0;
+
   return (
     <span
       suppressHydrationWarning
@@ -183,31 +194,37 @@ function AnimatedTime({ graduationDate, staggerEntrance = false }: Props) {
       aria-atomic="true"
       className="inline-flex gap-0.5 font-mono tabular-nums sm:gap-1"
     >
-      {Object.entries(timeElapsed).map(([unit, value]) =>
-        unit === "years" && value === 0
-          ? null
-          : renderUnit(
-              unit,
-              <>
-                <span className="relative flex items-center justify-center rounded-md bg-elevated px-1 shadow-sm">
-                  <span className="flex h-full items-center">
-                    {value
-                      .toString()
-                      .padStart(2, "0")
-                      .split("")
-                      .map((digit, idx) => (
-                        <DigitColumn
-                          key={`${unit}-${idx}`}
-                          digit={parseInt(digit, 10)}
-                          reducedMotion={reducedMotion ?? false}
-                        />
-                      ))}
-                  </span>
-                </span>
-                <span className="mt-1 text-[8px] sm:text-xs">{unit}</span>
-              </>
-            )
-      )}
+      {Object.entries(timeElapsed).map(([unit, value]) => {
+        if (unit === "years" && value === 0) {
+          return null;
+        }
+
+        const currentUnitIndex = unitIndex;
+        unitIndex += 1;
+
+        return renderUnit(
+          unit,
+          <>
+            <span className="relative flex items-center justify-center rounded-md bg-elevated px-1 shadow-sm">
+              <span className="flex h-full items-center">
+                {value
+                  .toString()
+                  .padStart(2, "0")
+                  .split("")
+                  .map((digit, idx) => (
+                    <DigitColumn
+                      key={`${unit}-${idx}`}
+                      digit={parseInt(digit, 10)}
+                      reducedMotion={reducedMotion ?? false}
+                    />
+                  ))}
+              </span>
+            </span>
+            <span className="mt-1 text-[8px] sm:text-xs">{unit}</span>
+          </>,
+          currentUnitIndex
+        );
+      })}
     </span>
   );
 }
