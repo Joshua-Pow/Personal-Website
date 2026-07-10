@@ -14,6 +14,7 @@ import {
   sentenceStaggerBy,
   sentenceStaggerStartDelay,
 } from "@/lib/motion";
+import { cn } from "@/lib/utils/cn";
 
 type StaggerContextValue = {
   reducedMotion: boolean;
@@ -107,10 +108,6 @@ type StaggerBlockProps = {
 export function StaggerBlock({ children, className }: StaggerBlockProps) {
   const { delay, duration, reducedMotion } = useStaggerItem();
 
-  if (reducedMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
   const style = {
     "--stagger-delay": `${delay}s`,
     "--stagger-duration": `${duration}s`,
@@ -118,7 +115,14 @@ export function StaggerBlock({ children, className }: StaggerBlockProps) {
 
   return (
     <div className={className} style={style}>
-      <div className="stagger-reveal-soft h-full w-full">{children}</div>
+      <div
+        className={cn(
+          "h-full w-full",
+          reducedMotion ? "stagger-reveal-reduced" : "stagger-reveal-soft"
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 }

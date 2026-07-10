@@ -144,11 +144,6 @@ code {
   .preview-shimmer {
     animation: none !important;
   }
-
-  .stagger-reveal,
-  .stagger-reveal-soft {
-    animation: none !important;
-  }
 }
 
 @keyframes stagger-reveal {
@@ -160,6 +155,16 @@ code {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes stagger-reveal-reduced {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
@@ -183,10 +188,33 @@ code {
   animation-delay: var(--stagger-delay, 0s);
 }
 
-.stagger-reveal-soft {
-  animation: stagger-reveal-soft var(--stagger-duration, 0.7s)
+.stagger-reveal-reduced {
+  animation: stagger-reveal-reduced var(--stagger-duration, 0.8s)
     cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: var(--stagger-delay, 0s);
+}
+
+/* Motion perf: avoid blur on touch/mobile GPUs — use compositor opacity + transform */
+.stagger-reveal-soft {
+  animation: stagger-reveal var(--stagger-duration, 0.7s)
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--stagger-delay, 0s);
+}
+
+@media (min-width: 768px) and (pointer: fine) {
+  .stagger-reveal-soft {
+    animation-name: stagger-reveal-soft;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger-reveal {
+    animation-name: stagger-reveal-reduced;
+  }
+
+  .stagger-reveal-soft {
+    animation-name: stagger-reveal-reduced;
+  }
 }
 
 @keyframes preview-shimmer {

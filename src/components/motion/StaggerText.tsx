@@ -29,12 +29,14 @@ function staggerStyle(delay: number, duration: number): CSSProperties {
 function StaggerChar({ children }: { children: string }) {
   const { delay, duration, reducedMotion } = useStaggerItem();
 
-  if (reducedMotion) {
-    return <>{children}</>;
-  }
-
   return (
-    <span className="stagger-reveal inline" style={staggerStyle(delay, duration)}>
+    <span
+      className={cn(
+        "inline",
+        reducedMotion ? "stagger-reveal-reduced" : "stagger-reveal"
+      )}
+      style={staggerStyle(delay, duration)}
+    >
       {children}
     </span>
   );
@@ -43,12 +45,14 @@ function StaggerChar({ children }: { children: string }) {
 function StaggerUnit({ children }: { children: ReactNode }) {
   const { delay, duration, reducedMotion } = useStaggerItem();
 
-  if (reducedMotion) {
-    return <span className="inline">{children}</span>;
-  }
-
   return (
-    <span className="stagger-reveal inline" style={staggerStyle(delay, duration)}>
+    <span
+      className={cn(
+        "inline",
+        reducedMotion ? "stagger-reveal-reduced" : "stagger-reveal"
+      )}
+      style={staggerStyle(delay, duration)}
+    >
       {children}
     </span>
   );
