@@ -37,14 +37,17 @@ function useStaggerContext() {
 }
 
 export function useStaggerItem() {
-  const { variant, reducedMotion, staggerBy, startDelay, getIndex } =
+  const { variant, reducedMotion, staggerBy, startDelay, getIndex, granularity } =
     useStaggerContext();
   const index = getIndex();
-  const v = variants[variant];
+  const v =
+    variant === "textReveal" && granularity === "word"
+      ? variants.textRevealWord
+      : variants[variant];
   const delay = reducedMotion ? 0 : startDelay + index * staggerBy;
   const transition =
     variant === "textReveal"
-      ? getTextRevealTransition(reducedMotion, delay)
+      ? getTextRevealTransition(reducedMotion, delay, granularity)
       : variant === "textRevealSoft"
         ? getTextRevealSoftTransition(reducedMotion, delay)
         : { ...getVariantTransition(variant, 0, reducedMotion), delay };
