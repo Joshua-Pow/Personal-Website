@@ -1,6 +1,5 @@
 import { SiteHeader } from "@/components/SiteHeader";
-import { HomeIntro } from "@/components/HomeIntro";
-import { HomePageWidgets } from "@/components/HomePageWidgets";
+import { HomeMain } from "@/components/HomeMain";
 import {
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -33,9 +32,8 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
       />
       <SiteHeader />
-      <div className="my-auto flex flex-col gap-10">
-        <HomeIntro />
-        <HomePageWidgets />
+      <div className="my-auto">
+        <HomeMain />
       </div>
     </div>
   );

@@ -1,17 +1,59 @@
 "use client";
 
-import { Children, isValidElement } from "react";
-import { motion, useReducedMotion } from "motion/react";
-import { durations, fadeUp, getTransition } from "@/lib/motion";
+import {
+  Children,
+  Fragment,
+  isValidElement,
+  type ReactElement,
+  type ReactNode,
+} from "react";
+import { motion, stagger, useReducedMotion } from "motion/react";
+import {
+  getVariantTransition,
+  revealStaggerBy,
+  revealStaggerStartDelay,
+  variants,
+  type VariantName,
+} from "@/lib/motion";
 
 type RevealStaggerProps = {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
+  variant?: VariantName;
+  staggerBy?: number;
+  startDelay?: number;
 };
 
-export function RevealStagger({ children, className }: RevealStaggerProps) {
+function flattenChildren(children: ReactNode): ReactElement[] {
+  const items: ReactElement[] = [];
+
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child)) return;
+
+    if (child.type === Fragment) {
+      items.push(
+        ...flattenChildren((child.props as { children?: ReactNode }).children)
+      );
+      return;
+    }
+
+    items.push(child);
+  });
+
+  return items;
+}
+
+export function RevealStagger({
+  children,
+  className,
+  variant = "fadeUp",
+  staggerBy = revealStaggerBy,
+  startDelay = revealStaggerStartDelay,
+}: RevealStaggerProps) {
   const reducedMotion = useReducedMotion();
-  const itemTransition = getTransition(durations.reveal, reducedMotion ?? false);
+  const v = variants[variant];
+  const itemTransition = getVariantTransition(variant, 0, reducedMotion ?? false);
+  const items = flattenChildren(children);
 
   return (
     <motion.div
@@ -22,29 +64,27 @@ export function RevealStagger({ children, className }: RevealStaggerProps) {
         hidden: {},
         visible: {
           transition: {
-            staggerChildren: reducedMotion ? 0 : 0.03,
+            delayChildren: reducedMotion
+              ? 0
+              : stagger(staggerBy, { startDelay }),
           },
         },
       }}
     >
-      {Children.map(children, (child, index) => {
-        if (!isValidElement(child)) return child;
-
-        return (
-          <motion.div
-            key={child.key ?? index}
-            variants={{
-              hidden: fadeUp.initial,
-              visible: {
-                ...fadeUp.animate,
-                transition: itemTransition,
-              },
-            }}
-          >
-            {child}
-          </motion.div>
-        );
-      })}
+      {items.map((child, index) => (
+        <motion.div
+          key={child.key ?? index}
+          variants={{
+            hidden: v.initial,
+            visible: {
+              ...v.animate,
+              transition: itemTransition,
+            },
+          }}
+        >
+          {child}
+        </motion.div>
+      ))}
     </motion.div>
   );
 }

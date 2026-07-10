@@ -1,6 +1,6 @@
+import { Fragment } from "react";
 import { Link } from "next-view-transitions";
 import AnimatedTime from "@/components/AnimatedTime";
-import { RevealStagger } from "@/components/motion/RevealStagger";
 import { MotionLink } from "@/components/motion/MotionLink";
 import { WordPopover } from "@/components/WordPopover";
 import { interactiveLink } from "@/lib/interactive";
@@ -13,13 +13,12 @@ const tapLinkClassName = cn(
 
 export function HomeIntro() {
   return (
-    <div className="space-y-4 text-left leading-relaxed tracking-tighter">
+    <Fragment>
       <p className="text-pretty">
         Hi, I&apos;m <span className="font-medium">Joshua Pow</span>.
       </p>
 
-      <RevealStagger className="space-y-4">
-        <p className="text-pretty">
+      <p className="text-pretty">
           I&apos;m a computer engineer from the{" "}
           <span className="text-nowrap font-medium">University of Toronto </span>
           and an aspiring{" "}
@@ -80,7 +79,6 @@ export function HomeIntro() {
           </Link>
           .
         </p>
-      </RevealStagger>
-    </div>
+    </Fragment>
   );
 }

@@ -17,6 +17,9 @@ export const durations = {
 
 export const nameLetterStagger = 0.035;
 
+export const revealStaggerBy = 0.07;
+export const revealStaggerStartDelay = 0.1;
+
 export const popupHidden = {
   opacity: 0,
   y: 4,

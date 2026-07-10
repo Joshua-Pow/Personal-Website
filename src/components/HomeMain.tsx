@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Reveal } from "@/components/motion/Reveal";
+import { HomeIntro } from "@/components/HomeIntro";
+import { RevealStagger } from "@/components/motion/RevealStagger";
 
 const SpotifyWidget = dynamic(() => import("@/components/SpotifyWidget"));
 const VisitorGlobe = dynamic(() => import("@/components/VisitorGlobe"), {
@@ -13,15 +14,16 @@ const VisitorGlobe = dynamic(() => import("@/components/VisitorGlobe"), {
   ),
 });
 
-export function HomePageWidgets() {
+export function HomeMain() {
   return (
-    <>
-      <Reveal variant="focusIn" delay={200}>
+    <RevealStagger className="space-y-4 text-left leading-relaxed tracking-tighter">
+      <HomeIntro />
+      <div className="!mt-10">
         <SpotifyWidget />
-      </Reveal>
-      <Reveal variant="focusIn" delay={250} className="mb-4 flex flex-col items-center">
+      </div>
+      <div className="mb-4 flex flex-col items-center">
         <VisitorGlobe />
-      </Reveal>
-    </>
+      </div>
+    </RevealStagger>
   );
 }
