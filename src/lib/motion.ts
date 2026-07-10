@@ -20,6 +20,9 @@ export const nameLetterStagger = 0.035;
 
 export const revealStaggerBy = 0.12;
 export const revealStaggerStartDelay = 0.15;
+export const sentenceStaggerBy = 0.12;
+export const sentenceStaggerStartDelay = 0.2;
+export const sentenceRevealDuration = 0.75;
 export const wordStaggerBy = 0.045;
 export const wordStaggerStartDelay = 0.2;
 export const wordRevealDuration = 0.72;

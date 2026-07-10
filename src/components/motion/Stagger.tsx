@@ -13,6 +13,9 @@ import {
   revealStaggerBy,
   revealStaggerDuration,
   revealStaggerStartDelay,
+  sentenceRevealDuration,
+  sentenceStaggerBy,
+  sentenceStaggerStartDelay,
   timeUnitStaggerBy,
   wordRevealDuration,
   wordStaggerBy,
@@ -45,7 +48,11 @@ export function useStaggerItem() {
 
   const delay = reducedMotion ? 0 : startDelay + index * staggerBy;
   const duration =
-    granularity === "word" ? wordRevealDuration : charRevealDuration;
+    granularity === "sentence"
+      ? sentenceRevealDuration
+      : granularity === "word"
+        ? wordRevealDuration
+        : charRevealDuration;
 
   return { delay, duration, reducedMotion, granularity };
 }
@@ -86,16 +93,20 @@ export function StaggerGroup({
   const resolvedStaggerBy =
     staggerBy ??
     (adaptive
-      ? granularity === "word"
-        ? wordStaggerBy
-        : charStaggerBy
+      ? granularity === "sentence"
+        ? sentenceStaggerBy
+        : granularity === "word"
+          ? wordStaggerBy
+          : charStaggerBy
       : revealStaggerBy);
   const resolvedStartDelay =
     startDelay ??
     (adaptive
-      ? granularity === "word"
-        ? wordStaggerStartDelay
-        : charStaggerStartDelay
+      ? granularity === "sentence"
+        ? sentenceStaggerStartDelay
+        : granularity === "word"
+          ? wordStaggerStartDelay
+          : charStaggerStartDelay
       : revealStaggerStartDelay);
 
   let index = 0;

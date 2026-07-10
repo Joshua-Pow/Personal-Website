@@ -35,12 +35,18 @@ function revealClass(reducedMotion: boolean) {
   return reducedMotion ? "stagger-reveal-reduced" : "stagger-reveal-soft";
 }
 
-function StaggerToken({ children }: { children: ReactNode }) {
+function StaggerToken({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   const { delay, duration, reducedMotion } = useStaggerItem();
 
   return (
     <span
-      className={cn("inline", revealClass(reducedMotion))}
+      className={cn("inline", revealClass(reducedMotion), className)}
       style={staggerStyle(delay, duration)}
     >
       {children}
@@ -173,5 +179,11 @@ export function StaggerText({ children, className }: StaggerTextProps) {
 }
 
 export function StaggerSentence({ children, className }: StaggerTextProps) {
+  const granularity = useStaggerGranularityContext();
+
+  if (granularity === "sentence") {
+    return <StaggerToken className={className}>{children}</StaggerToken>;
+  }
+
   return <StaggerText className={className}>{children}</StaggerText>;
 }
