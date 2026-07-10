@@ -1,24 +1,37 @@
 "use client";
 
 import AnimatedTime from "@/components/AnimatedTime";
+import {
+  useStaggerGranularityContext,
+  useStaggerItem,
+} from "@/components/motion/Stagger";
 import { WordPopover } from "@/components/WordPopover";
+import type { StaggerGranularity } from "@/hooks/useStaggerGranularity";
 import {
   Children,
   cloneElement,
   Fragment,
   isValidElement,
+  useMemo,
   type ReactElement,
   type ReactNode,
 } from "react";
 import { motion } from "motion/react";
-import { useStaggerItem } from "@/components/motion/Stagger";
 import { cn } from "@/lib/utils/cn";
 
 function isAtomicElement(element: ReactElement): boolean {
   return element.type === WordPopover || element.type === AnimatedTime;
 }
 
-function StaggerChar({ children }: { children: string }) {
+function splitText(text: string, granularity: StaggerGranularity): string[] {
+  if (granularity === "char") {
+    return [...text];
+  }
+
+  return text.match(/\S+\s*/g) ?? [];
+}
+
+function StaggerToken({ children }: { children: string }) {
   const { v, transition, reducedMotion } = useStaggerItem();
 
   if (reducedMotion) {
@@ -27,7 +40,7 @@ function StaggerChar({ children }: { children: string }) {
 
   return (
     <motion.span
-      className="inline"
+      className="inline [contain:paint]"
       style={{ transformOrigin: "left bottom" }}
       initial={v.initial}
       animate={v.animate}
@@ -47,7 +60,7 @@ function StaggerUnit({ children }: { children: ReactNode }) {
 
   return (
     <motion.span
-      className="inline"
+      className="inline [contain:paint]"
       style={{ transformOrigin: "left bottom" }}
       initial={v.initial}
       animate={v.animate}
@@ -58,25 +71,29 @@ function StaggerUnit({ children }: { children: ReactNode }) {
   );
 }
 
-function processStaggerNode(node: ReactNode, keyPrefix: string): ReactNode {
+function processStaggerNode(
+  node: ReactNode,
+  keyPrefix: string,
+  granularity: StaggerGranularity
+): ReactNode {
   if (node == null || node === false || node === true) {
     return null;
   }
 
   if (typeof node === "string") {
-    return [...node].map((char, index) => (
-      <StaggerChar key={`${keyPrefix}-${index}`}>{char}</StaggerChar>
+    return splitText(node, granularity).map((token, index) => (
+      <StaggerToken key={`${keyPrefix}-${index}`}>{token}</StaggerToken>
     ));
   }
 
   if (typeof node === "number") {
-    return processStaggerNode(String(node), keyPrefix);
+    return processStaggerNode(String(node), keyPrefix, granularity);
   }
 
   if (Array.isArray(node)) {
     return node.map((child, index) => (
       <Fragment key={`${keyPrefix}-${index}`}>
-        {processStaggerNode(child, `${keyPrefix}-${index}`)}
+        {processStaggerNode(child, `${keyPrefix}-${index}`, granularity)}
       </Fragment>
     ));
   }
@@ -98,7 +115,7 @@ function processStaggerNode(node: ReactNode, keyPrefix: string): ReactNode {
   return cloneElement(
     node,
     { key: node.key ?? keyPrefix },
-    processStaggerNode(props.children, keyPrefix)
+    processStaggerNode(props.children, keyPrefix, granularity)
   );
 }
 
@@ -108,8 +125,13 @@ type StaggerTextProps = {
 };
 
 export function StaggerText({ children, className }: StaggerTextProps) {
-  const content = Children.map(children, (child, index) =>
-    processStaggerNode(child, `t-${index}`)
+  const granularity = useStaggerGranularityContext();
+  const content = useMemo(
+    () =>
+      Children.map(children, (child, index) =>
+        processStaggerNode(child, `t-${index}`, granularity)
+      ),
+    [children, granularity]
   );
 
   if (className) {
