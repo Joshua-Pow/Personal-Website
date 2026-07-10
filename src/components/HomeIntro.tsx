@@ -1,7 +1,7 @@
 import { Link } from "next-view-transitions";
 import AnimatedTime from "@/components/AnimatedTime";
 import { MotionLink } from "@/components/motion/MotionLink";
-import { StaggerSentence } from "@/components/motion/Stagger";
+import { StaggerText } from "@/components/motion/StaggerText";
 import { WordPopover } from "@/components/WordPopover";
 import { interactiveLink } from "@/lib/interactive";
 import { cn } from "@/lib/utils/cn";
@@ -15,29 +15,29 @@ export function HomeIntro() {
   return (
     <>
       <p className="text-pretty">
-        <StaggerSentence>
+        <StaggerText>
           Hi, I&apos;m <span className="font-medium">Joshua Pow</span>.
-        </StaggerSentence>
+        </StaggerText>
       </p>
 
       <p className="text-pretty">
-        <StaggerSentence>
+        <StaggerText>
           I&apos;m a computer engineer from the{" "}
           <span className="text-nowrap font-medium">University of Toronto </span>
           and an aspiring{" "}
           <span className="text-nowrap font-medium">Design Engineer</span>.
-        </StaggerSentence>
+        </StaggerText>
       </p>
 
       <p className="text-pretty">
-        <StaggerSentence>
+        <StaggerText>
           I graduated <AnimatedTime graduationDate={new Date("2024-06-18 11:00:00")} />{" "}
           ago.
-        </StaggerSentence>
+        </StaggerText>
       </p>
 
       <p className="text-pretty">
-        <StaggerSentence>
+        <StaggerText>
           Since then, I&apos;ve been{" "}
           <Link href="/history" className={tapLinkClassName}>
             working
@@ -54,11 +54,11 @@ export function HomeIntro() {
             {"<div/>"}
           </code>{" "}
           at a time.
-        </StaggerSentence>
+        </StaggerText>
       </p>
 
       <p className="text-pretty">
-        <StaggerSentence>
+        <StaggerText>
           Off the clock, I pursue a mild recreational{" "}
           <WordPopover
             term="technophilia"
@@ -74,10 +74,7 @@ export function HomeIntro() {
             term="voraciously"
             definition="With an eager, almost insatiable appetite for books."
           />{" "}
-          across self-improvement and software craft.{" "}
-        </StaggerSentence>
-        <StaggerSentence>
-          The{" "}
+          across self-improvement and software craft. The{" "}
           <WordPopover
             term="aphorisms"
             definition="Short, memorable statements of truth or wisdom, often passed down rather than authored."
@@ -87,7 +84,7 @@ export function HomeIntro() {
             adages
           </Link>
           .
-        </StaggerSentence>
+        </StaggerText>
       </p>
     </>
   );

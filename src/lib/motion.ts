@@ -20,9 +20,11 @@ export const nameLetterStagger = 0.035;
 
 export const revealStaggerBy = 0.1;
 export const revealStaggerStartDelay = 0.2;
+export const charStaggerBy = 0.022;
+export const charStaggerStartDelay = 0.35;
 export const revealStaggerDuration = 0.65;
 
-export const textRevealBlur = 6;
+export const textRevealBlur = 4;
 
 export const popupHidden = {
   opacity: 0,
@@ -54,7 +56,7 @@ export const fadeScaleUp: MotionVariant = {
 export const textReveal: MotionVariant = {
   initial: {
     opacity: 0,
-    y: 10,
+    y: 8,
     filter: `blur(${textRevealBlur}px)`,
   },
   animate: {
@@ -168,8 +170,8 @@ export function getTextRevealTransition(
 
   return {
     delay,
-    opacity: { duration: 0.55, ease: easeOutExpo },
-    y: { duration: 0.6, ease: easeOutExpo },
-    filter: { duration: 0.65, ease: easeOutExpo },
+    opacity: { duration: 0.75, ease: easeOutExpo },
+    y: { duration: 0.8, ease: easeOutExpo },
+    filter: { duration: 0.85, ease: easeOutExpo },
   };
 }
