@@ -17,8 +17,9 @@ export const durations = {
 
 export const nameLetterStagger = 0.035;
 
-export const revealStaggerBy = 0.07;
-export const revealStaggerStartDelay = 0.1;
+export const revealStaggerBy = 0.1;
+export const revealStaggerStartDelay = 0.2;
+export const revealStaggerDuration = 0.5;
 
 export const popupHidden = {
   opacity: 0,
@@ -92,7 +93,7 @@ export type VariantName = keyof typeof variants;
 
 const variantDurations: Record<VariantName, number> = {
   fadeUp: durations.reveal,
-  fadeScaleUp: durations.page,
+  fadeScaleUp: revealStaggerDuration,
   fadeUpSm: durations.ui,
   fadeIn: durations.ui,
   blurIn: durations.pageTitle,
