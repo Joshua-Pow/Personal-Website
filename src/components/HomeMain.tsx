@@ -17,7 +17,7 @@ const VisitorGlobe = dynamic(() => import("@/components/VisitorGlobe"), {
 export function HomeMain() {
   return (
     <StaggerGroup
-      variant="fadeScaleUp"
+      variant="textReveal"
       className="space-y-4 text-left leading-relaxed tracking-tighter"
     >
       <HomeIntro />

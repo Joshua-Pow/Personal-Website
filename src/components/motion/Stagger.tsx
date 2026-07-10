@@ -3,6 +3,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import {
+  getTextRevealTransition,
   getVariantTransition,
   revealStaggerBy,
   revealStaggerStartDelay,
@@ -34,10 +35,13 @@ function useStaggerItem() {
     useStaggerContext();
   const index = getIndex();
   const v = variants[variant];
-  const transition = getVariantTransition(variant, 0, reducedMotion);
   const delay = reducedMotion ? 0 : startDelay + index * staggerBy;
+  const transition =
+    variant === "textReveal"
+      ? getTextRevealTransition(reducedMotion, delay)
+      : { ...getVariantTransition(variant, 0, reducedMotion), delay };
 
-  return { v, transition: { ...transition, delay }, reducedMotion };
+  return { v, transition, reducedMotion };
 }
 
 type StaggerGroupProps = {
@@ -83,6 +87,7 @@ export function StaggerSentence({ children, className }: StaggerSentenceProps) {
   return (
     <motion.span
       className={cn("inline", className)}
+      style={{ transformOrigin: "left bottom" }}
       initial={v.initial}
       animate={v.animate}
       transition={transition}

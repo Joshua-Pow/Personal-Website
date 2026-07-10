@@ -2,6 +2,7 @@ import type { TargetAndTransition, Transition } from "motion/react";
 
 export const easeOut = [0.23, 1, 0.32, 1] as const;
 export const easeIn = [0.4, 0, 1, 1] as const;
+export const easeOutExpo = [0.16, 1, 0.3, 1] as const;
 
 export const durations = {
   fast: 0.15,
@@ -19,7 +20,9 @@ export const nameLetterStagger = 0.035;
 
 export const revealStaggerBy = 0.1;
 export const revealStaggerStartDelay = 0.2;
-export const revealStaggerDuration = 0.5;
+export const revealStaggerDuration = 0.65;
+
+export const textRevealBlur = 6;
 
 export const popupHidden = {
   opacity: 0,
@@ -46,6 +49,19 @@ export const fadeUp: MotionVariant = {
 export const fadeScaleUp: MotionVariant = {
   initial: { opacity: 0, y: "20%", scale: 0.96 },
   animate: { opacity: 1, y: 0, scale: 1 },
+};
+
+export const textReveal: MotionVariant = {
+  initial: {
+    opacity: 0,
+    y: 10,
+    filter: `blur(${textRevealBlur}px)`,
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+  },
 };
 
 export const fadeUpSm: MotionVariant = {
@@ -81,6 +97,7 @@ export const focusIn: MotionVariant = {
 export const variants = {
   fadeUp,
   fadeScaleUp,
+  textReveal,
   fadeUpSm,
   fadeIn,
   blurIn,
@@ -94,6 +111,7 @@ export type VariantName = keyof typeof variants;
 const variantDurations: Record<VariantName, number> = {
   fadeUp: durations.reveal,
   fadeScaleUp: revealStaggerDuration,
+  textReveal: revealStaggerDuration,
   fadeUpSm: durations.ui,
   fadeIn: durations.ui,
   blurIn: durations.pageTitle,
@@ -138,4 +156,20 @@ export function getVariantTransition(
   reduced?: boolean
 ): Transition {
   return getTransition(variantDurations[variant], reduced, delay);
+}
+
+export function getTextRevealTransition(
+  reduced?: boolean,
+  delay = 0
+): Transition {
+  if (reduced) {
+    return { duration: 0, delay: 0 };
+  }
+
+  return {
+    delay,
+    opacity: { duration: 0.55, ease: easeOutExpo },
+    y: { duration: 0.6, ease: easeOutExpo },
+    filter: { duration: 0.65, ease: easeOutExpo },
+  };
 }
