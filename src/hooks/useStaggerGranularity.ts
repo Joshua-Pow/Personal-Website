@@ -1,7 +1,7 @@
 "use client";
 
-export type StaggerGranularity = "char";
+export type StaggerGranularity = "word" | "char";
 
 export function useStaggerGranularity(): StaggerGranularity {
-  return "char";
+  return "word";
 }

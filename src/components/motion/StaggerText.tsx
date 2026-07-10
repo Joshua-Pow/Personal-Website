@@ -3,6 +3,7 @@
 import AnimatedTime from "@/components/AnimatedTime";
 import { useStaggerGranularityContext, useStaggerItem } from "@/components/motion/Stagger";
 import { WordPopover } from "@/components/WordPopover";
+import type { StaggerGranularity } from "@/hooks/useStaggerGranularity";
 import {
   Children,
   cloneElement,
@@ -16,7 +17,7 @@ import {
 import { cn } from "@/lib/utils/cn";
 
 function isAtomicElement(element: ReactElement): boolean {
-  return element.type === WordPopover || element.type === AnimatedTime;
+  return element.type === WordPopover;
 }
 
 function staggerStyle(delay: number, duration: number): CSSProperties {
@@ -26,15 +27,29 @@ function staggerStyle(delay: number, duration: number): CSSProperties {
   } as CSSProperties;
 }
 
+function revealClass(reducedMotion: boolean) {
+  return reducedMotion ? "stagger-reveal-reduced" : "stagger-reveal-soft";
+}
+
+function StaggerToken({ children }: { children: ReactNode }) {
+  const { delay, duration, reducedMotion } = useStaggerItem();
+
+  return (
+    <span
+      className={cn("inline", revealClass(reducedMotion))}
+      style={staggerStyle(delay, duration)}
+    >
+      {children}
+    </span>
+  );
+}
+
 function StaggerChar({ children }: { children: string }) {
   const { delay, duration, reducedMotion } = useStaggerItem();
 
   return (
     <span
-      className={cn(
-        "inline",
-        reducedMotion ? "stagger-reveal-reduced" : "stagger-reveal"
-      )}
+      className={cn("inline", revealClass(reducedMotion))}
       style={staggerStyle(delay, duration)}
     >
       {children}
@@ -42,41 +57,51 @@ function StaggerChar({ children }: { children: string }) {
   );
 }
 
-function StaggerUnit({ children }: { children: ReactNode }) {
-  const { delay, duration, reducedMotion } = useStaggerItem();
+function processTextString(
+  text: string,
+  keyPrefix: string,
+  granularity: StaggerGranularity
+): ReactNode {
+  if (granularity === "word") {
+    const parts = text.split(/(\s+)/).filter((part) => part.length > 0);
 
-  return (
-    <span
-      className={cn(
-        "inline",
-        reducedMotion ? "stagger-reveal-reduced" : "stagger-reveal"
-      )}
-      style={staggerStyle(delay, duration)}
-    >
-      {children}
-    </span>
-  );
+    return parts.map((part, index) => {
+      if (/^\s+$/.test(part)) {
+        return <Fragment key={`${keyPrefix}-ws-${index}`}>{part}</Fragment>;
+      }
+
+      return (
+        <StaggerToken key={`${keyPrefix}-w-${index}`}>{part}</StaggerToken>
+      );
+    });
+  }
+
+  return [...text].map((char, index) => (
+    <StaggerChar key={`${keyPrefix}-${index}`}>{char}</StaggerChar>
+  ));
 }
 
-function processCharNode(node: ReactNode, keyPrefix: string): ReactNode {
+function processStaggerNode(
+  node: ReactNode,
+  keyPrefix: string,
+  granularity: StaggerGranularity
+): ReactNode {
   if (node == null || node === false || node === true) {
     return null;
   }
 
   if (typeof node === "string") {
-    return [...node].map((char, index) => (
-      <StaggerChar key={`${keyPrefix}-${index}`}>{char}</StaggerChar>
-    ));
+    return processTextString(node, keyPrefix, granularity);
   }
 
   if (typeof node === "number") {
-    return processCharNode(String(node), keyPrefix);
+    return processTextString(String(node), keyPrefix, granularity);
   }
 
   if (Array.isArray(node)) {
     return node.map((child, index) => (
       <Fragment key={`${keyPrefix}-${index}`}>
-        {processCharNode(child, `${keyPrefix}-${index}`)}
+        {processStaggerNode(child, `${keyPrefix}-${index}`, granularity)}
       </Fragment>
     ));
   }
@@ -85,20 +110,29 @@ function processCharNode(node: ReactNode, keyPrefix: string): ReactNode {
     return node;
   }
 
+  if (node.type === AnimatedTime) {
+    return cloneElement(node as ReactElement<{ staggerEntrance?: boolean }>, {
+      key: node.key ?? keyPrefix,
+      staggerEntrance: true,
+    });
+  }
+
   if (isAtomicElement(node)) {
-    return <StaggerUnit key={node.key ?? keyPrefix}>{node}</StaggerUnit>;
+    return (
+      <StaggerToken key={node.key ?? keyPrefix}>{node}</StaggerToken>
+    );
   }
 
   const props = node.props as { children?: ReactNode };
 
   if (props.children == null) {
-    return <StaggerUnit key={node.key ?? keyPrefix}>{node}</StaggerUnit>;
+    return <StaggerToken key={node.key ?? keyPrefix}>{node}</StaggerToken>;
   }
 
   return cloneElement(
     node,
     { key: node.key ?? keyPrefix },
-    processCharNode(props.children, keyPrefix)
+    processStaggerNode(props.children, keyPrefix, granularity)
   );
 }
 
@@ -108,12 +142,13 @@ type StaggerTextProps = {
 };
 
 export function StaggerText({ children, className }: StaggerTextProps) {
+  const granularity = useStaggerGranularityContext();
   const content = useMemo(
     () =>
       Children.map(children, (child, index) =>
-        processCharNode(child, `t-${index}`)
+        processStaggerNode(child, `t-${index}`, granularity)
       ),
-    [children]
+    [children, granularity]
   );
 
   if (className) {
@@ -124,11 +159,5 @@ export function StaggerText({ children, className }: StaggerTextProps) {
 }
 
 export function StaggerSentence({ children, className }: StaggerTextProps) {
-  const granularity = useStaggerGranularityContext();
-
-  if (granularity === "char") {
-    return <StaggerText className={className}>{children}</StaggerText>;
-  }
-
-  return <StaggerUnit>{children}</StaggerUnit>;
+  return <StaggerText className={className}>{children}</StaggerText>;
 }

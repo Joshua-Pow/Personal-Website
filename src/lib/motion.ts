@@ -18,12 +18,15 @@ export const durations = {
 
 export const nameLetterStagger = 0.035;
 
-export const revealStaggerBy = 0.1;
-export const revealStaggerStartDelay = 0.2;
-export const charStaggerBy = 0.012;
-export const charStaggerStartDelay = 0.15;
-export const charRevealDuration = 0.42;
-export const revealStaggerDuration = 0.65;
+export const revealStaggerBy = 0.12;
+export const revealStaggerStartDelay = 0.15;
+export const wordStaggerBy = 0.045;
+export const wordStaggerStartDelay = 0.2;
+export const wordRevealDuration = 0.72;
+export const charStaggerBy = 0.028;
+export const charStaggerStartDelay = 0.2;
+export const charRevealDuration = 0.65;
+export const revealStaggerDuration = 0.75;
 
 export const textRevealBlur = 4;
 

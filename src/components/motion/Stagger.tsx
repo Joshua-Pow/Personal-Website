@@ -11,7 +11,11 @@ import {
   charStaggerBy,
   charStaggerStartDelay,
   revealStaggerBy,
+  revealStaggerDuration,
   revealStaggerStartDelay,
+  wordRevealDuration,
+  wordStaggerBy,
+  wordStaggerStartDelay,
 } from "@/lib/motion";
 import { cn } from "@/lib/utils/cn";
 
@@ -38,8 +42,10 @@ export function useStaggerItem() {
     useStaggerContext();
   const index = getIndex();
   const delay = reducedMotion ? 0 : startDelay + index * staggerBy;
+  const duration =
+    granularity === "word" ? wordRevealDuration : charRevealDuration;
 
-  return { delay, duration: charRevealDuration, reducedMotion, granularity };
+  return { delay, duration, reducedMotion, granularity };
 }
 
 export function useStaggerGranularityContext(): StaggerGranularity {
@@ -65,9 +71,19 @@ export function StaggerGroup({
   const granularity = useStaggerGranularity();
 
   const resolvedStaggerBy =
-    staggerBy ?? (adaptive ? charStaggerBy : revealStaggerBy);
+    staggerBy ??
+    (adaptive
+      ? granularity === "word"
+        ? wordStaggerBy
+        : charStaggerBy
+      : revealStaggerBy);
   const resolvedStartDelay =
-    startDelay ?? (adaptive ? charStaggerStartDelay : revealStaggerStartDelay);
+    startDelay ??
+    (adaptive
+      ? granularity === "word"
+        ? wordStaggerStartDelay
+        : charStaggerStartDelay
+      : revealStaggerStartDelay);
 
   let index = 0;
   const getIndex = () => index++;
@@ -93,11 +109,11 @@ type StaggerBlockProps = {
 };
 
 export function StaggerBlock({ children, className }: StaggerBlockProps) {
-  const { delay, duration, reducedMotion } = useStaggerItem();
+  const { delay, reducedMotion } = useStaggerItem();
 
   const style = {
     "--stagger-delay": `${delay}s`,
-    "--stagger-duration": `${duration}s`,
+    "--stagger-duration": `${revealStaggerDuration}s`,
   } as CSSProperties;
 
   return (
