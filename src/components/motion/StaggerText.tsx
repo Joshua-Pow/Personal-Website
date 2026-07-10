@@ -1,11 +1,7 @@
 "use client";
 
 import AnimatedTime from "@/components/AnimatedTime";
-import {
-  useStaggerGranularityContext,
-  useStaggerItem,
-} from "@/components/motion/Stagger";
-import { useIsClientMounted } from "@/hooks/useStaggerGranularity";
+import { useStaggerGranularityContext, useStaggerItem } from "@/components/motion/Stagger";
 import { WordPopover } from "@/components/WordPopover";
 import {
   Children,
@@ -13,55 +9,48 @@ import {
   Fragment,
   isValidElement,
   useMemo,
+  type CSSProperties,
   type ReactElement,
   type ReactNode,
 } from "react";
-import { motion } from "motion/react";
 import { cn } from "@/lib/utils/cn";
 
 function isAtomicElement(element: ReactElement): boolean {
   return element.type === WordPopover || element.type === AnimatedTime;
 }
 
-function StaggerChar({ children }: { children: string }) {
-  const { v, transition, reducedMotion } = useStaggerItem();
-  const isClient = useIsClientMounted();
+function staggerStyle(delay: number, duration: number): CSSProperties {
+  return {
+    "--stagger-delay": `${delay}s`,
+    "--stagger-duration": `${duration}s`,
+  } as CSSProperties;
+}
 
-  if (reducedMotion || !isClient) {
+function StaggerChar({ children }: { children: string }) {
+  const { delay, duration, reducedMotion } = useStaggerItem();
+
+  if (reducedMotion) {
     return <>{children}</>;
   }
 
   return (
-    <motion.span
-      className="inline"
-      style={{ transformOrigin: "left bottom" }}
-      initial={v.initial}
-      animate={v.animate}
-      transition={transition}
-    >
+    <span className="stagger-reveal inline" style={staggerStyle(delay, duration)}>
       {children}
-    </motion.span>
+    </span>
   );
 }
 
 function StaggerUnit({ children }: { children: ReactNode }) {
-  const { v, transition, reducedMotion } = useStaggerItem();
-  const isClient = useIsClientMounted();
+  const { delay, duration, reducedMotion } = useStaggerItem();
 
-  if (reducedMotion || !isClient) {
+  if (reducedMotion) {
     return <span className="inline">{children}</span>;
   }
 
   return (
-    <motion.span
-      className="inline"
-      style={{ transformOrigin: "left bottom" }}
-      initial={v.initial}
-      animate={v.animate}
-      transition={transition}
-    >
+    <span className="stagger-reveal inline" style={staggerStyle(delay, duration)}>
       {children}
-    </motion.span>
+    </span>
   );
 }
 

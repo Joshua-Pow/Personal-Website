@@ -49,7 +49,6 @@ export function HomeMain() {
 
       {widgetsReady ? (
         <StaggerGroup
-          variant="textRevealSoft"
           staggerBy={revealStaggerBy}
           startDelay={revealStaggerStartDelay}
         >

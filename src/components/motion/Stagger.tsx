@@ -1,28 +1,21 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { createContext, useContext, type CSSProperties, type ReactNode } from "react";
+import { useReducedMotion } from "motion/react";
 import {
-  useIsClientMounted,
   useStaggerGranularity,
   type StaggerGranularity,
 } from "@/hooks/useStaggerGranularity";
 import {
   charStaggerBy,
   charStaggerStartDelay,
-  getTextRevealSoftTransition,
-  getTextRevealTransition,
-  getVariantTransition,
   revealStaggerBy,
   revealStaggerStartDelay,
   sentenceStaggerBy,
   sentenceStaggerStartDelay,
-  variants,
-  type VariantName,
 } from "@/lib/motion";
 
 type StaggerContextValue = {
-  variant: VariantName;
   reducedMotion: boolean;
   staggerBy: number;
   startDelay: number;
@@ -41,22 +34,13 @@ function useStaggerContext() {
 }
 
 export function useStaggerItem() {
-  const { variant, reducedMotion, staggerBy, startDelay, getIndex, granularity } =
+  const { reducedMotion, staggerBy, startDelay, getIndex, granularity } =
     useStaggerContext();
   const index = getIndex();
-  const v =
-    variant === "textReveal" && granularity === "sentence"
-      ? variants.textRevealSentence
-      : variants[variant];
   const delay = reducedMotion ? 0 : startDelay + index * staggerBy;
-  const transition =
-    variant === "textReveal"
-      ? getTextRevealTransition(reducedMotion, delay, granularity)
-      : variant === "textRevealSoft"
-        ? getTextRevealSoftTransition(reducedMotion, delay)
-        : { ...getVariantTransition(variant, 0, reducedMotion), delay };
+  const duration = granularity === "sentence" ? 0.8 : 0.55;
 
-  return { v, transition, reducedMotion };
+  return { delay, duration, reducedMotion, granularity };
 }
 
 export function useStaggerGranularityContext(): StaggerGranularity {
@@ -66,7 +50,6 @@ export function useStaggerGranularityContext(): StaggerGranularity {
 type StaggerGroupProps = {
   children: ReactNode;
   className?: string;
-  variant?: VariantName;
   staggerBy?: number;
   startDelay?: number;
   adaptive?: boolean;
@@ -75,7 +58,6 @@ type StaggerGroupProps = {
 export function StaggerGroup({
   children,
   className,
-  variant = "fadeUp",
   staggerBy,
   startDelay,
   adaptive = false,
@@ -84,7 +66,6 @@ export function StaggerGroup({
   const granularity = useStaggerGranularity();
   const isCharMode = granularity === "char";
 
-  const resolvedVariant = adaptive ? "textReveal" : variant;
   const resolvedStaggerBy =
     staggerBy ??
     (adaptive
@@ -106,7 +87,6 @@ export function StaggerGroup({
   return (
     <StaggerContext.Provider
       value={{
-        variant: resolvedVariant,
         reducedMotion,
         staggerBy: resolvedStaggerBy,
         startDelay: resolvedStartDelay,
@@ -125,21 +105,20 @@ type StaggerBlockProps = {
 };
 
 export function StaggerBlock({ children, className }: StaggerBlockProps) {
-  const { v, transition, reducedMotion } = useStaggerItem();
-  const isClient = useIsClientMounted();
+  const { delay, duration, reducedMotion } = useStaggerItem();
 
-  if (reducedMotion || !isClient) {
+  if (reducedMotion) {
     return <div className={className}>{children}</div>;
   }
 
+  const style = {
+    "--stagger-delay": `${delay}s`,
+    "--stagger-duration": `${duration}s`,
+  } as CSSProperties;
+
   return (
-    <motion.div
-      className={className}
-      initial={v.initial}
-      animate={v.animate}
-      transition={transition}
-    >
-      {children}
-    </motion.div>
+    <div className={className} style={style}>
+      <div className="stagger-reveal-soft h-full w-full">{children}</div>
+    </div>
   );
 }

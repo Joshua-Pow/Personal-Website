@@ -25,12 +25,3 @@ function getServerSnapshot(): StaggerGranularity {
 export function useStaggerGranularity(): StaggerGranularity {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
-
-function subscribeClient(onStoreChange: () => void) {
-  onStoreChange();
-  return () => {};
-}
-
-export function useIsClientMounted(): boolean {
-  return useSyncExternalStore(subscribeClient, () => true, () => false);
-}

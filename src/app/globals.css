@@ -144,6 +144,49 @@ code {
   .preview-shimmer {
     animation: none !important;
   }
+
+  .stagger-reveal,
+  .stagger-reveal-soft {
+    animation: none !important;
+  }
+}
+
+@keyframes stagger-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stagger-reveal-soft {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.stagger-reveal {
+  animation: stagger-reveal var(--stagger-duration, 0.8s)
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--stagger-delay, 0s);
+}
+
+.stagger-reveal-soft {
+  animation: stagger-reveal-soft var(--stagger-duration, 0.7s)
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--stagger-delay, 0s);
 }
 
 @keyframes preview-shimmer {

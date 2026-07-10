@@ -185,18 +185,10 @@ export function getTextRevealTransition(
     return { duration: 0, delay: 0 };
   }
 
-  if (granularity === "sentence") {
-    return {
-      delay,
-      opacity: { duration: 0.8, ease: easeOutExpo },
-      y: { duration: 0.85, ease: easeOutExpo },
-    };
-  }
-
   return {
+    duration: granularity === "sentence" ? 0.8 : 0.55,
     delay,
-    opacity: { duration: 0.5, ease: easeOutExpo },
-    y: { duration: 0.55, ease: easeOutExpo },
+    ease: easeOutExpo,
   };
 }
 
@@ -209,9 +201,8 @@ export function getTextRevealSoftTransition(
   }
 
   return {
-    delay,
-    opacity: { duration: 0.6, ease: easeOutExpo },
-    y: { duration: 0.65, ease: easeOutExpo },
-    filter: { duration: 0.7, ease: easeOutExpo },
+    opacity: { duration: 0.6, ease: easeOutExpo, delay },
+    y: { duration: 0.65, ease: easeOutExpo, delay },
+    filter: { duration: 0.7, ease: easeOutExpo, delay },
   };
 }

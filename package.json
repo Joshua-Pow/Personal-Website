@@ -40,6 +40,7 @@
     "eslint-config-next": "^16.2.10",
     "gray-matter": "^4.0.3",
     "husky": "^9.1.7",
+    "playwright": "^1.61.1",
     "postcss": "^8",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.8.0",
