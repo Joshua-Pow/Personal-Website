@@ -247,17 +247,21 @@ code {
   border: 1px solid var(--sfx-stroke);
   background: color-mix(in oklch, var(--sfx-panel) 90%, white);
   color: var(--sfx-ink);
-  box-shadow: 0 1px 0 oklch(100% 0 0 / 70%) inset;
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease,
-    transform 150ms ease;
+  box-shadow:
+    0 1px 0 oklch(100% 0 0 / 70%) inset,
+    0 2px 6px oklch(40% 0.04 80 / 6%);
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 .sfx-lab-btn:hover {
   background: oklch(100% 0.01 95);
   border-color: color-mix(in oklch, var(--sfx-gold-deep) 45%, var(--sfx-stroke));
+  box-shadow:
+    0 1px 0 oklch(100% 0 0 / 75%) inset,
+    0 6px 14px oklch(45% 0.06 80 / 12%);
 }
 
 .sfx-lab-btn:disabled {
@@ -277,13 +281,17 @@ code {
   box-shadow:
     0 1px 0 oklch(100% 0 0 / 28%) inset,
     0 6px 16px oklch(45% 0.14 28 / 22%);
-  transition:
-    filter 150ms ease,
-    transform 150ms ease;
+  transition-property: box-shadow, filter;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 .sfx-lab-btn-play:hover {
   filter: brightness(1.05);
+  box-shadow:
+    0 1px 0 oklch(100% 0 0 / 32%) inset,
+    0 10px 22px oklch(45% 0.14 28 / 30%);
 }
 
 .sfx-lab-rail,
@@ -305,10 +313,10 @@ code {
 .sfx-lab-sound {
   border-radius: 0.7rem;
   color: var(--sfx-ink-soft);
-  transition:
-    background-color 150ms ease,
-    color 150ms ease,
-    box-shadow 150ms ease;
+  transition-property: background-color, color, box-shadow;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 .sfx-lab-sound:hover {
@@ -324,6 +332,15 @@ code {
   );
   color: var(--sfx-ink);
   box-shadow: 0 0 0 1px color-mix(in oklch, var(--sfx-gold-deep) 35%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sfx-lab-btn,
+  .sfx-lab-btn-play,
+  .sfx-lab-sound {
+    transition-duration: 0.01ms;
+    will-change: auto;
+  }
 }
 
 .sfx-lab-field {

@@ -1,7 +1,13 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  type ComponentProps,
+} from "react";
+import { motion, useReducedMotion } from "motion/react";
 import {
   RECIPES,
   SOUND_BLURBS,
@@ -51,6 +57,9 @@ const btnClass =
 const btnAccentClass =
   "sfx-lab-btn-play px-3.5 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-poppy)_40%,transparent)]";
 
+/** Snappy UI spring — interruptible hover/press feedback (100–250ms feel). */
+const tapSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
+
 function slugifyName(value: string): string {
   return value
     .trim()
@@ -58,6 +67,69 @@ function slugifyName(value: string): string {
     .replace(/[^a-z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 40);
+}
+
+type LabButtonProps = Omit<ComponentProps<typeof motion.button>, "children"> & {
+  variant?: "secondary" | "play";
+  children: React.ReactNode;
+};
+
+function LabButton({
+  variant = "secondary",
+  className,
+  children,
+  disabled,
+  ...props
+}: LabButtonProps) {
+  const reducedMotion = useReducedMotion();
+  const inert = Boolean(disabled || reducedMotion);
+
+  return (
+    <motion.button
+      {...props}
+      type="button"
+      disabled={disabled}
+      className={cn(
+        variant === "play" ? btnAccentClass : btnClass,
+        className
+      )}
+      whileHover={inert ? undefined : { y: -1.5, scale: 1.03 }}
+      whileTap={inert ? undefined : { y: 0, scale: 0.96 }}
+      transition={tapSpring}
+      data-sfx-press
+      data-sfx-release
+    >
+      {children}
+    </motion.button>
+  );
+}
+
+type SoundChipProps = {
+  active: boolean;
+  label: string;
+  onSelect: () => void;
+};
+
+function SoundChip({ active, label, onSelect }: SoundChipProps) {
+  const reducedMotion = useReducedMotion();
+
+  return (
+    <motion.button
+      type="button"
+      className={cn(
+        "sfx-lab-sound flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-sm",
+        active && "sfx-lab-sound-active"
+      )}
+      whileHover={reducedMotion ? undefined : { x: 2, scale: 1.01 }}
+      whileTap={reducedMotion ? undefined : { scale: 0.96 }}
+      transition={tapSpring}
+      data-sfx-press
+      data-sfx-release
+      onClick={onSelect}
+    >
+      <span className="font-medium">{label}</span>
+    </motion.button>
+  );
 }
 
 function NumberField({
@@ -158,14 +230,19 @@ function LayerEditor({
       ? `${layer.waveform} · ${Math.round(layer.frequency)}Hz`
       : `${layer.filterType} · ${Math.round(layer.filterFrequency)}Hz`;
 
+  const reducedMotion = useReducedMotion();
+
   return (
     <div className="sfx-lab-layer">
       <div className="flex items-center gap-2 px-3 py-2">
-        <button
+        <motion.button
           type="button"
-          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg text-left"
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
+          whileHover={reducedMotion ? undefined : { x: 1 }}
+          whileTap={reducedMotion ? undefined : { scale: 0.98 }}
+          transition={tapSpring}
         >
           <span className="text-xs text-[var(--sfx-ink-soft)]" aria-hidden>
             {open ? "▾" : "▸"}
@@ -176,10 +253,8 @@ function LayerEditor({
           <span className="truncate text-[11px] text-[var(--sfx-ink-soft)]">
             {summary}
           </span>
-        </button>
-        <button type="button" className={btnClass} onClick={onRemove}>
-          Remove
-        </button>
+        </motion.button>
+        <LabButton onClick={onRemove}>Remove</LabButton>
       </div>
 
       {open && (
@@ -470,36 +545,21 @@ export function SfxDashboard() {
     <div className="pb-6">
       <div className="sfx-lab-toolbar sticky top-0 z-20 mb-5 rounded-2xl border px-3 py-3 backdrop-blur-md">
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" className={btnAccentClass} onClick={preview}>
+          <LabButton variant="play" onClick={preview}>
             Play preview
-          </button>
-          <button type="button" className={btnClass} onClick={createNew}>
-            New sound
-          </button>
-          <button type="button" className={btnClass} onClick={duplicateAsDraft}>
-            Duplicate
-          </button>
-          <button
-            type="button"
-            className={btnClass}
-            onClick={saveDraft}
-            disabled={!slugifyName(draftName)}
-          >
+          </LabButton>
+          <LabButton onClick={createNew}>New sound</LabButton>
+          <LabButton onClick={duplicateAsDraft}>Duplicate</LabButton>
+          <LabButton onClick={saveDraft} disabled={!slugifyName(draftName)}>
             Save draft
-          </button>
+          </LabButton>
           {selection.kind === "builtin" && dirty && (
-            <button type="button" className={btnClass} onClick={resetBuiltin}>
-              Reset to builtin
-            </button>
+            <LabButton onClick={resetBuiltin}>Reset to builtin</LabButton>
           )}
           {selection.kind === "draft" && drafts[selection.name] && (
-            <button type="button" className={btnClass} onClick={deleteDraft}>
-              Delete draft
-            </button>
+            <LabButton onClick={deleteDraft}>Delete draft</LabButton>
           )}
-          <button type="button" className={btnClass} onClick={copyTs}>
-            Copy as TypeScript
-          </button>
+          <LabButton onClick={copyTs}>Copy as TypeScript</LabButton>
         </div>
         {(muted || copyStatus) && (
           <div className="mt-2 space-y-1">
@@ -528,21 +588,16 @@ export function SfxDashboard() {
               <ul className="space-y-0.5">
                 {sounds.map((name) => (
                   <li key={name}>
-                    <button
-                      type="button"
-                      className={cn(
-                        "sfx-lab-sound flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-sm",
-                        selection.kind === "builtin" &&
-                          selection.name === name &&
-                          "sfx-lab-sound-active"
-                      )}
-                      onClick={() => {
+                    <SoundChip
+                      label={name}
+                      active={
+                        selection.kind === "builtin" && selection.name === name
+                      }
+                      onSelect={() => {
                         loadBuiltin(name);
                         play(name);
                       }}
-                    >
-                      <span className="font-medium">{name}</span>
-                    </button>
+                    />
                   </li>
                 ))}
               </ul>
@@ -560,22 +615,17 @@ export function SfxDashboard() {
                 <ul className="space-y-0.5">
                   {draftNames.map((name) => (
                     <li key={name}>
-                      <button
-                        type="button"
-                        className={cn(
-                          "sfx-lab-sound flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-sm",
-                          selection.kind === "draft" &&
-                            selection.name === name &&
-                            "sfx-lab-sound-active"
-                        )}
-                        onClick={() => {
+                      <SoundChip
+                        label={name}
+                        active={
+                          selection.kind === "draft" && selection.name === name
+                        }
+                        onSelect={() => {
                           loadDraft(name);
                           const draft = drafts[name];
                           if (draft) playRecipe(draft.recipe);
                         }}
-                      >
-                        <span className="font-medium">{name}</span>
-                      </button>
+                      />
                     </li>
                   ))}
                 </ul>
@@ -624,9 +674,7 @@ export function SfxDashboard() {
               <h3 className="sfx-lab-section-label text-[11px] font-semibold uppercase">
                 Layers
               </h3>
-              <button
-                type="button"
-                className={btnClass}
+              <LabButton
                 onClick={() =>
                   updateRecipe({
                     ...recipe,
@@ -645,7 +693,7 @@ export function SfxDashboard() {
                 }
               >
                 Add layer
-              </button>
+              </LabButton>
             </div>
             {recipe.layers.map((layer, index) => (
               <LayerEditor
@@ -675,9 +723,7 @@ export function SfxDashboard() {
                 Shimmer
               </h3>
               {recipe.shimmer ? (
-                <button
-                  type="button"
-                  className={btnClass}
+                <LabButton
                   onClick={() => {
                     updateRecipe({
                       masterGain: recipe.masterGain,
@@ -686,11 +732,9 @@ export function SfxDashboard() {
                   }}
                 >
                   Remove
-                </button>
+                </LabButton>
               ) : (
-                <button
-                  type="button"
-                  className={btnClass}
+                <LabButton
                   onClick={() =>
                     updateRecipe({
                       ...recipe,
@@ -704,7 +748,7 @@ export function SfxDashboard() {
                   }
                 >
                   Add shimmer
-                </button>
+                </LabButton>
               )}
             </div>
             {recipe.shimmer && (
