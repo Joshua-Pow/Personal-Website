@@ -94,7 +94,7 @@ function HeaderName() {
   );
 }
 
-function BackLinkName() {
+function BackLinkName({ color }: { color?: string }) {
   return (
     <Link
       href="/"
@@ -103,15 +103,17 @@ function BackLinkName() {
       data-sfx-press
       data-sfx-release
     >
-      <PowNameLabel color={NAME_COLORS.backLink} />
+      <PowNameLabel color={color ?? NAME_COLORS.backLink} />
     </Link>
   );
 }
 
 type SharedPowNameProps = {
   variant: "header" | "back-link";
+  /** Override label color (back-link only). Useful on tinted surfaces. */
+  color?: string;
 };
 
-export function SharedPowName({ variant }: SharedPowNameProps) {
-  return variant === "header" ? <HeaderName /> : <BackLinkName />;
+export function SharedPowName({ variant, color }: SharedPowNameProps) {
+  return variant === "header" ? <HeaderName /> : <BackLinkName color={color} />;
 }

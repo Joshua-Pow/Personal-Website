@@ -36,7 +36,7 @@ export default function SfxPage() {
             </div>
             <div className="flex shrink-0 items-center gap-1.5 pt-0.5 sm:gap-2 sm:pt-1">
               <TickSoundToggle />
-              <SharedPowName variant="back-link" />
+              <SharedPowName variant="back-link" color="var(--sfx-ink)" />
             </div>
           </div>
           <div className="sfx-lab-path mt-3 max-w-[12rem]" aria-hidden />
