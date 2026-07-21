@@ -22,7 +22,7 @@ function playTickSequence(count: number) {
       clearInterval(interval);
       return;
     }
-    play("tick");
+    play("toggle");
     tickCount++;
   }, 50);
 }
