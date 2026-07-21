@@ -53,9 +53,9 @@ const fieldClass =
   "sfx-lab-field min-h-11 w-full px-2.5 py-2 text-sm focus:outline-none sm:min-h-0 sm:py-1.5";
 const labelClass = "sfx-lab-label mb-1 block text-[11px] font-medium uppercase";
 const btnClass =
-  "sfx-lab-btn min-h-11 px-3.5 py-2 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-gold)_45%,transparent)] disabled:cursor-not-allowed sm:min-h-0 sm:py-1.5";
+  "sfx-lab-btn min-h-9 px-3 py-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-gold)_45%,transparent)] disabled:cursor-not-allowed sm:min-h-0 sm:px-3.5";
 const btnAccentClass =
-  "sfx-lab-btn-play min-h-11 px-4 py-2 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-poppy)_40%,transparent)] sm:min-h-0 sm:py-1.5";
+  "sfx-lab-btn-play min-h-9 px-3.5 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-poppy)_40%,transparent)] sm:min-h-0 sm:px-4";
 
 /** Snappy UI spring — interruptible hover/press feedback (100–250ms feel). */
 const tapSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
@@ -543,9 +543,13 @@ export function SfxDashboard() {
 
   return (
     <div className="pb-6">
-      <div className="sfx-lab-toolbar sticky top-0 z-20 mb-5 rounded-2xl border px-3 py-3 backdrop-blur-md supports-[backdrop-filter]:bg-[color-mix(in_oklch,var(--sfx-linen)_78%,transparent)]">
-        <div className="flex flex-wrap items-center gap-2">
-          <LabButton variant="play" onClick={preview}>
+      <div className="sfx-lab-toolbar sticky top-0 z-20 mb-4 border px-2.5 py-2 backdrop-blur-md supports-[backdrop-filter]:bg-[color-mix(in_oklch,var(--sfx-linen)_78%,transparent)] sm:mb-5 sm:px-3 sm:py-2.5">
+        <div className="sfx-lab-toolbar-actions grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
+          <LabButton
+            variant="play"
+            className="col-span-2 sm:col-auto"
+            onClick={preview}
+          >
             Play preview
           </LabButton>
           <LabButton onClick={createNew}>New sound</LabButton>
@@ -554,22 +558,31 @@ export function SfxDashboard() {
             Save draft
           </LabButton>
           {selection.kind === "builtin" && dirty && (
-            <LabButton onClick={resetBuiltin}>Reset to builtin</LabButton>
+            <LabButton onClick={resetBuiltin}>
+              <span className="sm:hidden">Reset</span>
+              <span className="hidden sm:inline">Reset to builtin</span>
+            </LabButton>
           )}
           {selection.kind === "draft" && drafts[selection.name] && (
-            <LabButton onClick={deleteDraft}>Delete draft</LabButton>
+            <LabButton onClick={deleteDraft}>
+              <span className="sm:hidden">Delete</span>
+              <span className="hidden sm:inline">Delete draft</span>
+            </LabButton>
           )}
-          <LabButton onClick={copyTs}>Copy as TypeScript</LabButton>
+          <LabButton onClick={copyTs}>
+            <span className="sm:hidden">Copy TS</span>
+            <span className="hidden sm:inline">Copy as TypeScript</span>
+          </LabButton>
         </div>
         {(muted || copyStatus) && (
-          <div className="mt-2 space-y-1">
+          <div className="mt-1.5 space-y-1 sm:mt-2">
             {muted && (
-              <p className="sfx-lab-muted rounded-xl px-3 py-1.5 text-xs">
+              <p className="sfx-lab-muted rounded-lg px-2.5 py-1 text-[11px] leading-snug sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-xs">
                 Sound is muted. Use the speaker toggle to unmute previews.
               </p>
             )}
             {copyStatus && (
-              <p className="text-xs text-[var(--sfx-ink-soft)]" role="status">
+              <p className="text-[11px] text-[var(--sfx-ink-soft)] sm:text-xs" role="status">
                 {copyStatus}
                 {dirty ? " · unsaved edits" : ""}
               </p>

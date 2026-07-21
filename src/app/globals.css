@@ -263,6 +263,8 @@ code {
   box-shadow:
     0 1px 0 oklch(100% 0 0 / 55%) inset,
     0 8px 28px oklch(45% 0.05 80 / 8%);
+  border-radius: 0.85rem;
+  corner-shape: squircle;
 }
 
 @media (max-width: 767px) {
@@ -274,10 +276,26 @@ code {
   .sfx-lab-canvas {
     border-radius: 1rem;
   }
+
+  .sfx-lab-toolbar {
+    border-radius: 0.7rem;
+    /* Dense action strip — avoid the tall wrapped pill stack on phones */
+    padding: 0.45rem 0.5rem;
+  }
+
+  .sfx-lab-btn,
+  .sfx-lab-btn-play {
+    min-height: 2.25rem;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.01em;
+  }
 }
 
 .sfx-lab-btn {
-  border-radius: 999px;
+  /* Modest radius + squircle (Chromium); falls back to rounded square elsewhere */
+  border-radius: 0.5rem;
+  corner-shape: squircle;
   border: 1px solid var(--sfx-stroke);
   background: color-mix(in oklch, var(--sfx-panel) 90%, white);
   color: var(--sfx-ink);
@@ -303,7 +321,8 @@ code {
 }
 
 .sfx-lab-btn-play {
-  border-radius: 999px;
+  border-radius: 0.5rem;
+  corner-shape: squircle;
   border: 1px solid color-mix(in oklch, var(--sfx-poppy-deep) 55%, transparent);
   background: linear-gradient(
     165deg,
