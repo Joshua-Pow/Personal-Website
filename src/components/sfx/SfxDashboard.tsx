@@ -50,12 +50,12 @@ const FILTER_TYPES: BiquadFilterType[] = [
 ];
 
 const fieldClass =
-  "sfx-lab-field w-full px-2.5 py-1.5 text-sm focus:outline-none";
+  "sfx-lab-field min-h-11 w-full px-2.5 py-2 text-sm focus:outline-none sm:min-h-0 sm:py-1.5";
 const labelClass = "sfx-lab-label mb-1 block text-[11px] font-medium uppercase";
 const btnClass =
-  "sfx-lab-btn px-3 py-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-gold)_45%,transparent)] disabled:cursor-not-allowed";
+  "sfx-lab-btn min-h-11 px-3.5 py-2 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-gold)_45%,transparent)] disabled:cursor-not-allowed sm:min-h-0 sm:py-1.5";
 const btnAccentClass =
-  "sfx-lab-btn-play px-3.5 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-poppy)_40%,transparent)]";
+  "sfx-lab-btn-play min-h-11 px-4 py-2 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-poppy)_40%,transparent)] sm:min-h-0 sm:py-1.5";
 
 /** Snappy UI spring — interruptible hover/press feedback (100–250ms feel). */
 const tapSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
@@ -117,7 +117,7 @@ function SoundChip({ active, label, onSelect }: SoundChipProps) {
     <motion.button
       type="button"
       className={cn(
-        "sfx-lab-sound flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-sm",
+        "sfx-lab-sound flex min-h-11 w-full items-center justify-between gap-2 px-2.5 py-2 text-left text-sm sm:min-h-0 sm:py-1.5",
         active && "sfx-lab-sound-active"
       )}
       whileHover={reducedMotion ? undefined : { x: 2, scale: 1.01 }}
@@ -543,7 +543,7 @@ export function SfxDashboard() {
 
   return (
     <div className="pb-6">
-      <div className="sfx-lab-toolbar sticky top-0 z-20 mb-5 rounded-2xl border px-3 py-3 backdrop-blur-md">
+      <div className="sfx-lab-toolbar sticky top-0 z-20 mb-5 rounded-2xl border px-3 py-3 backdrop-blur-md supports-[backdrop-filter]:bg-[color-mix(in_oklch,var(--sfx-linen)_78%,transparent)]">
         <div className="flex flex-wrap items-center gap-2">
           <LabButton variant="play" onClick={preview}>
             Play preview
