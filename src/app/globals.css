@@ -112,8 +112,8 @@ code {
   }
 
   ::view-transition-group(pow) {
-    animation-duration: 0.75s;
-    animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
   }
 
   ::view-transition-old(pow),

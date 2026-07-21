@@ -2,49 +2,60 @@
 
 import { Children, isValidElement } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { durations, fadeUp, getTransition } from "@/lib/motion";
+import {
+  durations,
+  fadeUp,
+  getTransition,
+  textRevealBaseDelay,
+  textRevealStaggerMs,
+} from "@/lib/motion";
+import { usePageEnterReady } from "@/components/motion/PageEnterProvider";
 
 type RevealStaggerProps = {
   children: React.ReactNode;
   className?: string;
+  /** Delay before the first item (ms). */
+  baseDelay?: number;
+  /** Gap between items (ms). */
+  stagger?: number;
 };
 
-export function RevealStagger({ children, className }: RevealStaggerProps) {
+/**
+ * Staggers each child with the shared text-enter Motion recipe.
+ * Uses per-item delays (not staggerChildren) so delays aren't overridden.
+ */
+export function RevealStagger({
+  children,
+  className,
+  baseDelay = textRevealBaseDelay,
+  stagger = textRevealStaggerMs,
+}: RevealStaggerProps) {
   const reducedMotion = useReducedMotion();
-  const itemTransition = getTransition(durations.reveal, reducedMotion ?? false);
+  const ready = usePageEnterReady();
+  const items = Children.toArray(children).filter(isValidElement);
+
+  if (reducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
 
   return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      animate="visible"
-      variants={{
-        hidden: {},
-        visible: {
-          transition: {
-            staggerChildren: reducedMotion ? 0 : 0.03,
-          },
-        },
-      }}
-    >
-      {Children.map(children, (child, index) => {
-        if (!isValidElement(child)) return child;
+    <div className={className}>
+      {items.map((child, index) => {
+        const delay = baseDelay + index * stagger;
+        const transition = getTransition(durations.reveal, false, delay);
 
         return (
           <motion.div
             key={child.key ?? index}
-            variants={{
-              hidden: fadeUp.initial,
-              visible: {
-                ...fadeUp.animate,
-                transition: itemTransition,
-              },
-            }}
+            initial={fadeUp.initial}
+            animate={ready ? fadeUp.animate : fadeUp.initial}
+            transition={transition}
+            style={{ willChange: "opacity, transform, filter" }}
           >
             {child}
           </motion.div>
         );
       })}
-    </motion.div>
+    </div>
   );
 }

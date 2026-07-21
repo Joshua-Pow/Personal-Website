@@ -11,6 +11,7 @@ import {
 type RevealOnScrollProps = {
   children: React.ReactNode;
   variant?: VariantName;
+  /** Delay in milliseconds. */
   delay?: number;
   className?: string;
   as?: "div" | "p" | "span" | "h2";
@@ -24,19 +25,30 @@ export function RevealOnScroll({
   as = "div",
 }: RevealOnScrollProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
+  const isInView = useInView(ref, { once: true, amount: 0.15 });
   const reducedMotion = useReducedMotion();
   const Component = motion[as];
   const v = variants[variant];
-  const shouldReveal = reducedMotion || isInView;
+  const transition = getVariantTransition(
+    variant,
+    delay,
+    reducedMotion ?? false
+  );
+  const shouldReveal = Boolean(reducedMotion || isInView);
 
   return (
     <Component
       ref={ref}
       initial={reducedMotion ? false : v.initial}
       animate={shouldReveal ? v.animate : v.initial}
-      transition={getVariantTransition(variant, delay, reducedMotion ?? false)}
+      transition={transition}
       className={className}
+      style={{
+        willChange:
+          variant === "blurUp" || variant === "blurUpLg" || variant === "focusIn"
+            ? "opacity, transform"
+            : "opacity, transform, filter",
+      }}
     >
       {children}
     </Component>

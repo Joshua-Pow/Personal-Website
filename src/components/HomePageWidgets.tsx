@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Reveal } from "@/components/motion/Reveal";
+import { enterDelays } from "@/lib/motion";
 
 const SpotifyWidget = dynamic(() => import("@/components/SpotifyWidget"));
 const VisitorGlobe = dynamic(() => import("@/components/VisitorGlobe"), {
@@ -16,10 +17,14 @@ const VisitorGlobe = dynamic(() => import("@/components/VisitorGlobe"), {
 export function HomePageWidgets() {
   return (
     <>
-      <Reveal variant="focusIn" delay={200}>
+      <Reveal variant="focusIn" delay={enterDelays.secondary}>
         <SpotifyWidget />
       </Reveal>
-      <Reveal variant="focusIn" delay={250} className="mb-4 flex flex-col items-center">
+      <Reveal
+        variant="focusIn"
+        delay={enterDelays.tertiary}
+        className="mb-4 flex flex-col items-center"
+      >
         <VisitorGlobe />
       </Reveal>
     </>
