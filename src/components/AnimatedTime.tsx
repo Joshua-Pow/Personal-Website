@@ -2,7 +2,8 @@
 
 import React, { useEffect, useSyncExternalStore, useState, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { play } from "@/lib/sfx";
+import { playRecipe, RECIPES } from "@/lib/sfx";
+import type { SoundRecipe } from "@/lib/sfx";
 import {
   getTickSoundMutedServerSnapshot,
   getTickSoundMutedSnapshot,
@@ -41,8 +42,17 @@ const digitSpring = {
   mass: 0.7,
 };
 
-/** Total window for a multi-digit rollover cascade (ms). */
-const ROLLOVER_MS = 320;
+/**
+ * Cascade window for multi-digit rollovers. Long enough that each click
+ * reads as its own flip-board hit (fast → slow).
+ */
+const ROLLOVER_MS = 560;
+
+/** Punchier than stock toggle so stacked flips stay audible. */
+const FLIP_CLICK: SoundRecipe = {
+  ...RECIPES.toggle,
+  masterGain: RECIPES.toggle.masterGain * 1.55,
+};
 
 type DigitFlip = {
   key: string;
@@ -57,7 +67,12 @@ type DigitFlip = {
 function cascadeDelayMs(index: number, count: number): number {
   if (count <= 1) return 0;
   const t = index / (count - 1);
-  return ROLLOVER_MS * t * t;
+  // Stronger ease-in so the last hit lands late and clear.
+  return ROLLOVER_MS * t * t * t;
+}
+
+function playFlipClick() {
+  playRecipe(FLIP_CLICK);
 }
 
 /** Digits that changed, ordered ones→tens within each unit, seconds→years. */
@@ -174,25 +189,29 @@ function AnimatedTime({ graduationDate }: Props) {
       const flips = collectDigitFlips(prevTimeRef.current, newTimeElapsed);
       clearSoundTimeouts();
 
-      if (
-        hasTickedRef.current &&
-        flips.length > 0 &&
-        isVisibleRef.current &&
-        !reducedMotion
-      ) {
+      // Animation can respect reduced motion; clicks still fire when unmuted.
+      if (hasTickedRef.current && flips.length > 0 && isVisibleRef.current) {
         const delays: Record<string, number> = {};
+
         flips.forEach((flip, index) => {
-          const delayMs = cascadeDelayMs(index, flips.length);
+          const delayMs = reducedMotion
+            ? 0
+            : cascadeDelayMs(index, flips.length);
           delays[flip.key] = delayMs / 1000;
 
           if (!isMutedRef.current) {
-            const timeoutId = window.setTimeout(() => {
-              play("toggle");
-            }, delayMs);
-            soundTimeoutsRef.current.push(timeoutId);
+            if (delayMs <= 0) {
+              playFlipClick();
+            } else {
+              const timeoutId = window.setTimeout(() => {
+                playFlipClick();
+              }, delayMs);
+              soundTimeoutsRef.current.push(timeoutId);
+            }
           }
         });
-        setFlipDelays(delays);
+
+        setFlipDelays(reducedMotion ? {} : delays);
       } else {
         setFlipDelays({});
       }
