@@ -61,14 +61,14 @@ type DigitFlip = {
 };
 
 /**
- * Ease-in stagger: early flips bunch up, later ones spread out —
- * fast start, slow down into the final click.
+ * Ease-in stagger: early flips close together, later ones breathe —
+ * fast start, slow down into the final click. Keep a usable gap so
+ * stacked toggle hits don’t smear into one sound.
  */
 function cascadeDelayMs(index: number, count: number): number {
   if (count <= 1) return 0;
   const t = index / (count - 1);
-  // Stronger ease-in so the last hit lands late and clear.
-  return ROLLOVER_MS * t * t * t;
+  return ROLLOVER_MS * t * t;
 }
 
 function playFlipClick() {
