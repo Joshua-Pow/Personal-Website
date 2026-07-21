@@ -29,6 +29,8 @@ const CONFIG = {
   maxBorderRadius: 16,
   edgeThresholdPx: 40,
   minSwipeDistance: 60,
+  /** Dwell near the edge before the border effect activates — skips quick fly-offs. */
+  activationDelayMs: 180,
 } as const;
 
 const CARD_GLOW_SHADOW = `
@@ -111,6 +113,11 @@ export const EdgeBorderEffect = ({
   const rafIdRef = useRef<number | null>(null);
   const currentIntensityRef = useRef(0);
   const animationRef = useRef<ReturnType<typeof animate> | null>(null);
+  const activationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+  const isEdgeArmedRef = useRef(false);
+  const pendingIntensityRef = useRef(0);
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchStartEdgeRef = useRef<"left" | "right" | "top" | "bottom" | null>(
@@ -138,6 +145,13 @@ export const EdgeBorderEffect = ({
     isMobileActiveRef.current = isMobileActive;
   }, [isMobileActive]);
 
+  const clearActivationTimeout = useCallback(() => {
+    if (activationTimeoutRef.current !== null) {
+      clearTimeout(activationTimeoutRef.current);
+      activationTimeoutRef.current = null;
+    }
+  }, []);
+
   const setIntensity = useCallback(
     (target: number) => {
       if (target === currentIntensityRef.current) return;
@@ -151,6 +165,13 @@ export const EdgeBorderEffect = ({
     },
     [intensity]
   );
+
+  const disarmEdge = useCallback(() => {
+    clearActivationTimeout();
+    isEdgeArmedRef.current = false;
+    pendingIntensityRef.current = 0;
+    setIntensity(0);
+  }, [clearActivationTimeout, setIntensity]);
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -168,15 +189,38 @@ export const EdgeBorderEffect = ({
           thresholdPx,
           CONFIG.maxBorderWidth
         );
-        setIntensity(nextIntensity);
+
+        // Leaving the edge zone — collapse immediately and require a fresh dwell.
+        if (nextIntensity <= 0) {
+          disarmEdge();
+          return;
+        }
+
+        pendingIntensityRef.current = nextIntensity;
+
+        // Already dwelling / active — track the cursor intensity live.
+        if (isEdgeArmedRef.current) {
+          setIntensity(nextIntensity);
+          return;
+        }
+
+        // First contact with the edge — wait before activating so quick
+        // mouse exits off-screen don't flash the border effect.
+        if (activationTimeoutRef.current === null) {
+          activationTimeoutRef.current = setTimeout(() => {
+            activationTimeoutRef.current = null;
+            isEdgeArmedRef.current = true;
+            setIntensity(pendingIntensityRef.current);
+          }, CONFIG.activationDelayMs);
+        }
       });
     },
-    [setIntensity]
+    [disarmEdge, setIntensity]
   );
 
   const handleMouseLeave = useCallback(() => {
-    setIntensity(0);
-  }, [setIntensity]);
+    disarmEdge();
+  }, [disarmEdge]);
 
   const detectEdge = (
     x: number,
@@ -305,6 +349,7 @@ export const EdgeBorderEffect = ({
       if (rafIdRef.current) {
         cancelAnimationFrame(rafIdRef.current);
       }
+      clearActivationTimeout();
     };
 
     if ("requestIdleCallback" in window) {
@@ -319,6 +364,7 @@ export const EdgeBorderEffect = ({
     attachDesktopListeners();
     return removeDesktopListeners;
   }, [
+    clearActivationTimeout,
     handleMouseMove,
     handleMouseLeave,
     handleTouchStart,
