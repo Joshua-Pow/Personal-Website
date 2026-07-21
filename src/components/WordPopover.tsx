@@ -5,6 +5,7 @@ import { Popover } from "@base-ui/react/popover";
 import { AnimatePresence, useReducedMotion } from "motion/react";
 import { PopoverSurface } from "@/components/motion/PopoverSurface";
 import { wordTrigger } from "@/lib/interactive";
+import { play } from "@/lib/sfx";
 
 type WordPopoverProps = {
   term: string;
@@ -19,8 +20,20 @@ export function WordPopover({ term, definition }: WordPopoverProps) {
   const reducedMotion = useReducedMotion();
 
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger className={wordTrigger}>
+    <Popover.Root
+      open={open}
+      onOpenChange={(next) => {
+        if (next && !open) {
+          play("bloom");
+        }
+        setOpen(next);
+      }}
+    >
+      <Popover.Trigger
+        className={wordTrigger}
+        data-sfx-press
+        data-sfx-release
+      >
         {term}
       </Popover.Trigger>
       <AnimatePresence>

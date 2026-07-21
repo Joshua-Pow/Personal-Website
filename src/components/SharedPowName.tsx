@@ -86,6 +86,7 @@ function HeaderName() {
       <span
         className="vt-pow group relative inline-block overflow-hidden whitespace-nowrap font-medium"
         style={{ color: NAME_COLORS.header }}
+        data-sfx-hover="sparkle"
       >
         <LetterScrollName />
       </span>
