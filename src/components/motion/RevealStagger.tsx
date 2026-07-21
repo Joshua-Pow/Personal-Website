@@ -1,6 +1,6 @@
 "use client";
 
-import { Children } from "react";
+import { Children, isValidElement } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import {
   durations,
@@ -21,7 +21,8 @@ type RevealStaggerProps = {
 };
 
 /**
- * Staggers children with the shared text-enter Motion recipe.
+ * Staggers each child with the shared text-enter Motion recipe.
+ * Uses per-item delays (not staggerChildren) so delays aren't overridden.
  */
 export function RevealStagger({
   children,
@@ -31,41 +32,30 @@ export function RevealStagger({
 }: RevealStaggerProps) {
   const reducedMotion = useReducedMotion();
   const ready = usePageEnterReady();
+  const items = Children.toArray(children).filter(isValidElement);
 
   if (reducedMotion) {
     return <div className={className}>{children}</div>;
   }
 
   return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      animate={ready ? "visible" : "hidden"}
-      variants={{
-        hidden: {},
-        visible: {
-          transition: {
-            staggerChildren: stagger / 1000,
-            delayChildren: baseDelay / 1000,
-          },
-        },
-      }}
-    >
-      {Children.map(children, (child, index) => (
-        <motion.div
-          key={index}
-          variants={{
-            hidden: fadeUp.initial,
-            visible: {
-              ...fadeUp.animate,
-              transition: getTransition(durations.reveal),
-            },
-          }}
-          style={{ willChange: "opacity, transform, filter" }}
-        >
-          {child}
-        </motion.div>
-      ))}
-    </motion.div>
+    <div className={className}>
+      {items.map((child, index) => {
+        const delay = baseDelay + index * stagger;
+        const transition = getTransition(durations.reveal, false, delay);
+
+        return (
+          <motion.div
+            key={child.key ?? index}
+            initial={fadeUp.initial}
+            animate={ready ? fadeUp.animate : fadeUp.initial}
+            transition={transition}
+            style={{ willChange: "opacity, transform, filter" }}
+          >
+            {child}
+          </motion.div>
+        );
+      })}
+    </div>
   );
 }
