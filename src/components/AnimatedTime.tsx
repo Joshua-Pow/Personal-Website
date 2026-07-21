@@ -15,18 +15,6 @@ interface Props {
   graduationDate: Date;
 }
 
-function playTickSequence(count: number) {
-  let tickCount = 0;
-  const interval = setInterval(() => {
-    if (tickCount >= count) {
-      clearInterval(interval);
-      return;
-    }
-    play("toggle");
-    tickCount++;
-  }, 50);
-}
-
 function DigitColumn({
   digit,
   reducedMotion,
@@ -71,6 +59,7 @@ function AnimatedTime({ graduationDate }: Props) {
   });
 
   const prevTimeRef = useRef(timeElapsed);
+  const hasTickedRef = useRef(false);
   const isVisibleRef = useRef(true);
   const isMuted = useSyncExternalStore(
     subscribeTickSoundMuted,
@@ -110,16 +99,17 @@ function AnimatedTime({ graduationDate }: Props) {
       };
 
       if (isVisibleRef.current && !reducedMotion && !isMutedRef.current) {
-        Object.entries(newTimeElapsed).forEach(([unit, value]) => {
-          const prevValue =
-            prevTimeRef.current[unit as keyof typeof timeElapsed];
-          if (value !== prevValue) {
-            const difference = Math.abs(value - prevValue);
-            playTickSequence(Math.min(difference + 2, 8));
-          }
-        });
+        const changed = (
+          Object.keys(newTimeElapsed) as (keyof typeof newTimeElapsed)[]
+        ).some((unit) => newTimeElapsed[unit] !== prevTimeRef.current[unit]);
+
+        // One flip-clock click per update — skip the initial hydrate.
+        if (hasTickedRef.current && changed) {
+          play("toggle");
+        }
       }
 
+      hasTickedRef.current = true;
       prevTimeRef.current = newTimeElapsed;
       setTimeElapsed(newTimeElapsed);
     };
