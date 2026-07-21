@@ -27,7 +27,7 @@ const personJsonLd = {
 
 export default function Home() {
   return (
-    <div className="flex flex-grow flex-col px-8">
+    <div className="flex grow flex-col px-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
