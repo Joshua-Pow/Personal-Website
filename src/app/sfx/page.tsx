@@ -16,21 +16,22 @@ export const metadata: Metadata = {
 
 export default function SfxPage() {
   return (
-    <div className="relative left-1/2 w-screen max-w-[64rem] -translate-x-1/2 px-4 pb-8 pt-6 sm:px-6">
-      <div className="mb-4 flex items-start justify-between gap-4">
+    <div className="sfx-lab relative left-1/2 w-[min(100vw,48rem)] -translate-x-1/2 px-8 pb-14 pt-8">
+      <div className="mb-5 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-subtle">
-            Lab
+          <p className="sfx-lab-kicker text-[11px] font-medium uppercase">
+            Studio
           </p>
-          <h1 className="font-instrument text-3xl tracking-tight text-on-surface">
+          <h1 className="sfx-lab-title font-instrument text-4xl tracking-tight">
             sfx
           </h1>
-          <p className="mt-1 max-w-2xl text-sm text-on-surface-muted">
-            Pick a sound on the left, tweak layers on the right. Play stays
-            sticky while you edit.
+          <div className="sfx-lab-path mt-3 max-w-[12rem]" aria-hidden />
+          <p className="sfx-lab-lede mt-3 max-w-prose text-sm leading-relaxed">
+            A small sound atelier — pick a voice on the left, paint layers on
+            the right. Preview stays within reach while you work.
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 pt-1">
           <TickSoundToggle />
           <SharedPowName variant="back-link" />
         </div>

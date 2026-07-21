@@ -165,3 +165,211 @@ code {
 .preview-shimmer {
   animation: preview-shimmer 1.4s ease-in-out infinite;
 }
+
+/* ── sfx lab: impressionist field atmosphere ── */
+.sfx-lab {
+  --sfx-sky: oklch(93% 0.035 245);
+  --sfx-mist: oklch(92% 0.03 300);
+  --sfx-gold: oklch(78% 0.13 88);
+  --sfx-gold-deep: oklch(68% 0.14 78);
+  --sfx-poppy: oklch(55% 0.19 28);
+  --sfx-poppy-deep: oklch(48% 0.18 25);
+  --sfx-violet: oklch(52% 0.14 312);
+  --sfx-leaf: oklch(42% 0.07 145);
+  --sfx-linen: oklch(97.5% 0.018 95);
+  --sfx-panel: oklch(99% 0.012 92 / 78%);
+  --sfx-ink: oklch(28% 0.03 55);
+  --sfx-ink-soft: oklch(45% 0.03 60);
+  --sfx-stroke: oklch(55% 0.06 80 / 22%);
+  position: relative;
+  color: var(--sfx-ink);
+  isolation: isolate;
+}
+
+.sfx-lab::before {
+  content: "";
+  position: absolute;
+  inset: -1.5rem -1rem 0;
+  z-index: -2;
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(ellipse 80% 55% at 18% 12%, oklch(94% 0.04 250 / 70%), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 88% 8%, oklch(92% 0.045 310 / 55%), transparent 50%),
+    radial-gradient(ellipse 90% 60% at 50% 100%, oklch(86% 0.1 90 / 45%), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 70% 70%, oklch(70% 0.12 25 / 12%), transparent 60%),
+    linear-gradient(
+      168deg,
+      var(--sfx-sky) 0%,
+      var(--sfx-mist) 28%,
+      var(--sfx-linen) 62%,
+      oklch(94% 0.05 95) 100%
+    );
+  pointer-events: none;
+}
+
+.sfx-lab::after {
+  content: "";
+  position: absolute;
+  inset: -1.5rem -1rem 0;
+  z-index: -1;
+  border-radius: 1.75rem;
+  opacity: 0.28;
+  background-image: var(--page-noise-image);
+  background-size: 180px 180px;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.sfx-lab-kicker {
+  color: var(--sfx-leaf);
+  letter-spacing: 0.14em;
+}
+
+.sfx-lab-title {
+  color: var(--sfx-ink);
+  text-shadow: 0 1px 0 oklch(100% 0 0 / 40%);
+}
+
+.sfx-lab-lede {
+  color: var(--sfx-ink-soft);
+}
+
+.sfx-lab-toolbar {
+  border-color: var(--sfx-stroke);
+  background: color-mix(in oklch, var(--sfx-linen) 82%, transparent);
+  box-shadow:
+    0 1px 0 oklch(100% 0 0 / 55%) inset,
+    0 8px 28px oklch(45% 0.05 80 / 8%);
+}
+
+.sfx-lab-btn {
+  border-radius: 999px;
+  border: 1px solid var(--sfx-stroke);
+  background: color-mix(in oklch, var(--sfx-panel) 90%, white);
+  color: var(--sfx-ink);
+  box-shadow: 0 1px 0 oklch(100% 0 0 / 70%) inset;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.sfx-lab-btn:hover {
+  background: oklch(100% 0.01 95);
+  border-color: color-mix(in oklch, var(--sfx-gold-deep) 45%, var(--sfx-stroke));
+}
+
+.sfx-lab-btn:disabled {
+  opacity: 0.4;
+}
+
+.sfx-lab-btn-play {
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--sfx-poppy-deep) 55%, transparent);
+  background: linear-gradient(
+    165deg,
+    oklch(62% 0.18 32) 0%,
+    var(--sfx-poppy) 48%,
+    var(--sfx-poppy-deep) 100%
+  );
+  color: oklch(99% 0.01 90);
+  box-shadow:
+    0 1px 0 oklch(100% 0 0 / 28%) inset,
+    0 6px 16px oklch(45% 0.14 28 / 22%);
+  transition:
+    filter 150ms ease,
+    transform 150ms ease;
+}
+
+.sfx-lab-btn-play:hover {
+  filter: brightness(1.05);
+}
+
+.sfx-lab-rail,
+.sfx-lab-canvas {
+  border: 1px solid var(--sfx-stroke);
+  border-radius: 1.15rem;
+  background: var(--sfx-panel);
+  box-shadow:
+    0 1px 0 oklch(100% 0 0 / 65%) inset,
+    0 10px 32px oklch(40% 0.04 80 / 7%);
+  backdrop-filter: blur(10px);
+}
+
+.sfx-lab-section-label {
+  color: var(--sfx-leaf);
+  letter-spacing: 0.12em;
+}
+
+.sfx-lab-sound {
+  border-radius: 0.7rem;
+  color: var(--sfx-ink-soft);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.sfx-lab-sound:hover {
+  background: color-mix(in oklch, var(--sfx-gold) 16%, transparent);
+  color: var(--sfx-ink);
+}
+
+.sfx-lab-sound-active {
+  background: linear-gradient(
+    120deg,
+    color-mix(in oklch, var(--sfx-gold) 34%, transparent),
+    color-mix(in oklch, var(--sfx-violet) 14%, transparent)
+  );
+  color: var(--sfx-ink);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--sfx-gold-deep) 35%, transparent);
+}
+
+.sfx-lab-field {
+  border-radius: 0.7rem;
+  border: 1px solid var(--sfx-stroke);
+  background: color-mix(in oklch, white 72%, var(--sfx-linen));
+  color: var(--sfx-ink);
+  box-shadow: 0 1px 0 oklch(100% 0 0 / 55%) inset;
+}
+
+.sfx-lab-field:focus {
+  border-color: color-mix(in oklch, var(--sfx-gold-deep) 55%, var(--sfx-stroke));
+  outline: none;
+  box-shadow:
+    0 1px 0 oklch(100% 0 0 / 55%) inset,
+    0 0 0 3px color-mix(in oklch, var(--sfx-gold) 28%, transparent);
+}
+
+.sfx-lab-label {
+  color: var(--sfx-ink-soft);
+  letter-spacing: 0.1em;
+}
+
+.sfx-lab-layer {
+  border: 1px solid var(--sfx-stroke);
+  border-radius: 0.95rem;
+  background: color-mix(in oklch, white 55%, var(--sfx-linen));
+  box-shadow: 0 1px 0 oklch(100% 0 0 / 50%) inset;
+}
+
+.sfx-lab-muted {
+  border: 1px solid color-mix(in oklch, var(--sfx-poppy) 30%, var(--sfx-stroke));
+  background: color-mix(in oklch, var(--sfx-poppy) 10%, var(--sfx-linen));
+  color: var(--sfx-ink);
+}
+
+.sfx-lab-path {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklch, var(--sfx-gold) 55%, transparent) 18%,
+    var(--sfx-gold) 50%,
+    color-mix(in oklch, var(--sfx-gold) 55%, transparent) 82%,
+    transparent 100%
+  );
+  opacity: 0.7;
+}

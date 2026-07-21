@@ -44,12 +44,12 @@ const FILTER_TYPES: BiquadFilterType[] = [
 ];
 
 const fieldClass =
-  "w-full rounded-md border border-black/10 bg-white/80 px-2 py-1.5 text-sm text-on-surface shadow-sm focus:border-accent-bright focus:outline-none focus:ring-1 focus:ring-accent-bright/40";
-const labelClass = "mb-1 block text-[11px] font-medium uppercase tracking-wide text-subtle";
+  "sfx-lab-field w-full px-2.5 py-1.5 text-sm focus:outline-none";
+const labelClass = "sfx-lab-label mb-1 block text-[11px] font-medium uppercase";
 const btnClass =
-  "rounded-md border border-black/10 bg-elevated px-2.5 py-1.5 text-xs font-medium text-on-surface transition-colors hover:bg-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-40";
+  "sfx-lab-btn px-3 py-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-gold)_45%,transparent)] disabled:cursor-not-allowed";
 const btnAccentClass =
-  "rounded-md bg-accent-bright px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-40";
+  "sfx-lab-btn-play px-3.5 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-poppy)_40%,transparent)]";
 
 function slugifyName(value: string): string {
   return value
@@ -159,7 +159,7 @@ function LayerEditor({
       : `${layer.filterType} · ${Math.round(layer.filterFrequency)}Hz`;
 
   return (
-    <div className="rounded-lg border border-black/8 bg-white/50">
+    <div className="sfx-lab-layer">
       <div className="flex items-center gap-2 px-3 py-2">
         <button
           type="button"
@@ -167,13 +167,15 @@ function LayerEditor({
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
         >
-          <span className="text-xs text-subtle" aria-hidden>
+          <span className="text-xs text-[var(--sfx-ink-soft)]" aria-hidden>
             {open ? "▾" : "▸"}
           </span>
-          <span className="text-xs font-semibold text-on-surface">
+          <span className="text-xs font-semibold text-[var(--sfx-ink)]">
             Layer {index + 1}
           </span>
-          <span className="truncate text-[11px] text-subtle">{summary}</span>
+          <span className="truncate text-[11px] text-[var(--sfx-ink-soft)]">
+            {summary}
+          </span>
         </button>
         <button type="button" className={btnClass} onClick={onRemove}>
           Remove
@@ -181,7 +183,7 @@ function LayerEditor({
       </div>
 
       {open && (
-        <div className="space-y-3 border-t border-black/6 px-3 py-3">
+        <div className="space-y-3 border-t border-[var(--sfx-stroke)] px-3 py-3">
           <SelectField
             label="Kind"
             value={layer.kind}
@@ -463,9 +465,10 @@ export function SfxDashboard() {
     [draftName, recipe]
   );
 
+
   return (
-    <div className="pb-10">
-      <div className="sticky top-0 z-20 -mx-2 mb-4 border-b border-black/8 bg-[color-mix(in_oklch,var(--page-bg)_88%,transparent)] px-2 py-3 backdrop-blur-md supports-[backdrop-filter]:bg-[color-mix(in_oklch,var(--page-bg)_72%,transparent)]">
+    <div className="pb-6">
+      <div className="sfx-lab-toolbar sticky top-0 z-20 mb-5 rounded-2xl border px-3 py-3 backdrop-blur-md">
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" className={btnAccentClass} onClick={preview}>
             Play preview
@@ -501,12 +504,12 @@ export function SfxDashboard() {
         {(muted || copyStatus) && (
           <div className="mt-2 space-y-1">
             {muted && (
-              <p className="rounded-md border border-accent-bright/30 bg-accent-bright/10 px-3 py-1.5 text-xs text-on-surface">
+              <p className="sfx-lab-muted rounded-xl px-3 py-1.5 text-xs">
                 Sound is muted. Use the speaker toggle to unmute previews.
               </p>
             )}
             {copyStatus && (
-              <p className="text-xs text-subtle" role="status">
+              <p className="text-xs text-[var(--sfx-ink-soft)]" role="status">
                 {copyStatus}
                 {dirty ? " · unsaved edits" : ""}
               </p>
@@ -515,11 +518,11 @@ export function SfxDashboard() {
         )}
       </div>
 
-      <div className="grid items-start gap-6 md:grid-cols-[13.5rem_minmax(0,1fr)]">
-        <aside className="md:sticky md:top-[4.75rem] md:max-h-[calc(100dvh-5.5rem)] md:overflow-y-auto md:pr-1">
+      <div className="grid items-start gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
+        <aside className="sfx-lab-rail p-3 md:sticky md:top-[5.25rem] md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
           <div className="space-y-5">
             <section>
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-subtle">
+              <h2 className="sfx-lab-section-label mb-2 text-[11px] font-semibold uppercase">
                 Built-ins
               </h2>
               <ul className="space-y-0.5">
@@ -528,10 +531,10 @@ export function SfxDashboard() {
                     <button
                       type="button"
                       className={cn(
-                        "flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
-                        selection.kind === "builtin" && selection.name === name
-                          ? "bg-accent-bright/15 text-accent-hover"
-                          : "hover:bg-elevated"
+                        "sfx-lab-sound flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-sm",
+                        selection.kind === "builtin" &&
+                          selection.name === name &&
+                          "sfx-lab-sound-active"
                       )}
                       onClick={() => {
                         loadBuiltin(name);
@@ -546,11 +549,13 @@ export function SfxDashboard() {
             </section>
 
             <section>
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-subtle">
+              <h2 className="sfx-lab-section-label mb-2 text-[11px] font-semibold uppercase">
                 Custom
               </h2>
               {draftNames.length === 0 ? (
-                <p className="px-2 text-xs text-subtle">No drafts yet.</p>
+                <p className="px-2 text-xs text-[var(--sfx-ink-soft)]">
+                  No drafts yet.
+                </p>
               ) : (
                 <ul className="space-y-0.5">
                   {draftNames.map((name) => (
@@ -558,10 +563,10 @@ export function SfxDashboard() {
                       <button
                         type="button"
                         className={cn(
-                          "flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
-                          selection.kind === "draft" && selection.name === name
-                            ? "bg-accent-bright/15 text-accent-hover"
-                            : "hover:bg-elevated"
+                          "sfx-lab-sound flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-sm",
+                          selection.kind === "draft" &&
+                            selection.name === name &&
+                            "sfx-lab-sound-active"
                         )}
                         onClick={() => {
                           loadDraft(name);
@@ -579,7 +584,7 @@ export function SfxDashboard() {
           </div>
         </aside>
 
-        <div className="min-w-0 space-y-4">
+        <div className="sfx-lab-canvas min-w-0 space-y-4 p-4 sm:p-5">
           <div className="space-y-2">
             <label className="block">
               <span className={labelClass}>Name</span>
@@ -594,7 +599,7 @@ export function SfxDashboard() {
               />
             </label>
             {selection.kind === "builtin" && (
-              <p className="text-xs text-subtle">
+              <p className="text-xs text-[var(--sfx-ink-soft)]">
                 {SOUND_BLURBS[selection.name]}
               </p>
             )}
@@ -616,7 +621,7 @@ export function SfxDashboard() {
 
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-subtle">
+              <h3 className="sfx-lab-section-label text-[11px] font-semibold uppercase">
                 Layers
               </h3>
               <button
@@ -664,9 +669,9 @@ export function SfxDashboard() {
             ))}
           </div>
 
-          <div className="space-y-3 rounded-lg border border-black/8 bg-white/50 p-3">
+          <div className="sfx-lab-layer space-y-3 p-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-subtle">
+              <h3 className="sfx-lab-section-label text-[11px] font-semibold uppercase">
                 Shimmer
               </h3>
               {recipe.shimmer ? (
