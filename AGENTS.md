@@ -28,6 +28,10 @@ There is a single service: the Next.js app.
   - `POST /api/visitor-location` mocks the location as "Toronto, Ontario 🇨🇦" when
     `NODE_ENV=development` and uses an in-memory store instead of Cloudflare KV.
   - `/api/spotify` returns HTTP 500 without Spotify secrets; this is expected locally.
+ To enable it, provide `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, and
+ `SPOTIFY_REFRESH_TOKEN`. `src/lib/spotify.ts` reads them straight from `process.env`,
+ so injecting them as env vars (Cursor Secrets) or adding them to `.dev.vars` both work —
+ the running dev server must be restarted after they change.
 - The interactive globe (the `cobe` WebGL canvas on the homepage) may render as a solid
   black circle in headless/virtualized displays. This is a rendering-environment
   limitation, not a code or setup bug — the rest of the page works normally.
