@@ -7,15 +7,21 @@ import {
   variants,
   type VariantName,
 } from "@/lib/motion";
+import { usePageEnterReady } from "@/components/motion/PageEnterProvider";
+
+type RevealAs = "div" | "p" | "span" | "h1" | "h2" | "section";
 
 type RevealProps = {
   children: React.ReactNode;
   variant?: VariantName;
+  /** Delay in milliseconds. */
   delay?: number;
   duration?: number;
   className?: string;
-  as?: "div" | "p" | "span" | "h1" | "h2" | "section";
+  as?: RevealAs;
   "data-vt"?: string;
+  /** Skip the shared page-enter gate (nested stagger children). */
+  skipGate?: boolean;
 };
 
 export function Reveal({
@@ -25,9 +31,12 @@ export function Reveal({
   duration,
   className,
   as = "div",
+  skipGate = false,
   "data-vt": dataVt,
 }: RevealProps) {
   const reducedMotion = useReducedMotion();
+  const pageReady = usePageEnterReady();
+  const ready = skipGate || pageReady;
   const Component = motion[as];
   const v = variants[variant];
   const transition =
@@ -37,11 +46,17 @@ export function Reveal({
 
   return (
     <Component
-      initial={v.initial}
-      animate={v.animate}
+      initial={reducedMotion ? false : v.initial}
+      animate={reducedMotion || ready ? v.animate : v.initial}
       transition={transition}
       className={className}
       data-vt={dataVt}
+      style={{
+        willChange:
+          variant === "blurUp" || variant === "blurUpLg" || variant === "focusIn"
+            ? "opacity, transform"
+            : "opacity, transform, filter",
+      }}
     >
       {children}
     </Component>

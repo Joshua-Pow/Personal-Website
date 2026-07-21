@@ -1,5 +1,4 @@
-import { AnimatedName } from "@/components/AnimatedName";
-import React from "react";
+import { SubpageLayout } from "@/components/SubpageLayout";
 
 export const metadata = {
   title: "Notes",
@@ -10,11 +9,10 @@ export const metadata = {
 
 const page = () => {
   return (
-    <div className="flex h-full flex-col px-8">
-      <h1 className="pt-12 font-medium">Notes</h1>
-      <AnimatedName />
-      <p>A timeline of my thoughts and ideas.</p>
-    </div>
+    <SubpageLayout
+      title="Notes"
+      intro={<p>A timeline of my thoughts and ideas.</p>}
+    />
   );
 };
 

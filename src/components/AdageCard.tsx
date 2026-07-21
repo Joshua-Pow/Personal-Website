@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { formatAdageDate, type AdageData } from "@/lib/adages-types";
+import { textRevealStaggerMs } from "@/lib/motion";
 
 type AdageCardProps = {
   adage: AdageData & { content: ReactNode };
@@ -10,7 +11,7 @@ type AdageCardProps = {
 };
 
 export function AdageCard({ adage, index }: AdageCardProps) {
-  const baseDelay = index * 30;
+  const baseDelay = Math.min(index, 5) * textRevealStaggerMs;
   const isShortQuote = adage.quote.length < 80;
 
   return (
@@ -67,7 +68,7 @@ export function AdageCard({ adage, index }: AdageCardProps) {
         </time>
         <RevealOnScroll
           variant="fadeUpSm"
-          delay={baseDelay + 80}
+          delay={baseDelay + textRevealStaggerMs}
           as="div"
           className="text-sm leading-[1.57] tracking-tight text-on-surface-muted"
         >

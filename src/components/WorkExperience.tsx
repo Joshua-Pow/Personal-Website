@@ -4,6 +4,7 @@ import React from "react";
 import { RevealOnScroll } from "./motion/RevealOnScroll";
 import { Logos } from "./Logos";
 import { LanguageBadge } from "./LanguageBadge";
+import { textRevealStaggerMs } from "@/lib/motion";
 
 interface WorkExperienceProps {
   index: number;
@@ -32,7 +33,7 @@ function AnimatedParagraphs({
         <RevealOnScroll
           key={pIndex}
           variant="fadeUpSm"
-          delay={baseDelay + 80 + pIndex * 30}
+          delay={baseDelay + textRevealStaggerMs + pIndex * textRevealStaggerMs}
         >
           {child}
         </RevealOnScroll>
@@ -49,7 +50,7 @@ export function WorkExperience({
   description,
   technologies,
 }: WorkExperienceProps) {
-  const baseDelay = (index - 1) * 30;
+  const baseDelay = Math.min(index - 1, 5) * 40;
 
   return (
     <RevealOnScroll variant="blurUp" delay={baseDelay} className="mb-8">
