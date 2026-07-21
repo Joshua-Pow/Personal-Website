@@ -10,6 +10,7 @@ import type {
   CurrentlyPlayingResponse,
   RecentlyPlayedResponse,
 } from "@/lib/spotify";
+import { toDisplayItem } from "@/lib/spotify";
 
 const NOW_PLAYING_TRANSITION = {
   duration: 1.5,
@@ -78,19 +79,35 @@ function SpotifyContent({
   lastPlayed: RecentlyPlayedResponse["items"][0] | null;
 }) {
   const reducedMotion = useReducedMotion();
-  const track = currentlyPlaying?.item ?? lastPlayed?.track;
+  const fromPlayer = currentlyPlaying?.item ?? null;
+  const playable = fromPlayer ?? lastPlayed?.track ?? null;
+  const item = playable ? toDisplayItem(playable) : null;
 
-  if (!track) return null;
+  if (!item) return null;
 
-  const trackKey = `${track.name}-${track.artists.map((artist) => artist.name).join(",")}`;
+  const itemKey = `${item.kind}-${item.name}-${item.subtitle}`;
   const enterTransition = getTransition(durations.ui, reducedMotion ?? false);
   const exitTransition = getExitTransition(durations.ui, reducedMotion ?? false);
+  const isPlaying = Boolean(currentlyPlaying?.is_playing && fromPlayer);
+
+  let status: string;
+  if (isPlaying) {
+    status = "Now Playing";
+  } else if (fromPlayer) {
+    // Paused episode/track still comes from currently-playing — don't use
+    // lastPlayed's music timestamp while showing an audiobook chapter.
+    status = "Paused";
+  } else if (lastPlayed?.played_at) {
+    status = `Last played on ${formatLastPlayedTime(lastPlayed.played_at)}`;
+  } else {
+    status = "Not recently played";
+  }
 
   return (
     <div aria-live="polite" aria-atomic="true">
       <AnimatePresence mode="wait">
         <motion.div
-          key={trackKey}
+          key={itemKey}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: exitTransition }}
@@ -100,8 +117,8 @@ function SpotifyContent({
           <div className="relative mb-1 flex items-center gap-4 rounded-md bg-gradient-to-br from-[var(--surface-inset-from)] via-[var(--surface-inset-via)] to-[var(--surface-inset-to)] p-1 shadow-[inset_0_1px_2px_rgba(26,18,16,0.08)]">
             <div className="relative h-16 w-16 flex-shrink-0">
               <Image
-                src={track.album.images[0].url}
-                alt={track.album.name}
+                src={item.imageUrl}
+                alt={item.imageAlt}
                 className="rounded-md"
                 fill
                 sizes="64px"
@@ -110,33 +127,27 @@ function SpotifyContent({
 
             <div className="flex min-w-0 flex-col text-sm">
               <MotionLink
-                href={track.external_urls.spotify}
+                href={item.url}
                 target="_blank"
                 accent={false}
                 className="truncate font-medium text-on-surface underline decoration-on-surface-muted/70 decoration-2 underline-offset-1 transition-[text-decoration-color] duration-150 hover:text-on-surface hover:decoration-accent"
               >
-                {track.name}
+                {item.name}
               </MotionLink>
-              <p className="truncate opacity-50">
-                {track.artists.map((artist) => artist.name).join(", ")}
-              </p>
+              <p className="truncate opacity-50">{item.subtitle}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 pl-1 text-xs">
-            {currentlyPlaying?.is_playing ? (
+            {isPlaying ? (
               <>
                 <NowPlayingDot />
-                <span className="opacity-30">Now Playing</span>
+                <span className="opacity-30">{status}</span>
               </>
             ) : (
               <>
                 <span className="inline-flex size-2 rounded-full bg-gray-400" />
-                <span className="opacity-30">
-                  {lastPlayed?.played_at
-                    ? `Last played on ${formatLastPlayedTime(lastPlayed.played_at)}`
-                    : "Not recently played"}
-                </span>
+                <span className="opacity-30">{status}</span>
               </>
             )}
           </div>

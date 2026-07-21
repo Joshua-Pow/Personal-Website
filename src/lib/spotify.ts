@@ -8,21 +8,55 @@ interface SpotifyToken {
   scope?: string;
 }
 
+interface SpotifyImage {
+  url: string;
+  height?: number | null;
+  width?: number | null;
+}
+
 export interface SpotifyTrack {
+  type?: "track";
   name: string;
   artists: { name: string }[];
   album: {
     name: string;
-    images: { url: string }[];
+    images: SpotifyImage[];
   };
   external_urls: {
     spotify: string;
   };
 }
 
+export interface SpotifyEpisode {
+  type: "episode";
+  name: string;
+  images: SpotifyImage[];
+  external_urls: {
+    spotify: string;
+  };
+  show: {
+    name: string;
+    publisher: string;
+    images: SpotifyImage[];
+  };
+}
+
+export type SpotifyPlayableItem = SpotifyTrack | SpotifyEpisode;
+
+/** Normalized fields for the now-playing / last-played card. */
+export interface SpotifyDisplayItem {
+  name: string;
+  subtitle: string;
+  imageUrl: string;
+  imageAlt: string;
+  url: string;
+  kind: "track" | "episode";
+}
+
 export interface CurrentlyPlayingResponse {
   is_playing: boolean;
-  item: SpotifyTrack | null;
+  currently_playing_type?: "track" | "episode" | "ad" | "unknown";
+  item: SpotifyPlayableItem | null;
 }
 
 export interface RecentlyPlayedResponse {
@@ -82,6 +116,38 @@ async function getSpotifyCredentials(): Promise<SpotifyCredentials> {
   };
 }
 
+export function toDisplayItem(
+  item: SpotifyPlayableItem
+): SpotifyDisplayItem | null {
+  // Audiobook chapters and podcasts both arrive as EpisodeObjects.
+  if (item.type === "episode" || "show" in item) {
+    const episode = item as SpotifyEpisode;
+    const image = episode.images[0] ?? episode.show.images[0];
+    if (!image?.url) return null;
+
+    return {
+      name: episode.name,
+      subtitle: episode.show.name,
+      imageUrl: image.url,
+      imageAlt: episode.show.name,
+      url: episode.external_urls.spotify,
+      kind: "episode",
+    };
+  }
+
+  const image = item.album.images[0];
+  if (!image?.url) return null;
+
+  return {
+    name: item.name,
+    subtitle: item.artists.map((artist) => artist.name).join(", "),
+    imageUrl: image.url,
+    imageAlt: item.album.name,
+    url: item.external_urls.spotify,
+    kind: "track",
+  };
+}
+
 async function getAccessToken(): Promise<string> {
   const { client_id, client_secret, refresh_token } =
     await getSpotifyCredentials();
@@ -129,8 +195,10 @@ async function getAccessToken(): Promise<string> {
 async function fetchCurrentlyPlaying(
   token: string
 ): Promise<CurrentlyPlayingResponse | null> {
+  // Without additional_types=episode, Spotify returns currently_playing_type
+  // "episode" (podcasts / audiobook chapters) with item: null.
   const response = await fetch(
-    "https://api.spotify.com/v1/me/player/currently-playing",
+    "https://api.spotify.com/v1/me/player/currently-playing?additional_types=episode",
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -155,6 +223,7 @@ async function fetchCurrentlyPlaying(
 async function fetchLastPlayed(
   token: string
 ): Promise<RecentlyPlayedResponse["items"][0] | null> {
+  // Recently-played only returns music tracks — not episodes/audiobooks.
   const response = await fetch(
     "https://api.spotify.com/v1/me/player/recently-played?limit=1",
     {
@@ -218,7 +287,12 @@ export const getSpotifyData = cache(async () => {
       : null;
   const lastPlayedRaw =
     lastPlayedResult.status === "fulfilled" ? lastPlayedResult.value : null;
-  const lastPlayed = currentlyPlaying?.is_playing ? null : lastPlayedRaw;
+
+  // Prefer a live item; if Spotify says we're playing but item is still null
+  // (ads / unknown), fall back to last played so the card doesn't vanish.
+  const hasLiveItem = Boolean(currentlyPlaying?.item);
+  const lastPlayed =
+    currentlyPlaying?.is_playing && hasLiveItem ? null : lastPlayedRaw;
 
   return { currentlyPlaying, lastPlayed };
 });
