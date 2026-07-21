@@ -2,7 +2,6 @@
 
 import React, { useEffect, useSyncExternalStore, useState, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { easeOut } from "@/lib/motion";
 import { play } from "@/lib/sfx";
 import {
   getTickSoundMutedServerSnapshot,
@@ -15,12 +14,79 @@ interface Props {
   graduationDate: Date;
 }
 
+type TimeElapsed = {
+  years: number;
+  months: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+/** Least-significant unit first so rollovers cascade like a flip board. */
+const FLIP_UNITS = [
+  "seconds",
+  "minutes",
+  "hours",
+  "days",
+  "months",
+  "years",
+] as const;
+
+/** Springy reel: snappy start, soft settle. */
+const digitSpring = {
+  type: "spring" as const,
+  stiffness: 380,
+  damping: 26,
+  mass: 0.7,
+};
+
+/** Total window for a multi-digit rollover cascade (ms). */
+const ROLLOVER_MS = 320;
+
+type DigitFlip = {
+  key: string;
+  unit: (typeof FLIP_UNITS)[number];
+  index: number;
+};
+
+/**
+ * Ease-in stagger: early flips bunch up, later ones spread out —
+ * fast start, slow down into the final click.
+ */
+function cascadeDelayMs(index: number, count: number): number {
+  if (count <= 1) return 0;
+  const t = index / (count - 1);
+  return ROLLOVER_MS * t * t;
+}
+
+/** Digits that changed, ordered ones→tens within each unit, seconds→years. */
+function collectDigitFlips(prev: TimeElapsed, next: TimeElapsed): DigitFlip[] {
+  const flips: DigitFlip[] = [];
+
+  for (const unit of FLIP_UNITS) {
+    const prevDigits = prev[unit].toString().padStart(2, "0");
+    const nextDigits = next[unit].toString().padStart(2, "0");
+    if (prevDigits === nextDigits) continue;
+
+    for (let index = nextDigits.length - 1; index >= 0; index -= 1) {
+      if (prevDigits[index] !== nextDigits[index]) {
+        flips.push({ key: `${unit}-${index}`, unit, index });
+      }
+    }
+  }
+
+  return flips;
+}
+
 function DigitColumn({
   digit,
   reducedMotion,
+  delay = 0,
 }: {
   digit: number;
   reducedMotion: boolean;
+  delay?: number;
 }) {
   return (
     <span className="relative h-6 w-3 overflow-hidden sm:h-8 sm:w-4">
@@ -32,7 +98,7 @@ function DigitColumn({
         <motion.span
           className="absolute left-0 flex flex-col"
           animate={{ y: `-${digit * 10}%` }}
-          transition={{ duration: 0.28, ease: easeOut }}
+          transition={{ ...digitSpring, delay }}
         >
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
             <span
@@ -49,7 +115,7 @@ function DigitColumn({
 }
 
 function AnimatedTime({ graduationDate }: Props) {
-  const [timeElapsed, setTimeElapsed] = useState({
+  const [timeElapsed, setTimeElapsed] = useState<TimeElapsed>({
     years: 0,
     months: 0,
     days: 0,
@@ -57,10 +123,12 @@ function AnimatedTime({ graduationDate }: Props) {
     minutes: 0,
     seconds: 0,
   });
+  const [flipDelays, setFlipDelays] = useState<Record<string, number>>({});
 
   const prevTimeRef = useRef(timeElapsed);
   const hasTickedRef = useRef(false);
   const isVisibleRef = useRef(true);
+  const soundTimeoutsRef = useRef<number[]>([]);
   const isMuted = useSyncExternalStore(
     subscribeTickSoundMuted,
     getTickSoundMutedSnapshot,
@@ -74,6 +142,11 @@ function AnimatedTime({ graduationDate }: Props) {
   }, [isMuted]);
 
   useEffect(() => {
+    const clearSoundTimeouts = () => {
+      soundTimeoutsRef.current.forEach((id) => window.clearTimeout(id));
+      soundTimeoutsRef.current = [];
+    };
+
     const handleVisibilityChange = () => {
       isVisibleRef.current = !document.hidden;
     };
@@ -85,7 +158,7 @@ function AnimatedTime({ graduationDate }: Props) {
       const now = new Date();
       const diff = now.getTime() - graduationDate.getTime();
 
-      const newTimeElapsed = {
+      const newTimeElapsed: TimeElapsed = {
         years: Math.floor(diff / (1000 * 60 * 60 * 24 * 365)),
         months: Math.floor(
           (diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30)
@@ -98,15 +171,30 @@ function AnimatedTime({ graduationDate }: Props) {
         seconds: Math.floor((diff % (1000 * 60)) / 1000),
       };
 
-      if (isVisibleRef.current && !reducedMotion && !isMutedRef.current) {
-        const changed = (
-          Object.keys(newTimeElapsed) as (keyof typeof newTimeElapsed)[]
-        ).some((unit) => newTimeElapsed[unit] !== prevTimeRef.current[unit]);
+      const flips = collectDigitFlips(prevTimeRef.current, newTimeElapsed);
+      clearSoundTimeouts();
 
-        // One flip-clock click per update — skip the initial hydrate.
-        if (hasTickedRef.current && changed) {
-          play("toggle");
-        }
+      if (
+        hasTickedRef.current &&
+        flips.length > 0 &&
+        isVisibleRef.current &&
+        !reducedMotion
+      ) {
+        const delays: Record<string, number> = {};
+        flips.forEach((flip, index) => {
+          const delayMs = cascadeDelayMs(index, flips.length);
+          delays[flip.key] = delayMs / 1000;
+
+          if (!isMutedRef.current) {
+            const timeoutId = window.setTimeout(() => {
+              play("toggle");
+            }, delayMs);
+            soundTimeoutsRef.current.push(timeoutId);
+          }
+        });
+        setFlipDelays(delays);
+      } else {
+        setFlipDelays({});
       }
 
       hasTickedRef.current = true;
@@ -119,6 +207,7 @@ function AnimatedTime({ graduationDate }: Props) {
 
     return () => {
       stopAlignedTicks();
+      clearSoundTimeouts();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [graduationDate, reducedMotion]);
@@ -139,13 +228,17 @@ function AnimatedTime({ graduationDate }: Props) {
                   .toString()
                   .padStart(2, "0")
                   .split("")
-                  .map((digit, idx) => (
-                    <DigitColumn
-                      key={`${unit}-${idx}`}
-                      digit={parseInt(digit, 10)}
-                      reducedMotion={reducedMotion ?? false}
-                    />
-                  ))}
+                  .map((digit, idx) => {
+                    const key = `${unit}-${idx}`;
+                    return (
+                      <DigitColumn
+                        key={key}
+                        digit={parseInt(digit, 10)}
+                        reducedMotion={reducedMotion ?? false}
+                        delay={flipDelays[key] ?? 0}
+                      />
+                    );
+                  })}
               </span>
             </span>
             <span className="mt-1 text-[8px] sm:text-xs">{unit}</span>
