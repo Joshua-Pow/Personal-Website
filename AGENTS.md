@@ -28,6 +28,16 @@ There is a single service: the Next.js app.
   - `POST /api/visitor-location` mocks the location as "Toronto, Ontario 🇨🇦" when
     `NODE_ENV=development` and uses an in-memory store instead of Cloudflare KV.
   - `/api/spotify` returns HTTP 500 without Spotify secrets; this is expected locally.
+ To enable it, provide `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, and
+ `SPOTIFY_REFRESH_TOKEN`. `src/lib/spotify.ts` reads them straight from `process.env`,
+ so injecting them as env vars (Cursor Secrets) or adding them to `.dev.vars` both work —
+ the running dev server must be restarted after they change (a tmux/shell session started
+ before the secrets were injected won't have them; start a fresh session).
+ With valid secrets the endpoint returns `{ currentlyPlaying, lastPlayed }`; both are
+ `null` when nothing is playing/recently played, and `SpotifyWidget` renders nothing in
+ that case. Note: `getSpotifyData` mints a new access token on every request, so rapid
+ back-to-back polling can intermittently 401/403 from Spotify token propagation — this is
+ pre-existing behavior, not a setup problem.
 - The interactive globe (the `cobe` WebGL canvas on the homepage) may render as a solid
   black circle in headless/virtualized displays. This is a rendering-environment
   limitation, not a code or setup bug — the rest of the page works normally.
