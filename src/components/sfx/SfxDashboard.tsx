@@ -7,7 +7,7 @@ import {
   useSyncExternalStore,
   type ComponentProps,
 } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   RECIPES,
   SOUND_BLURBS,
@@ -59,6 +59,9 @@ const btnAccentClass =
 
 /** Snappy UI spring — interruptible hover/press feedback (100–250ms feel). */
 const tapSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
+/** Accordion chevron — same spring family as toolbar buttons. */
+const chevronSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
+const panelEase = [0.16, 1, 0.3, 1] as const;
 
 function slugifyName(value: string): string {
   return value
@@ -237,16 +240,31 @@ function LayerEditor({
       <div className="flex items-center gap-2 px-3 py-2">
         <motion.button
           type="button"
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg text-left"
+          className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg text-left"
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
           whileHover={reducedMotion ? undefined : { x: 1 }}
           whileTap={reducedMotion ? undefined : { scale: 0.98 }}
           transition={tapSpring}
         >
-          <span className="text-xs text-[var(--sfx-ink-soft)]" aria-hidden>
-            {open ? "▾" : "▸"}
-          </span>
+          <motion.span
+            className="inline-flex size-6 shrink-0 items-center justify-center text-[var(--sfx-ink)]"
+            animate={{ rotate: open ? 90 : 0 }}
+            transition={reducedMotion ? { duration: 0 } : chevronSpring}
+            aria-hidden
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="size-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </motion.span>
           <span className="text-xs font-semibold text-[var(--sfx-ink)]">
             Layer {index + 1}
           </span>
@@ -257,145 +275,163 @@ function LayerEditor({
         <LabButton onClick={onRemove}>Remove</LabButton>
       </div>
 
-      {open && (
-        <div className="space-y-3 border-t border-[var(--sfx-stroke)] px-3 py-3">
-          <SelectField
-            label="Kind"
-            value={layer.kind}
-            options={["tone", "noise"] as const}
-            onChange={(kind) => {
-              if (kind === layer.kind) return;
-              if (kind === "tone") {
-                onChange({
-                  kind: "tone",
-                  waveform: "sine",
-                  frequency: 880,
-                  attack: layer.attack,
-                  decay: layer.decay,
-                  peak: layer.peak,
-                  offset: layer.offset,
-                });
-              } else {
-                onChange({
-                  kind: "noise",
-                  filterType: "bandpass",
-                  filterFrequency: 2000,
-                  filterQ: 1,
-                  attack: layer.attack,
-                  decay: layer.decay,
-                  peak: layer.peak,
-                  offset: layer.offset,
-                });
-              }
-            }}
-          />
-
-          <div className="grid grid-cols-2 gap-2">
-            <NumberField
-              label="Offset"
-              value={layer.offset}
-              step={0.001}
-              min={0}
-              onChange={(offset) => onChange({ ...layer, offset })}
-            />
-            <NumberField
-              label="Attack"
-              value={layer.attack}
-              step={0.001}
-              min={0}
-              onChange={(attack) =>
-                onChange({ ...layer, attack: attack ?? layer.attack })
-              }
-            />
-            <NumberField
-              label="Decay"
-              value={layer.decay}
-              step={0.001}
-              min={0}
-              onChange={(decay) =>
-                onChange({ ...layer, decay: decay ?? layer.decay })
-              }
-            />
-            <NumberField
-              label="Peak"
-              value={layer.peak}
-              step={0.001}
-              min={0}
-              max={1}
-              onChange={(peak) =>
-                onChange({ ...layer, peak: peak ?? layer.peak })
-              }
-            />
-          </div>
-
-          {layer.kind === "tone" ? (
-            <div className="grid grid-cols-2 gap-2">
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="layer-body"
+            initial={
+              reducedMotion ? false : { height: 0, opacity: 0 }
+            }
+            animate={{ height: "auto", opacity: 1 }}
+            exit={
+              reducedMotion
+                ? undefined
+                : { height: 0, opacity: 0 }
+            }
+            transition={{ duration: 0.2, ease: panelEase }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-3 border-t border-[var(--sfx-stroke)] px-3 py-3">
               <SelectField
-                label="Waveform"
-                value={layer.waveform}
-                options={WAVEFORMS}
-                onChange={(waveform) => setTone({ waveform })}
+                label="Kind"
+                value={layer.kind}
+                options={["tone", "noise"] as const}
+                onChange={(kind) => {
+                  if (kind === layer.kind) return;
+                  if (kind === "tone") {
+                    onChange({
+                      kind: "tone",
+                      waveform: "sine",
+                      frequency: 880,
+                      attack: layer.attack,
+                      decay: layer.decay,
+                      peak: layer.peak,
+                      offset: layer.offset,
+                    });
+                  } else {
+                    onChange({
+                      kind: "noise",
+                      filterType: "bandpass",
+                      filterFrequency: 2000,
+                      filterQ: 1,
+                      attack: layer.attack,
+                      decay: layer.decay,
+                      peak: layer.peak,
+                      offset: layer.offset,
+                    });
+                  }
+                }}
               />
-              <NumberField
-                label="Frequency"
-                value={layer.frequency}
-                step={1}
-                min={20}
-                onChange={(frequency) =>
-                  setTone({ frequency: frequency ?? layer.frequency })
-                }
-              />
-              <NumberField
-                label="Detune"
-                value={layer.detune}
-                step={1}
-                onChange={(detune) => setTone({ detune })}
-              />
-              <NumberField
-                label="Glide to"
-                value={layer.glideTo}
-                step={1}
-                min={20}
-                onChange={(glideTo) => setTone({ glideTo })}
-              />
-              <NumberField
-                label="Glide time"
-                value={layer.glideTime}
-                step={0.001}
-                min={0}
-                onChange={(glideTime) => setTone({ glideTime })}
-              />
+
+              <div className="grid grid-cols-2 gap-2">
+                <NumberField
+                  label="Offset"
+                  value={layer.offset}
+                  step={0.001}
+                  min={0}
+                  onChange={(offset) => onChange({ ...layer, offset })}
+                />
+                <NumberField
+                  label="Attack"
+                  value={layer.attack}
+                  step={0.001}
+                  min={0}
+                  onChange={(attack) =>
+                    onChange({ ...layer, attack: attack ?? layer.attack })
+                  }
+                />
+                <NumberField
+                  label="Decay"
+                  value={layer.decay}
+                  step={0.001}
+                  min={0}
+                  onChange={(decay) =>
+                    onChange({ ...layer, decay: decay ?? layer.decay })
+                  }
+                />
+                <NumberField
+                  label="Peak"
+                  value={layer.peak}
+                  step={0.001}
+                  min={0}
+                  max={1}
+                  onChange={(peak) =>
+                    onChange({ ...layer, peak: peak ?? layer.peak })
+                  }
+                />
+              </div>
+
+              {layer.kind === "tone" ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <SelectField
+                    label="Waveform"
+                    value={layer.waveform}
+                    options={WAVEFORMS}
+                    onChange={(waveform) => setTone({ waveform })}
+                  />
+                  <NumberField
+                    label="Frequency"
+                    value={layer.frequency}
+                    step={1}
+                    min={20}
+                    onChange={(frequency) =>
+                      setTone({ frequency: frequency ?? layer.frequency })
+                    }
+                  />
+                  <NumberField
+                    label="Detune"
+                    value={layer.detune}
+                    step={1}
+                    onChange={(detune) => setTone({ detune })}
+                  />
+                  <NumberField
+                    label="Glide to"
+                    value={layer.glideTo}
+                    step={1}
+                    min={20}
+                    onChange={(glideTo) => setTone({ glideTo })}
+                  />
+                  <NumberField
+                    label="Glide time"
+                    value={layer.glideTime}
+                    step={0.001}
+                    min={0}
+                    onChange={(glideTime) => setTone({ glideTime })}
+                  />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <SelectField
+                    label="Filter"
+                    value={layer.filterType}
+                    options={FILTER_TYPES}
+                    onChange={(filterType) => setNoise({ filterType })}
+                  />
+                  <NumberField
+                    label="Filter Hz"
+                    value={layer.filterFrequency}
+                    step={1}
+                    min={20}
+                    onChange={(filterFrequency) =>
+                      setNoise({
+                        filterFrequency:
+                          filterFrequency ?? layer.filterFrequency,
+                      })
+                    }
+                  />
+                  <NumberField
+                    label="Filter Q"
+                    value={layer.filterQ}
+                    step={0.1}
+                    min={0}
+                    onChange={(filterQ) => setNoise({ filterQ })}
+                  />
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-2">
-              <SelectField
-                label="Filter"
-                value={layer.filterType}
-                options={FILTER_TYPES}
-                onChange={(filterType) => setNoise({ filterType })}
-              />
-              <NumberField
-                label="Filter Hz"
-                value={layer.filterFrequency}
-                step={1}
-                min={20}
-                onChange={(filterFrequency) =>
-                  setNoise({
-                    filterFrequency: filterFrequency ?? layer.filterFrequency,
-                  })
-                }
-              />
-              <NumberField
-                label="Filter Q"
-                value={layer.filterQ}
-                step={0.1}
-                min={0}
-                onChange={(filterQ) => setNoise({ filterQ })}
-              />
-            </div>
-          )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -543,7 +579,7 @@ export function SfxDashboard() {
 
   return (
     <div className="pb-6">
-      <div className="sfx-lab-toolbar sticky top-0 z-20 mb-4 border px-2.5 py-2 backdrop-blur-md supports-[backdrop-filter]:bg-[color-mix(in_oklch,var(--sfx-linen)_78%,transparent)] sm:mb-5 sm:px-3 sm:py-2.5">
+      <div className="sfx-lab-toolbar sticky top-3 z-20 mb-4 border px-2.5 py-2 backdrop-blur-md supports-[backdrop-filter]:bg-[color-mix(in_oklch,var(--sfx-linen)_78%,transparent)] sm:top-4 sm:mb-5 sm:px-3 sm:py-2.5">
         <div className="sfx-lab-toolbar-actions grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
           <LabButton
             variant="play"
@@ -592,7 +628,7 @@ export function SfxDashboard() {
       </div>
 
       <div className="grid items-start gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
-        <aside className="sfx-lab-rail p-3 md:sticky md:top-[5.25rem] md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
+        <aside className="sfx-lab-rail p-3 md:sticky md:top-[6.75rem] md:max-h-[calc(100dvh-7.5rem)] md:overflow-y-auto">
           <div className="space-y-5">
             <section>
               <h2 className="sfx-lab-section-label mb-2 text-[11px] font-semibold uppercase">
