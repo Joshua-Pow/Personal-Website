@@ -37,7 +37,7 @@ export function TickSoundToggle() {
       aria-pressed={muted}
       data-sfx-toggle
       className={cn(
-        "group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10",
+        "vt-mute group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10",
         "text-on-surface-muted transition-[color,transform] duration-150 ease-out",
         "hover:text-accent-bright",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
