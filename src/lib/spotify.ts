@@ -35,11 +35,22 @@ export interface SpotifyApiResponse {
   lastPlayed: RecentlyPlayedResponse["items"][0] | null;
 }
 
-const client_id = process.env.SPOTIFY_CLIENT_ID!;
-const client_secret = process.env.SPOTIFY_CLIENT_SECRET!;
-const refresh_token = process.env.SPOTIFY_REFRESH_TOKEN!;
+const client_id = process.env.SPOTIFY_CLIENT_ID;
+const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+const refresh_token = process.env.SPOTIFY_REFRESH_TOKEN;
+
+function requireSpotifyConfig() {
+  if (!client_id || !client_secret || !refresh_token) {
+    throw new Error(
+      "Missing Spotify credentials (SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN)"
+    );
+  }
+
+  return { client_id, client_secret, refresh_token };
+}
 
 async function getAccessToken(): Promise<string> {
+  const { client_id, client_secret, refresh_token } = requireSpotifyConfig();
   const basic = Buffer.from(`${client_id}:${client_secret}`).toString("base64");
 
   const response = await fetch("https://accounts.spotify.com/api/token", {
@@ -52,10 +63,31 @@ async function getAccessToken(): Promise<string> {
       grant_type: "refresh_token",
       refresh_token,
     }),
-    next: { revalidate: 3600 }, // Token lasts for 1 hour
+    // Access tokens last ~1h; avoid serving a stale cached token after a secret rotation.
+    cache: "no-store",
   });
 
-  const data: SpotifyToken = await response.json();
+  const rawBody = await response.text();
+  let data: SpotifyToken & { error?: string; error_description?: string };
+
+  try {
+    data = JSON.parse(rawBody) as SpotifyToken & {
+      error?: string;
+      error_description?: string;
+    };
+  } catch {
+    throw new Error(
+      `Spotify token refresh returned non-JSON response (${response.status})`
+    );
+  }
+
+  if (!response.ok || !data.access_token) {
+    const detail = data.error_description || data.error || rawBody || "unknown error";
+    throw new Error(
+      `Spotify token refresh failed (${response.status}): ${detail}`
+    );
+  }
+
   return data.access_token;
 }
 
@@ -68,11 +100,19 @@ async function fetchCurrentlyPlaying(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      // next: { revalidate: 30 }, // Revalidate every 30 seconds
+      cache: "no-store",
     }
   );
 
   if (response.status === 204) return null;
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(
+      `Spotify currently-playing failed (${response.status}): ${body || "unknown error"}`
+    );
+  }
+
   return response.json();
 }
 
@@ -85,9 +125,16 @@ async function fetchLastPlayed(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      // next: { revalidate: 30 }, // Revalidate every 30 seconds
+      cache: "no-store",
     }
   );
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(
+      `Spotify recently-played failed (${response.status}): ${body || "unknown error"}`
+    );
+  }
 
   const data: RecentlyPlayedResponse = await response.json();
   return data.items?.[0] || null;

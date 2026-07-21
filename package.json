@@ -12,7 +12,8 @@
     "deploy": "node scripts/sync-adage-images.mjs && node scripts/generate-adages-manifest.mjs && opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "node scripts/sync-adage-images.mjs && node scripts/generate-adages-manifest.mjs && opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv worker-configuration.d.ts",
-    "adages:upload": "node scripts/upload-adage-image.mjs"
+    "adages:upload": "node scripts/upload-adage-image.mjs",
+    "spotify:refresh-token": "node scripts/get-spotify-refresh-token.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

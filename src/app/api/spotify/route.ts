@@ -13,9 +13,10 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Spotify API error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Spotify API error:", message);
     return NextResponse.json(
-      { error: "Failed to fetch Spotify data" },
+      { error: "Failed to fetch Spotify data", detail: message },
       { status: 500 }
     );
   }
