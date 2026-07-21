@@ -22,7 +22,7 @@ export default function SfxPage() {
         aria-labelledby="sfx-lab-title"
       >
         <header className="sfx-lab-portal-header px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="sfx-lab-kicker text-[11px] font-medium uppercase">
                 Studio
@@ -33,17 +33,17 @@ export default function SfxPage() {
               >
                 sfx
               </h1>
-              <div className="sfx-lab-path mt-3 max-w-[12rem]" aria-hidden />
-              <p className="sfx-lab-lede mt-3 max-w-prose text-sm leading-relaxed">
-                A small sound atelier — pick a voice on the left, paint layers
-                on the right. Preview stays within reach while you work.
-              </p>
             </div>
-            <div className="flex shrink-0 items-center gap-2 self-start sm:pt-1">
+            <div className="flex shrink-0 items-center gap-1.5 pt-0.5 sm:gap-2 sm:pt-1">
               <TickSoundToggle />
               <SharedPowName variant="back-link" />
             </div>
           </div>
+          <div className="sfx-lab-path mt-3 max-w-[12rem]" aria-hidden />
+          <p className="sfx-lab-lede mt-3 max-w-prose text-sm leading-relaxed">
+            A small sound atelier — pick a voice on the left, paint layers on
+            the right. Preview stays within reach while you work.
+          </p>
         </header>
 
         <div className="px-4 pb-5 pt-4 sm:px-6 sm:pb-6">
