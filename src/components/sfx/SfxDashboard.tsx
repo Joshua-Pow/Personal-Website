@@ -133,12 +133,16 @@ function LayerEditor({
   index,
   onChange,
   onRemove,
+  defaultOpen = true,
 }: {
   layer: SoundLayer;
   index: number;
   onChange: (layer: SoundLayer) => void;
   onRemove: () => void;
+  defaultOpen?: boolean;
 }) {
+  const [open, setOpen] = useState(defaultOpen);
+
   const setTone = (patch: Partial<ToneLayer>) => {
     if (layer.kind !== "tone") return;
     onChange({ ...layer, ...patch });
@@ -149,148 +153,170 @@ function LayerEditor({
     onChange({ ...layer, ...patch });
   };
 
+  const summary =
+    layer.kind === "tone"
+      ? `${layer.waveform} · ${Math.round(layer.frequency)}Hz`
+      : `${layer.filterType} · ${Math.round(layer.filterFrequency)}Hz`;
+
   return (
-    <div className="space-y-3 rounded-lg border border-black/8 bg-white/50 p-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-on-surface">
-          Layer {index + 1}
-        </p>
+    <div className="rounded-lg border border-black/8 bg-white/50">
+      <div className="flex items-center gap-2 px-3 py-2">
+        <button
+          type="button"
+          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+          onClick={() => setOpen((value) => !value)}
+          aria-expanded={open}
+        >
+          <span className="text-xs text-subtle" aria-hidden>
+            {open ? "▾" : "▸"}
+          </span>
+          <span className="text-xs font-semibold text-on-surface">
+            Layer {index + 1}
+          </span>
+          <span className="truncate text-[11px] text-subtle">{summary}</span>
+        </button>
         <button type="button" className={btnClass} onClick={onRemove}>
           Remove
         </button>
       </div>
 
-      <SelectField
-        label="Kind"
-        value={layer.kind}
-        options={["tone", "noise"] as const}
-        onChange={(kind) => {
-          if (kind === layer.kind) return;
-          if (kind === "tone") {
-            onChange({
-              kind: "tone",
-              waveform: "sine",
-              frequency: 880,
-              attack: layer.attack,
-              decay: layer.decay,
-              peak: layer.peak,
-              offset: layer.offset,
-            });
-          } else {
-            onChange({
-              kind: "noise",
-              filterType: "bandpass",
-              filterFrequency: 2000,
-              filterQ: 1,
-              attack: layer.attack,
-              decay: layer.decay,
-              peak: layer.peak,
-              offset: layer.offset,
-            });
-          }
-        }}
-      />
-
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <NumberField
-          label="Offset"
-          value={layer.offset}
-          step={0.001}
-          min={0}
-          onChange={(offset) => onChange({ ...layer, offset })}
-        />
-        <NumberField
-          label="Attack"
-          value={layer.attack}
-          step={0.001}
-          min={0}
-          onChange={(attack) =>
-            onChange({ ...layer, attack: attack ?? layer.attack })
-          }
-        />
-        <NumberField
-          label="Decay"
-          value={layer.decay}
-          step={0.001}
-          min={0}
-          onChange={(decay) =>
-            onChange({ ...layer, decay: decay ?? layer.decay })
-          }
-        />
-        <NumberField
-          label="Peak"
-          value={layer.peak}
-          step={0.001}
-          min={0}
-          max={1}
-          onChange={(peak) => onChange({ ...layer, peak: peak ?? layer.peak })}
-        />
-      </div>
-
-      {layer.kind === "tone" ? (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      {open && (
+        <div className="space-y-3 border-t border-black/6 px-3 py-3">
           <SelectField
-            label="Waveform"
-            value={layer.waveform}
-            options={WAVEFORMS}
-            onChange={(waveform) => setTone({ waveform })}
+            label="Kind"
+            value={layer.kind}
+            options={["tone", "noise"] as const}
+            onChange={(kind) => {
+              if (kind === layer.kind) return;
+              if (kind === "tone") {
+                onChange({
+                  kind: "tone",
+                  waveform: "sine",
+                  frequency: 880,
+                  attack: layer.attack,
+                  decay: layer.decay,
+                  peak: layer.peak,
+                  offset: layer.offset,
+                });
+              } else {
+                onChange({
+                  kind: "noise",
+                  filterType: "bandpass",
+                  filterFrequency: 2000,
+                  filterQ: 1,
+                  attack: layer.attack,
+                  decay: layer.decay,
+                  peak: layer.peak,
+                  offset: layer.offset,
+                });
+              }
+            }}
           />
-          <NumberField
-            label="Frequency"
-            value={layer.frequency}
-            step={1}
-            min={20}
-            onChange={(frequency) =>
-              setTone({ frequency: frequency ?? layer.frequency })
-            }
-          />
-          <NumberField
-            label="Detune"
-            value={layer.detune}
-            step={1}
-            onChange={(detune) => setTone({ detune })}
-          />
-          <NumberField
-            label="Glide to"
-            value={layer.glideTo}
-            step={1}
-            min={20}
-            onChange={(glideTo) => setTone({ glideTo })}
-          />
-          <NumberField
-            label="Glide time"
-            value={layer.glideTime}
-            step={0.001}
-            min={0}
-            onChange={(glideTime) => setTone({ glideTime })}
-          />
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          <SelectField
-            label="Filter"
-            value={layer.filterType}
-            options={FILTER_TYPES}
-            onChange={(filterType) => setNoise({ filterType })}
-          />
-          <NumberField
-            label="Filter Hz"
-            value={layer.filterFrequency}
-            step={1}
-            min={20}
-            onChange={(filterFrequency) =>
-              setNoise({
-                filterFrequency: filterFrequency ?? layer.filterFrequency,
-              })
-            }
-          />
-          <NumberField
-            label="Filter Q"
-            value={layer.filterQ}
-            step={0.1}
-            min={0}
-            onChange={(filterQ) => setNoise({ filterQ })}
-          />
+
+          <div className="grid grid-cols-2 gap-2">
+            <NumberField
+              label="Offset"
+              value={layer.offset}
+              step={0.001}
+              min={0}
+              onChange={(offset) => onChange({ ...layer, offset })}
+            />
+            <NumberField
+              label="Attack"
+              value={layer.attack}
+              step={0.001}
+              min={0}
+              onChange={(attack) =>
+                onChange({ ...layer, attack: attack ?? layer.attack })
+              }
+            />
+            <NumberField
+              label="Decay"
+              value={layer.decay}
+              step={0.001}
+              min={0}
+              onChange={(decay) =>
+                onChange({ ...layer, decay: decay ?? layer.decay })
+              }
+            />
+            <NumberField
+              label="Peak"
+              value={layer.peak}
+              step={0.001}
+              min={0}
+              max={1}
+              onChange={(peak) =>
+                onChange({ ...layer, peak: peak ?? layer.peak })
+              }
+            />
+          </div>
+
+          {layer.kind === "tone" ? (
+            <div className="grid grid-cols-2 gap-2">
+              <SelectField
+                label="Waveform"
+                value={layer.waveform}
+                options={WAVEFORMS}
+                onChange={(waveform) => setTone({ waveform })}
+              />
+              <NumberField
+                label="Frequency"
+                value={layer.frequency}
+                step={1}
+                min={20}
+                onChange={(frequency) =>
+                  setTone({ frequency: frequency ?? layer.frequency })
+                }
+              />
+              <NumberField
+                label="Detune"
+                value={layer.detune}
+                step={1}
+                onChange={(detune) => setTone({ detune })}
+              />
+              <NumberField
+                label="Glide to"
+                value={layer.glideTo}
+                step={1}
+                min={20}
+                onChange={(glideTo) => setTone({ glideTo })}
+              />
+              <NumberField
+                label="Glide time"
+                value={layer.glideTime}
+                step={0.001}
+                min={0}
+                onChange={(glideTime) => setTone({ glideTime })}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <SelectField
+                label="Filter"
+                value={layer.filterType}
+                options={FILTER_TYPES}
+                onChange={(filterType) => setNoise({ filterType })}
+              />
+              <NumberField
+                label="Filter Hz"
+                value={layer.filterFrequency}
+                step={1}
+                min={20}
+                onChange={(filterFrequency) =>
+                  setNoise({
+                    filterFrequency: filterFrequency ?? layer.filterFrequency,
+                  })
+                }
+              />
+              <NumberField
+                label="Filter Q"
+                value={layer.filterQ}
+                step={0.1}
+                min={0}
+                onChange={(filterQ) => setNoise({ filterQ })}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -438,105 +464,78 @@ export function SfxDashboard() {
   );
 
   return (
-    <div className="space-y-6 pb-16">
-      {muted && (
-        <p className="rounded-md border border-accent-bright/30 bg-accent-bright/10 px-3 py-2 text-sm text-on-surface">
-          Sound is muted. Use the metronome toggle above to unmute previews and
-          site cues.
-        </p>
-      )}
-
-      <div className="flex flex-wrap gap-2">
-        <button type="button" className={btnAccentClass} onClick={preview}>
-          Play preview
-        </button>
-        <button type="button" className={btnClass} onClick={createNew}>
-          New sound
-        </button>
-        <button type="button" className={btnClass} onClick={duplicateAsDraft}>
-          Duplicate
-        </button>
-        <button
-          type="button"
-          className={btnClass}
-          onClick={saveDraft}
-          disabled={!slugifyName(draftName)}
-        >
-          Save draft
-        </button>
-        {selection.kind === "builtin" && dirty && (
-          <button type="button" className={btnClass} onClick={resetBuiltin}>
-            Reset to builtin
+    <div className="pb-10">
+      <div className="sticky top-0 z-20 -mx-2 mb-4 border-b border-black/8 bg-[color-mix(in_oklch,var(--page-bg)_88%,transparent)] px-2 py-3 backdrop-blur-md supports-[backdrop-filter]:bg-[color-mix(in_oklch,var(--page-bg)_72%,transparent)]">
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" className={btnAccentClass} onClick={preview}>
+            Play preview
           </button>
-        )}
-        {selection.kind === "draft" && drafts[selection.name] && (
-          <button type="button" className={btnClass} onClick={deleteDraft}>
-            Delete draft
+          <button type="button" className={btnClass} onClick={createNew}>
+            New sound
           </button>
+          <button type="button" className={btnClass} onClick={duplicateAsDraft}>
+            Duplicate
+          </button>
+          <button
+            type="button"
+            className={btnClass}
+            onClick={saveDraft}
+            disabled={!slugifyName(draftName)}
+          >
+            Save draft
+          </button>
+          {selection.kind === "builtin" && dirty && (
+            <button type="button" className={btnClass} onClick={resetBuiltin}>
+              Reset to builtin
+            </button>
+          )}
+          {selection.kind === "draft" && drafts[selection.name] && (
+            <button type="button" className={btnClass} onClick={deleteDraft}>
+              Delete draft
+            </button>
+          )}
+          <button type="button" className={btnClass} onClick={copyTs}>
+            Copy as TypeScript
+          </button>
+        </div>
+        {(muted || copyStatus) && (
+          <div className="mt-2 space-y-1">
+            {muted && (
+              <p className="rounded-md border border-accent-bright/30 bg-accent-bright/10 px-3 py-1.5 text-xs text-on-surface">
+                Sound is muted. Use the speaker toggle to unmute previews.
+              </p>
+            )}
+            {copyStatus && (
+              <p className="text-xs text-subtle" role="status">
+                {copyStatus}
+                {dirty ? " · unsaved edits" : ""}
+              </p>
+            )}
+          </div>
         )}
-        <button type="button" className={btnClass} onClick={copyTs}>
-          Copy as TypeScript
-        </button>
       </div>
 
-      {copyStatus && (
-        <p className="text-xs text-subtle" role="status">
-          {copyStatus}
-          {dirty ? " · unsaved edits" : ""}
-        </p>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-[11rem_minmax(0,1fr)]">
-        <div className="space-y-4">
-          <section>
-            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-subtle">
-              Built-ins
-            </h2>
-            <ul className="space-y-1">
-              {sounds.map((name) => (
-                <li key={name}>
-                  <button
-                    type="button"
-                    className={cn(
-                      "flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
-                      selection.kind === "builtin" && selection.name === name
-                        ? "bg-accent-bright/15 text-accent-hover"
-                        : "hover:bg-elevated"
-                    )}
-                    onClick={() => {
-                      loadBuiltin(name);
-                      play(name);
-                    }}
-                  >
-                    <span className="font-medium">{name}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-subtle">
-              Drafts
-            </h2>
-            {draftNames.length === 0 ? (
-              <p className="text-xs text-subtle">No local drafts yet.</p>
-            ) : (
-              <ul className="space-y-1">
-                {draftNames.map((name) => (
+      <div className="grid items-start gap-6 md:grid-cols-[13.5rem_minmax(0,1fr)]">
+        <aside className="md:sticky md:top-[4.75rem] md:max-h-[calc(100dvh-5.5rem)] md:overflow-y-auto md:pr-1">
+          <div className="space-y-5">
+            <section>
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-subtle">
+                Built-ins
+              </h2>
+              <ul className="space-y-0.5">
+                {sounds.map((name) => (
                   <li key={name}>
                     <button
                       type="button"
                       className={cn(
                         "flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
-                        selection.kind === "draft" && selection.name === name
+                        selection.kind === "builtin" && selection.name === name
                           ? "bg-accent-bright/15 text-accent-hover"
                           : "hover:bg-elevated"
                       )}
                       onClick={() => {
-                        loadDraft(name);
-                        const draft = drafts[name];
-                        if (draft) playRecipe(draft.recipe);
+                        loadBuiltin(name);
+                        play(name);
                       }}
                     >
                       <span className="font-medium">{name}</span>
@@ -544,11 +543,43 @@ export function SfxDashboard() {
                   </li>
                 ))}
               </ul>
-            )}
-          </section>
-        </div>
+            </section>
 
-        <div className="space-y-4">
+            <section>
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-subtle">
+                Custom
+              </h2>
+              {draftNames.length === 0 ? (
+                <p className="px-2 text-xs text-subtle">No drafts yet.</p>
+              ) : (
+                <ul className="space-y-0.5">
+                  {draftNames.map((name) => (
+                    <li key={name}>
+                      <button
+                        type="button"
+                        className={cn(
+                          "flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                          selection.kind === "draft" && selection.name === name
+                            ? "bg-accent-bright/15 text-accent-hover"
+                            : "hover:bg-elevated"
+                        )}
+                        onClick={() => {
+                          loadDraft(name);
+                          const draft = drafts[name];
+                          if (draft) playRecipe(draft.recipe);
+                        }}
+                      >
+                        <span className="font-medium">{name}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+        </aside>
+
+        <div className="min-w-0 space-y-4">
           <div className="space-y-2">
             <label className="block">
               <span className={labelClass}>Name</span>
@@ -584,7 +615,7 @@ export function SfxDashboard() {
           />
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-subtle">
                 Layers
               </h3>
@@ -613,9 +644,10 @@ export function SfxDashboard() {
             </div>
             {recipe.layers.map((layer, index) => (
               <LayerEditor
-                key={index}
+                key={`${selection.kind}-${selection.name}-layer-${index}`}
                 layer={layer}
                 index={index}
+                defaultOpen={index === 0 || recipe.layers.length <= 2}
                 onChange={(nextLayer) => {
                   const layers = recipe.layers.slice();
                   layers[index] = nextLayer;
@@ -671,7 +703,7 @@ export function SfxDashboard() {
               )}
             </div>
             {recipe.shimmer && (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2">
                 <NumberField
                   label="Delay"
                   value={recipe.shimmer.delay}
@@ -741,7 +773,10 @@ export function SfxDashboard() {
           <label className="block">
             <span className={labelClass}>TypeScript export</span>
             <textarea
-              className={cn(fieldClass, "min-h-40 font-mono text-[11px] leading-relaxed")}
+              className={cn(
+                fieldClass,
+                "min-h-32 font-mono text-[11px] leading-relaxed"
+              )}
               readOnly
               value={tsSnippet}
               spellCheck={false}

@@ -16,19 +16,18 @@ export const metadata: Metadata = {
 
 export default function SfxPage() {
   return (
-    <div className="flex h-full flex-col px-8 pt-8">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
+    <div className="relative left-1/2 w-screen max-w-[64rem] -translate-x-1/2 px-4 pb-8 pt-6 sm:px-6">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wide text-subtle">
             Lab
           </p>
           <h1 className="font-instrument text-3xl tracking-tight text-on-surface">
             sfx
           </h1>
-          <p className="mt-2 max-w-prose text-sm text-on-surface-muted">
-            Browse built-in interaction sounds, tweak recipes live, and save
-            drafts locally. Copy a TypeScript snippet into{" "}
-            <code>src/lib/sfx/sounds/recipes.ts</code> to ship a new builtin.
+          <p className="mt-1 max-w-2xl text-sm text-on-surface-muted">
+            Pick a sound on the left, tweak layers on the right. Play stays
+            sticky while you edit.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
