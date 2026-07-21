@@ -9,7 +9,8 @@ export async function GET() {
     const data = await getSpotifyData();
     return NextResponse.json(data, {
       headers: {
-        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=30",
+        // Keep this private so CDN/browsers don't serve stale auth failures.
+        "Cache-Control": "private, max-age=0, s-maxage=0, must-revalidate",
       },
     });
   } catch (error) {
@@ -17,7 +18,12 @@ export async function GET() {
     console.error("Spotify API error:", message);
     return NextResponse.json(
       { error: "Failed to fetch Spotify data", detail: message },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
     );
   }
 }
