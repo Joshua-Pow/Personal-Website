@@ -5,6 +5,7 @@ import "./globals.css";
 import { ProgressiveBlur } from "@/components/ProgressiveBlur";
 import { EdgeBorderEffect } from "@/components/EdgeBorderEffect";
 import { MotionProvider } from "@/components/motion/MotionProvider";
+import { SfxProvider } from "@/components/SfxProvider";
 import { Footer } from "@/components/Footer";
 import {
   SITE_DESCRIPTION,
@@ -80,24 +81,26 @@ export default function RootLayout({
             Skip to main content
           </a>
           <MotionProvider>
-            <EdgeBorderEffect
-              blurSlot={
-                <ProgressiveBlur
-                  height="12%"
-                  blurLevels={[0.5, 1, 2, 4, 8, 16, 32, 64]}
-                />
-              }
-            >
-              <div className="relative mx-auto flex min-h-full max-w-screen-sm flex-col justify-between">
-                <main
-                  id="main-content"
-                  className="relative flex w-full flex-grow flex-col scroll-mt-4"
-                >
-                  {children}
-                </main>
-                <Footer />
-              </div>
-            </EdgeBorderEffect>
+            <SfxProvider>
+              <EdgeBorderEffect
+                blurSlot={
+                  <ProgressiveBlur
+                    height="12%"
+                    blurLevels={[0.5, 1, 2, 4, 8, 16, 32, 64]}
+                  />
+                }
+              >
+                <div className="relative mx-auto flex min-h-full max-w-screen-sm flex-col justify-between">
+                  <main
+                    id="main-content"
+                    className="relative flex w-full flex-grow flex-col scroll-mt-4"
+                  >
+                    {children}
+                  </main>
+                  <Footer />
+                </div>
+              </EdgeBorderEffect>
+            </SfxProvider>
           </MotionProvider>
         </body>
       </html>

@@ -133,6 +133,7 @@ export function TickSoundToggle() {
       onClick={toggleTickSoundMuted}
       aria-label={muted ? "Unmute counter ticking" : "Mute counter ticking"}
       aria-pressed={muted}
+      data-sfx-toggle
       className={cn(
         "group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10",
         "text-on-surface-muted transition-[color,transform] duration-150 ease-out",

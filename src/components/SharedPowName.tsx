@@ -95,7 +95,13 @@ function HeaderName() {
 
 function BackLinkName() {
   return (
-    <Link href="/" className="inline-block rounded-sm">
+    <Link
+      href="/"
+      className="inline-block rounded-sm"
+      data-sfx-hover="tick"
+      data-sfx-press
+      data-sfx-release
+    >
       <PowNameLabel color={NAME_COLORS.backLink} />
     </Link>
   );

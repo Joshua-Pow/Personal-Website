@@ -48,6 +48,9 @@ export function LinkPreviewPopover({
             whileTap={{ scale: 0.98 }}
             transition={{ duration: durations.fast }}
             className={className}
+            data-sfx-hover="tick"
+            data-sfx-press
+            data-sfx-release
           />
         }
       >

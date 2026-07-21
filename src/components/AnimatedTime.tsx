@@ -3,6 +3,7 @@
 import React, { useEffect, useSyncExternalStore, useState, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { easeOut } from "@/lib/motion";
+import { play } from "@/lib/sfx";
 import {
   getTickSoundMutedServerSnapshot,
   getTickSoundMutedSnapshot,
@@ -14,17 +15,14 @@ interface Props {
   graduationDate: Date;
 }
 
-function playTickSequence(
-  audioRef: React.RefObject<HTMLAudioElement | null>,
-  count: number
-) {
+function playTickSequence(count: number) {
   let tickCount = 0;
   const interval = setInterval(() => {
     if (tickCount >= count) {
       clearInterval(interval);
       return;
     }
-    audioRef.current?.play().catch(() => {});
+    play("tick");
     tickCount++;
   }, 50);
 }
@@ -72,7 +70,6 @@ function AnimatedTime({ graduationDate }: Props) {
     seconds: 0,
   });
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const prevTimeRef = useRef(timeElapsed);
   const isVisibleRef = useRef(true);
   const isMuted = useSyncExternalStore(
@@ -88,9 +85,6 @@ function AnimatedTime({ graduationDate }: Props) {
   }, [isMuted]);
 
   useEffect(() => {
-    audioRef.current = new Audio("./click.wav");
-    audioRef.current.volume = 0.05;
-
     const handleVisibilityChange = () => {
       isVisibleRef.current = !document.hidden;
     };
@@ -121,7 +115,7 @@ function AnimatedTime({ graduationDate }: Props) {
             prevTimeRef.current[unit as keyof typeof timeElapsed];
           if (value !== prevValue) {
             const difference = Math.abs(value - prevValue);
-            playTickSequence(audioRef, Math.min(difference + 2, 8));
+            playTickSequence(Math.min(difference + 2, 8));
           }
         });
       }
@@ -136,7 +130,6 @@ function AnimatedTime({ graduationDate }: Props) {
     return () => {
       stopAlignedTicks();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      audioRef.current?.remove();
     };
   }, [graduationDate, reducedMotion]);
 
