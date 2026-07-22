@@ -51,8 +51,8 @@ const FILTER_TYPES: BiquadFilterType[] = [
 ];
 
 const fieldClass =
-  "sfx-lab-field min-h-11 w-full px-2.5 py-2 text-base focus:outline-none sm:min-h-0 sm:py-1.5";
-const labelClass = "sfx-lab-label mb-1.5 block";
+  "sfx-lab-field min-h-10 w-full px-2.5 py-1.5 text-sm focus:outline-none sm:min-h-0 sm:py-1.5";
+const labelClass = "sfx-lab-label mb-1 block";
 const btnClass =
   "sfx-lab-btn inline-flex min-h-9 items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-gold)_45%,transparent)] disabled:cursor-not-allowed sm:min-h-0 sm:px-3.5";
 const btnAccentClass =
@@ -172,7 +172,7 @@ function SoundChip({ active, label, onSelect }: SoundChipProps) {
     <motion.button
       type="button"
       className={cn(
-        "sfx-lab-sound flex min-h-11 w-full items-center justify-between gap-2 px-2.5 py-2 text-left sm:min-h-0 sm:py-1.5",
+        "sfx-lab-sound flex min-h-10 w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left sm:min-h-0",
         active && "sfx-lab-sound-active"
       )}
       whileHover={reducedMotion ? undefined : { x: 2, scale: 1.01 }}

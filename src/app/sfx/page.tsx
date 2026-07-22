@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { SharedPowName } from "@/components/SharedPowName";
 import { TickSoundToggle } from "@/components/TickSoundToggle";
 import { SfxDashboard } from "@/components/sfx/SfxDashboard";
@@ -12,6 +12,18 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/sfx",
   },
+};
+
+/**
+ * Temporary lab surface: allow field text under 16px without iOS focus-zoom.
+ * WebKit still permits pinch-zoom; keep this off the main site (a11y).
+ * @see https://x.com/jakubkrehel/status/2077039409896030680
+ */
+export const viewport: Viewport = {
+  themeColor: "#FFF8F4",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function SfxPage() {
@@ -29,7 +41,7 @@ export default function SfxPage() {
               </p>
               <h1
                 id="sfx-lab-title"
-                className="sfx-lab-title font-instrument text-3xl tracking-tight sm:text-4xl"
+                className="sfx-lab-title font-instrument text-2xl tracking-tight sm:text-3xl"
               >
                 sfx
               </h1>
@@ -39,8 +51,8 @@ export default function SfxPage() {
               <SharedPowName variant="back-link" color="var(--sfx-ink)" />
             </div>
           </div>
-          <div className="sfx-lab-path mt-3 max-w-[12rem]" aria-hidden />
-          <p className="sfx-lab-lede mt-3 max-w-prose text-pretty text-sm leading-relaxed tracking-tight">
+          <div className="sfx-lab-path mt-2.5 max-w-[10rem]" aria-hidden />
+          <p className="sfx-lab-lede mt-2.5 max-w-prose text-pretty text-xs leading-relaxed tracking-tight sm:text-[0.8125rem]">
             A small sound atelier — pick a voice on the left, paint layers on
             the right. Preview stays within reach while you work.
           </p>
