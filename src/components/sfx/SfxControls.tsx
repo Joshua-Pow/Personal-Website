@@ -31,7 +31,13 @@ export function SliderField({
     <label className="sfx-lab-slider block">
       <span className="mb-1 flex items-baseline justify-between gap-2">
         <span className="sfx-lab-label mb-0">{label}</span>
-        <AnimatedMetric value={value} format={format} widthCh={widthCh} />
+        <AnimatedMetric
+          value={value}
+          format={format}
+          widthCh={widthCh}
+          min={min}
+          max={max}
+        />
       </span>
       <input
         type="range"

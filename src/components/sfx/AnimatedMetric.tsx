@@ -16,6 +16,9 @@ type AnimatedMetricProps = {
   format: (value: number) => string;
   /** Reserve a fixed slot so digit-count changes never shove the layout. */
   widthCh: number;
+  /** Clamp spring overshoot to the slider's legal range. */
+  min?: number;
+  max?: number;
   className?: string;
 };
 
@@ -27,9 +30,10 @@ const DIGIT_SPRING = {
 };
 
 const VALUE_SPRING = {
-  stiffness: 480,
-  damping: 42,
-  mass: 0.2,
+  // Critically-ish damped so readouts ease without overshooting past the thumb.
+  stiffness: 420,
+  damping: 48,
+  mass: 0.22,
 };
 
 /**
@@ -46,6 +50,8 @@ export function AnimatedMetric({
   value,
   format,
   widthCh,
+  min,
+  max,
   className,
 }: AnimatedMetricProps) {
   const reducedMotion = useReducedMotion();
@@ -67,7 +73,10 @@ export function AnimatedMetric({
     setSprung(latest);
   });
 
-  const display = reducedMotion ? value : sprung;
+  const raw = reducedMotion ? value : sprung;
+  const lo = min ?? Number.NEGATIVE_INFINITY;
+  const hi = max ?? Number.POSITIVE_INFINITY;
+  const display = Math.min(hi, Math.max(lo, raw));
   const text = format(display);
   // Right-align inside a fixed slot with figure spaces.
   const chars = text.padStart(widthCh, "\u2007").slice(-widthCh).split("");
