@@ -294,6 +294,14 @@ code {
     font-size: 0.75rem;
     letter-spacing: 0.01em;
   }
+
+  /* Icon-only controls keep a square hit target */
+  .sfx-lab-btn.size-9,
+  .sfx-lab-btn.size-8 {
+    width: 2.25rem;
+    min-height: 2.25rem;
+    padding: 0;
+  }
 }
 
 .sfx-lab-btn {

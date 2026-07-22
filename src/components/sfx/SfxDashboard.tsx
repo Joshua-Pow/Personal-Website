@@ -54,9 +54,11 @@ const fieldClass =
   "sfx-lab-field min-h-11 w-full px-2.5 py-2 text-base focus:outline-none sm:min-h-0 sm:py-1.5";
 const labelClass = "sfx-lab-label mb-1.5 block";
 const btnClass =
-  "sfx-lab-btn min-h-9 px-3 py-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-gold)_45%,transparent)] disabled:cursor-not-allowed sm:min-h-0 sm:px-3.5";
+  "sfx-lab-btn inline-flex min-h-9 items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-gold)_45%,transparent)] disabled:cursor-not-allowed sm:min-h-0 sm:px-3.5";
 const btnAccentClass =
-  "sfx-lab-btn-play min-h-9 px-3.5 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-poppy)_40%,transparent)] sm:min-h-0 sm:px-4";
+  "sfx-lab-btn-play inline-flex min-h-9 items-center justify-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-poppy)_40%,transparent)] sm:min-h-0 sm:px-4";
+const btnIconClass =
+  "sfx-lab-btn inline-flex size-9 shrink-0 items-center justify-center p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-gold)_45%,transparent)] disabled:cursor-not-allowed sm:size-8";
 
 /** Snappy UI spring — interruptible hover/press feedback (100–250ms feel). */
 const tapSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
@@ -65,6 +67,43 @@ const chevronSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
 const panelEase = [0.16, 1, 0.3, 1] as const;
 /** Layout reflow for list/toolbar membership changes. */
 const layoutSpring = { type: "spring" as const, stiffness: 420, damping: 32 };
+
+function IconPlus({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden
+      className={cn("size-3.5", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+function IconTrash({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden
+      className={cn("size-3.5", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 7h16" />
+      <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+      <path d="M6.5 7l.8 12.2A1.5 1.5 0 0 0 8.8 21h6.4a1.5 1.5 0 0 0 1.5-1.8L17.5 7" />
+      <path d="M10 11v6M14 11v6" />
+    </svg>
+  );
+}
 
 function slugifyName(value: string): string {
   return value
@@ -76,7 +115,7 @@ function slugifyName(value: string): string {
 }
 
 type LabButtonProps = Omit<ComponentProps<typeof motion.button>, "children"> & {
-  variant?: "secondary" | "play";
+  variant?: "secondary" | "play" | "icon";
   children: React.ReactNode;
 };
 
@@ -90,17 +129,26 @@ function LabButton({
 }: LabButtonProps) {
   const reducedMotion = useReducedMotion();
   const inert = Boolean(disabled || reducedMotion);
+  const variantClass =
+    variant === "play"
+      ? btnAccentClass
+      : variant === "icon"
+        ? btnIconClass
+        : btnClass;
 
   return (
     <motion.button
       {...props}
       type="button"
       disabled={disabled}
-      className={cn(
-        variant === "play" ? btnAccentClass : btnClass,
-        className
-      )}
-      whileHover={inert ? undefined : { y: -1.5, scale: 1.03 }}
+      className={cn(variantClass, className)}
+      whileHover={
+        inert
+          ? undefined
+          : variant === "icon"
+            ? { scale: 1.04 }
+            : { y: -1.5, scale: 1.03 }
+      }
       whileTap={inert ? undefined : { y: 0, scale: 0.96 }}
       transition={transition ? { ...tapSpring, ...transition } : tapSpring}
       data-sfx-press
@@ -212,12 +260,14 @@ function LayerEditor({
   index,
   onChange,
   onRemove,
+  removeDisabled = false,
   defaultOpen = true,
 }: {
   layer: SoundLayer;
   index: number;
   onChange: (layer: SoundLayer) => void;
   onRemove: () => void;
+  removeDisabled?: boolean;
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -276,7 +326,15 @@ function LayerEditor({
             {summary}
           </span>
         </motion.button>
-        <LabButton onClick={onRemove}>Remove</LabButton>
+        <LabButton
+          variant="icon"
+          onClick={onRemove}
+          disabled={removeDisabled}
+          aria-label={`Remove layer ${index + 1}`}
+          title="Remove layer"
+        >
+          <IconTrash />
+        </LabButton>
       </div>
 
       <AnimatePresence initial={false}>
@@ -893,6 +951,7 @@ export function SfxDashboard() {
                 Layers
               </h3>
               <LabButton
+                aria-label="Add layer"
                 onClick={() =>
                   updateRecipe({
                     ...recipe,
@@ -910,7 +969,8 @@ export function SfxDashboard() {
                   })
                 }
               >
-                Add layer
+                <IconPlus />
+                <span>Add</span>
               </LabButton>
             </div>
             {/* Remount Presence per selection so switching sounds doesn't parade enters */}
@@ -955,6 +1015,7 @@ export function SfxDashboard() {
                       layer={layer}
                       index={index}
                       defaultOpen={index === 0 || recipe.layers.length <= 2}
+                      removeDisabled={recipe.layers.length <= 1}
                       onChange={(nextLayer) => {
                         const layers = recipe.layers.slice();
                         layers[index] = nextLayer;
@@ -981,6 +1042,9 @@ export function SfxDashboard() {
               </h3>
               {recipe.shimmer ? (
                 <LabButton
+                  variant="icon"
+                  aria-label="Remove shimmer"
+                  title="Remove shimmer"
                   onClick={() => {
                     updateRecipe({
                       masterGain: recipe.masterGain,
@@ -988,10 +1052,11 @@ export function SfxDashboard() {
                     });
                   }}
                 >
-                  Remove
+                  <IconTrash />
                 </LabButton>
               ) : (
                 <LabButton
+                  aria-label="Add shimmer"
                   onClick={() =>
                     updateRecipe({
                       ...recipe,
@@ -1004,7 +1069,8 @@ export function SfxDashboard() {
                     })
                   }
                 >
-                  Add shimmer
+                  <IconPlus />
+                  <span>Add</span>
                 </LabButton>
               )}
             </div>
