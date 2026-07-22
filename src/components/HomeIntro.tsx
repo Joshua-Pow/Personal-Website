@@ -11,6 +11,12 @@ const tapLinkClassName = cn(
   "inline-block transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none"
 );
 
+const navSfxProps = {
+  "data-sfx-hover": "tick",
+  "data-sfx-press": true,
+  "data-sfx-release": true,
+} as const;
+
 export function HomeIntro() {
   return (
     <RevealStagger className="space-y-4 text-left leading-relaxed tracking-tighter">
@@ -35,7 +41,7 @@ export function HomeIntro() {
 
       <p className="text-pretty">
         Since then, I&apos;ve been{" "}
-        <Link href="/history" className={tapLinkClassName}>
+        <Link href="/history" className={tapLinkClassName} {...navSfxProps}>
           working
         </Link>{" "}
         at{" "}
@@ -74,7 +80,7 @@ export function HomeIntro() {
           definition="Short, memorable statements of truth or wisdom, often passed down rather than authored."
         />{" "}
         that survive scrutiny end up in my{" "}
-        <Link href="/adages" className={tapLinkClassName}>
+        <Link href="/adages" className={tapLinkClassName} {...navSfxProps}>
           adages
         </Link>
         .

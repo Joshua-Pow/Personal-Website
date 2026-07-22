@@ -86,6 +86,7 @@ function HeaderName() {
       <span
         className="vt-pow group relative inline-block overflow-hidden whitespace-nowrap font-medium"
         style={{ color: NAME_COLORS.header }}
+        data-sfx-hover="sparkle"
       >
         <LetterScrollName />
       </span>
@@ -93,18 +94,26 @@ function HeaderName() {
   );
 }
 
-function BackLinkName() {
+function BackLinkName({ color }: { color?: string }) {
   return (
-    <Link href="/" className="inline-block rounded-sm">
-      <PowNameLabel color={NAME_COLORS.backLink} />
+    <Link
+      href="/"
+      className="inline-block rounded-sm"
+      data-sfx-hover="tick"
+      data-sfx-press
+      data-sfx-release
+    >
+      <PowNameLabel color={color ?? NAME_COLORS.backLink} />
     </Link>
   );
 }
 
 type SharedPowNameProps = {
   variant: "header" | "back-link";
+  /** Override label color (back-link only). Useful on tinted surfaces. */
+  color?: string;
 };
 
-export function SharedPowName({ variant }: SharedPowNameProps) {
-  return variant === "header" ? <HeaderName /> : <BackLinkName />;
+export function SharedPowName({ variant, color }: SharedPowNameProps) {
+  return variant === "header" ? <HeaderName /> : <BackLinkName color={color} />;
 }

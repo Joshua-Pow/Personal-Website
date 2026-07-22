@@ -1,13 +1,6 @@
 const TICK_SOUND_MUTED_KEY = "counter-tick-muted";
 const tickSoundListeners = new Set<() => void>();
 
-export const METRONOME_SWING = 22;
-export const PIVOT = { x: 12, y: 17.75 };
-
-export function getMetronomeAngle(timestamp = Date.now()) {
-  return -METRONOME_SWING * Math.cos((Math.PI * timestamp) / 1000);
-}
-
 export function subscribeAlignedSecondTick(listener: () => void) {
   if (typeof window === "undefined") {
     return () => {};

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Popover } from "@base-ui/react/popover";
 import { motion } from "motion/react";
+import { Link } from "next-view-transitions";
 import { durations } from "@/lib/motion";
 import { LinkPreviewPanel } from "@/components/link-preview/LinkPreviewPanel";
 import { isBareEmbedPreview } from "@/components/link-preview/layouts";
@@ -24,6 +25,8 @@ const links: FooterLink[] = [
   { href: "https://github.com/joshua-pow", label: "github" },
   { href: "https://linkedin.com/in/joshuapow", label: "linkedin" },
 ];
+
+const localLinks = [{ href: "/sfx", label: "sfx" }] as const;
 
 const footerPopover = Popover.createHandle<FooterLink>();
 
@@ -171,6 +174,9 @@ export function Footer() {
                   "focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
                   "data-kbd-focus:focus-visible:ring-2 data-kbd-focus:focus-visible:ring-accent-bright data-kbd-focus:focus-visible:ring-offset-2 data-kbd-focus:focus-visible:ring-offset-surface-offset"
                 )}
+                data-sfx-hover="tick"
+                data-sfx-press
+                data-sfx-release
                 onMouseEnter={() => handleLinkEnter(link)}
                 onMouseLeave={(event) => event.currentTarget.blur()}
                 onFocus={(event) => {
@@ -189,6 +195,18 @@ export function Footer() {
           >
             {link.label}
           </Popover.Trigger>
+        ))}
+        {localLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={interactiveMuted("rounded-sm px-2 py-1")}
+            data-sfx-hover="tick"
+            data-sfx-press
+            data-sfx-release
+          >
+            {link.label}
+          </Link>
         ))}
       </div>
 

@@ -2,7 +2,8 @@
 
 import React, { useEffect, useSyncExternalStore, useState, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { easeOut } from "@/lib/motion";
+import { playRecipe, RECIPES } from "@/lib/sfx";
+import type { SoundRecipe } from "@/lib/sfx";
 import {
   getTickSoundMutedServerSnapshot,
   getTickSoundMutedSnapshot,
@@ -14,27 +15,93 @@ interface Props {
   graduationDate: Date;
 }
 
-function playTickSequence(
-  audioRef: React.RefObject<HTMLAudioElement | null>,
-  count: number
-) {
-  let tickCount = 0;
-  const interval = setInterval(() => {
-    if (tickCount >= count) {
-      clearInterval(interval);
-      return;
+type TimeElapsed = {
+  years: number;
+  months: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+/** Least-significant unit first so rollovers cascade like a flip board. */
+const FLIP_UNITS = [
+  "seconds",
+  "minutes",
+  "hours",
+  "days",
+  "months",
+  "years",
+] as const;
+
+/** Springy reel: snappy start, soft settle. */
+const digitSpring = {
+  type: "spring" as const,
+  stiffness: 380,
+  damping: 26,
+  mass: 0.7,
+};
+
+/**
+ * Cascade window for multi-digit rollovers. Long enough that each click
+ * reads as its own flip-board hit (fast → slow).
+ */
+const ROLLOVER_MS = 560;
+
+/** Punchier than stock toggle so stacked flips stay audible. */
+const FLIP_CLICK: SoundRecipe = {
+  ...RECIPES.toggle,
+  masterGain: RECIPES.toggle.masterGain * 1.55,
+};
+
+type DigitFlip = {
+  key: string;
+  unit: (typeof FLIP_UNITS)[number];
+  index: number;
+};
+
+/**
+ * Ease-in stagger: early flips close together, later ones breathe —
+ * fast start, slow down into the final click. Keep a usable gap so
+ * stacked toggle hits don’t smear into one sound.
+ */
+function cascadeDelayMs(index: number, count: number): number {
+  if (count <= 1) return 0;
+  const t = index / (count - 1);
+  return ROLLOVER_MS * t * t;
+}
+
+function playFlipClick() {
+  playRecipe(FLIP_CLICK);
+}
+
+/** Digits that changed, ordered ones→tens within each unit, seconds→years. */
+function collectDigitFlips(prev: TimeElapsed, next: TimeElapsed): DigitFlip[] {
+  const flips: DigitFlip[] = [];
+
+  for (const unit of FLIP_UNITS) {
+    const prevDigits = prev[unit].toString().padStart(2, "0");
+    const nextDigits = next[unit].toString().padStart(2, "0");
+    if (prevDigits === nextDigits) continue;
+
+    for (let index = nextDigits.length - 1; index >= 0; index -= 1) {
+      if (prevDigits[index] !== nextDigits[index]) {
+        flips.push({ key: `${unit}-${index}`, unit, index });
+      }
     }
-    audioRef.current?.play().catch(() => {});
-    tickCount++;
-  }, 50);
+  }
+
+  return flips;
 }
 
 function DigitColumn({
   digit,
   reducedMotion,
+  delay = 0,
 }: {
   digit: number;
   reducedMotion: boolean;
+  delay?: number;
 }) {
   return (
     <span className="relative h-6 w-3 overflow-hidden sm:h-8 sm:w-4">
@@ -46,7 +113,7 @@ function DigitColumn({
         <motion.span
           className="absolute left-0 flex flex-col"
           animate={{ y: `-${digit * 10}%` }}
-          transition={{ duration: 0.28, ease: easeOut }}
+          transition={{ ...digitSpring, delay }}
         >
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
             <span
@@ -63,7 +130,7 @@ function DigitColumn({
 }
 
 function AnimatedTime({ graduationDate }: Props) {
-  const [timeElapsed, setTimeElapsed] = useState({
+  const [timeElapsed, setTimeElapsed] = useState<TimeElapsed>({
     years: 0,
     months: 0,
     days: 0,
@@ -71,10 +138,12 @@ function AnimatedTime({ graduationDate }: Props) {
     minutes: 0,
     seconds: 0,
   });
+  const [flipDelays, setFlipDelays] = useState<Record<string, number>>({});
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const prevTimeRef = useRef(timeElapsed);
+  const hasTickedRef = useRef(false);
   const isVisibleRef = useRef(true);
+  const soundTimeoutsRef = useRef<number[]>([]);
   const isMuted = useSyncExternalStore(
     subscribeTickSoundMuted,
     getTickSoundMutedSnapshot,
@@ -88,8 +157,10 @@ function AnimatedTime({ graduationDate }: Props) {
   }, [isMuted]);
 
   useEffect(() => {
-    audioRef.current = new Audio("./click.wav");
-    audioRef.current.volume = 0.05;
+    const clearSoundTimeouts = () => {
+      soundTimeoutsRef.current.forEach((id) => window.clearTimeout(id));
+      soundTimeoutsRef.current = [];
+    };
 
     const handleVisibilityChange = () => {
       isVisibleRef.current = !document.hidden;
@@ -102,7 +173,7 @@ function AnimatedTime({ graduationDate }: Props) {
       const now = new Date();
       const diff = now.getTime() - graduationDate.getTime();
 
-      const newTimeElapsed = {
+      const newTimeElapsed: TimeElapsed = {
         years: Math.floor(diff / (1000 * 60 * 60 * 24 * 365)),
         months: Math.floor(
           (diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30)
@@ -115,17 +186,37 @@ function AnimatedTime({ graduationDate }: Props) {
         seconds: Math.floor((diff % (1000 * 60)) / 1000),
       };
 
-      if (isVisibleRef.current && !reducedMotion && !isMutedRef.current) {
-        Object.entries(newTimeElapsed).forEach(([unit, value]) => {
-          const prevValue =
-            prevTimeRef.current[unit as keyof typeof timeElapsed];
-          if (value !== prevValue) {
-            const difference = Math.abs(value - prevValue);
-            playTickSequence(audioRef, Math.min(difference + 2, 8));
+      const flips = collectDigitFlips(prevTimeRef.current, newTimeElapsed);
+      clearSoundTimeouts();
+
+      // Animation can respect reduced motion; clicks still fire when unmuted.
+      if (hasTickedRef.current && flips.length > 0 && isVisibleRef.current) {
+        const delays: Record<string, number> = {};
+
+        flips.forEach((flip, index) => {
+          const delayMs = reducedMotion
+            ? 0
+            : cascadeDelayMs(index, flips.length);
+          delays[flip.key] = delayMs / 1000;
+
+          if (!isMutedRef.current) {
+            if (delayMs <= 0) {
+              playFlipClick();
+            } else {
+              const timeoutId = window.setTimeout(() => {
+                playFlipClick();
+              }, delayMs);
+              soundTimeoutsRef.current.push(timeoutId);
+            }
           }
         });
+
+        setFlipDelays(reducedMotion ? {} : delays);
+      } else {
+        setFlipDelays({});
       }
 
+      hasTickedRef.current = true;
       prevTimeRef.current = newTimeElapsed;
       setTimeElapsed(newTimeElapsed);
     };
@@ -135,8 +226,8 @@ function AnimatedTime({ graduationDate }: Props) {
 
     return () => {
       stopAlignedTicks();
+      clearSoundTimeouts();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      audioRef.current?.remove();
     };
   }, [graduationDate, reducedMotion]);
 
@@ -156,13 +247,17 @@ function AnimatedTime({ graduationDate }: Props) {
                   .toString()
                   .padStart(2, "0")
                   .split("")
-                  .map((digit, idx) => (
-                    <DigitColumn
-                      key={`${unit}-${idx}`}
-                      digit={parseInt(digit, 10)}
-                      reducedMotion={reducedMotion ?? false}
-                    />
-                  ))}
+                  .map((digit, idx) => {
+                    const key = `${unit}-${idx}`;
+                    return (
+                      <DigitColumn
+                        key={key}
+                        digit={parseInt(digit, 10)}
+                        reducedMotion={reducedMotion ?? false}
+                        delay={flipDelays[key] ?? 0}
+                      />
+                    );
+                  })}
               </span>
             </span>
             <span className="mt-1 text-[8px] sm:text-xs">{unit}</span>
