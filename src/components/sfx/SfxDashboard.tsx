@@ -7,7 +7,12 @@ import {
   useSyncExternalStore,
   type ComponentProps,
 } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  type Transition,
+} from "motion/react";
 import {
   RECIPES,
   SOUND_BLURBS,
@@ -63,6 +68,30 @@ const chevronSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
 const panelEase = [0.16, 1, 0.3, 1] as const;
 /** Layout reflow for list/toolbar membership changes. */
 const layoutSpring = { type: "spring" as const, stiffness: 420, damping: 32 };
+/**
+ * Expand/collapse size motion — spring so rapid open/close retargets instead of
+ * restarting a timed height tween from 0 (review-animations: interruptibility).
+ */
+const collapseSpring = {
+  type: "spring" as const,
+  stiffness: 420,
+  damping: 36,
+  mass: 0.32,
+} as const;
+
+function collapseTransition(reduced: boolean | null): Transition {
+  if (reduced) {
+    return { duration: durations.fast, ease: panelEase };
+  }
+  return {
+    height: collapseSpring,
+    opacity: { duration: durations.ui, ease: panelEase },
+  };
+}
+
+function newLayerKey(): string {
+  return `ly-${Math.random().toString(36).slice(2, 10)}`;
+}
 
 function IconPlus({ className }: { className?: string }) {
   return (
@@ -241,14 +270,35 @@ const FILTER_OPTIONS = [
   { value: "notch" as const, title: "Notch", cue: "Hollow cut" },
 ];
 
+/** Always `N.NNNs` — never switches to `ms`, so width stays constant while dragging. */
 function formatSeconds(value: number): string {
-  if (value < 0.01) return `${Math.round(value * 1000)}ms`;
-  if (value < 1) return `${value.toFixed(3).replace(/0+$/, "").replace(/\.$/, "")}s`;
-  return `${value.toFixed(2)}s`;
+  return `${value.toFixed(3)}s`;
 }
 
+/** Fixed 5-digit Hz body (`  200Hz` … `10000Hz`) using figure spaces. */
 function formatHz(value: number): string {
-  return `${Math.round(value)}Hz`;
+  return `${Math.round(value).toString().padStart(5, "\u2007")}Hz`;
+}
+
+function formatGain(value: number): string {
+  return value.toFixed(2);
+}
+
+function formatPeak(value: number): string {
+  return value.toFixed(3);
+}
+
+/** Always three glyphs before ¢: `+40¢`, `-08¢`, `·00¢`. */
+function formatCents(value: number): string {
+  const rounded = Math.round(value);
+  const body = Math.abs(rounded).toString().padStart(2, "0");
+  if (rounded > 0) return `+${body}¢`;
+  if (rounded < 0) return `-${body}¢`;
+  return `\u2007${body}¢`;
+}
+
+function formatQ(value: number): string {
+  return value.toFixed(1).padStart(4, "\u2007");
 }
 
 function LayerEditor({
@@ -338,15 +388,19 @@ function LayerEditor({
           <motion.div
             key="layer-body"
             initial={
-              reducedMotion ? false : { height: 0, opacity: 0 }
+              reducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }
             }
-            animate={{ height: "auto", opacity: 1 }}
+            animate={
+              reducedMotion
+                ? { opacity: 1 }
+                : { height: "auto", opacity: 1 }
+            }
             exit={
               reducedMotion
-                ? undefined
+                ? { opacity: 0 }
                 : { height: 0, opacity: 0 }
             }
-            transition={{ duration: 0.2, ease: panelEase }}
+            transition={collapseTransition(reducedMotion)}
             className="overflow-hidden"
           >
             <div className="space-y-4 border-t border-[var(--sfx-stroke)] px-3 py-3">
@@ -391,6 +445,7 @@ function LayerEditor({
                   max={0.4}
                   step={0.001}
                   format={formatSeconds}
+                  valueWidthCh={6}
                   onChange={(offset) =>
                     onChange({
                       ...layer,
@@ -406,6 +461,7 @@ function LayerEditor({
                   max={0.4}
                   step={0.001}
                   format={formatSeconds}
+                  valueWidthCh={6}
                   onChange={(attack) => onChange({ ...layer, attack })}
                 />
                 <SliderField
@@ -416,6 +472,7 @@ function LayerEditor({
                   max={0.8}
                   step={0.001}
                   format={formatSeconds}
+                  valueWidthCh={6}
                   onChange={(decay) => onChange({ ...layer, decay })}
                 />
                 <SliderField
@@ -425,7 +482,8 @@ function LayerEditor({
                   min={0.01}
                   max={0.3}
                   step={0.001}
-                  format={(n) => n.toFixed(3)}
+                  format={formatPeak}
+                  valueWidthCh={5}
                   onChange={(peak) => onChange({ ...layer, peak })}
                 />
               </div>
@@ -448,6 +506,7 @@ function LayerEditor({
                       max={3200}
                       step={1}
                       format={formatHz}
+                      valueWidthCh={7}
                       onChange={(frequency) => setTone({ frequency })}
                     />
                     <SliderField
@@ -457,7 +516,8 @@ function LayerEditor({
                       min={-40}
                       max={40}
                       step={1}
-                      format={(n) => `${n > 0 ? "+" : ""}${n}¢`}
+                      format={formatCents}
+                      valueWidthCh={4}
                       onChange={(detune) =>
                         setTone({ detune: detune === 0 ? undefined : detune })
                       }
@@ -482,30 +542,55 @@ function LayerEditor({
                       }
                     }}
                   />
-                  {layer.glideTo !== undefined && (
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <SliderField
-                        label="Glide to"
-                        hint="Where the pitch slides."
-                        value={layer.glideTo}
-                        min={80}
-                        max={3200}
-                        step={1}
-                        format={formatHz}
-                        onChange={(glideTo) => setTone({ glideTo })}
-                      />
-                      <SliderField
-                        label="Glide time"
-                        hint="How long the slide takes."
-                        value={layer.glideTime ?? 0.12}
-                        min={0.01}
-                        max={0.5}
-                        step={0.001}
-                        format={formatSeconds}
-                        onChange={(glideTime) => setTone({ glideTime })}
-                      />
-                    </div>
-                  )}
+                  <AnimatePresence initial={false}>
+                    {layer.glideTo !== undefined ? (
+                      <motion.div
+                        key="glide-fields"
+                        initial={
+                          reducedMotion
+                            ? { opacity: 0 }
+                            : { height: 0, opacity: 0 }
+                        }
+                        animate={
+                          reducedMotion
+                            ? { opacity: 1 }
+                            : { height: "auto", opacity: 1 }
+                        }
+                        exit={
+                          reducedMotion
+                            ? { opacity: 0 }
+                            : { height: 0, opacity: 0 }
+                        }
+                        transition={collapseTransition(reducedMotion)}
+                        className="overflow-hidden"
+                      >
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <SliderField
+                            label="Glide to"
+                            hint="Where the pitch slides."
+                            value={layer.glideTo}
+                            min={80}
+                            max={3200}
+                            step={1}
+                            format={formatHz}
+                            valueWidthCh={7}
+                            onChange={(glideTo) => setTone({ glideTo })}
+                          />
+                          <SliderField
+                            label="Glide time"
+                            hint="How long the slide takes."
+                            value={layer.glideTime ?? 0.12}
+                            min={0.01}
+                            max={0.5}
+                            step={0.001}
+                            format={formatSeconds}
+                            valueWidthCh={6}
+                            onChange={(glideTime) => setTone({ glideTime })}
+                          />
+                        </div>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -525,6 +610,7 @@ function LayerEditor({
                       max={8000}
                       step={10}
                       format={formatHz}
+                      valueWidthCh={7}
                       onChange={(filterFrequency) =>
                         setNoise({ filterFrequency })
                       }
@@ -536,7 +622,8 @@ function LayerEditor({
                       min={0.2}
                       max={12}
                       step={0.1}
-                      format={(n) => n.toFixed(1)}
+                      format={formatQ}
+                      valueWidthCh={4}
                       onChange={(filterQ) => setNoise({ filterQ })}
                     />
                   </div>
@@ -571,6 +658,10 @@ export function SfxDashboard() {
   const [recipe, setRecipe] = useState<SoundRecipe>(() =>
     cloneRecipe(RECIPES.tick)
   );
+  /** Stable presence keys — index keys remount the wrong row when removing mid-list. */
+  const [layerKeys, setLayerKeys] = useState<string[]>(() =>
+    RECIPES.tick.layers.map(() => newLayerKey())
+  );
   const [draftName, setDraftName] = useState("tick");
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
@@ -582,13 +673,21 @@ export function SfxDashboard() {
     writeDrafts(next);
   }, []);
 
-  const loadBuiltin = useCallback((name: SoundName) => {
-    setSelection({ kind: "builtin", name });
-    setDraftName(name);
-    setRecipe(cloneRecipe(RECIPES[name]));
-    setDirty(false);
-    setCopyStatus(null);
+  const adoptRecipe = useCallback((next: SoundRecipe) => {
+    setRecipe(next);
+    setLayerKeys(next.layers.map(() => newLayerKey()));
   }, []);
+
+  const loadBuiltin = useCallback(
+    (name: SoundName) => {
+      setSelection({ kind: "builtin", name });
+      setDraftName(name);
+      adoptRecipe(cloneRecipe(RECIPES[name]));
+      setDirty(false);
+      setCopyStatus(null);
+    },
+    [adoptRecipe]
+  );
 
   const loadDraft = useCallback(
     (name: string) => {
@@ -596,11 +695,11 @@ export function SfxDashboard() {
       if (!draft) return;
       setSelection({ kind: "draft", name });
       setDraftName(name);
-      setRecipe(cloneRecipe(draft.recipe));
+      adoptRecipe(cloneRecipe(draft.recipe));
       setDirty(false);
       setCopyStatus(null);
     },
-    [drafts]
+    [adoptRecipe, drafts]
   );
 
   const updateRecipe = useCallback((next: SoundRecipe) => {
@@ -661,10 +760,10 @@ export function SfxDashboard() {
     }
     setSelection({ kind: "draft", name: candidate });
     setDraftName(candidate);
-    setRecipe(createBlankRecipe());
+    adoptRecipe(createBlankRecipe());
     setDirty(true);
     setCopyStatus(null);
-  }, [drafts]);
+  }, [adoptRecipe, drafts]);
 
   const shuffleRecipe = useCallback(() => {
     let candidate = "shuffle";
@@ -676,18 +775,18 @@ export function SfxDashboard() {
     const next = createRandomRecipe();
     setSelection({ kind: "draft", name: candidate });
     setDraftName(candidate);
-    setRecipe(next);
+    adoptRecipe(next);
     setDirty(true);
     setCopyStatus("Shuffled a new sound — hit Play preview");
     setShowGuide(false);
     if (!muted) playRecipe(next);
-  }, [drafts, muted]);
+  }, [adoptRecipe, drafts, muted]);
 
   const resetBuiltin = useCallback(() => {
     if (selection.kind !== "builtin") return;
-    setRecipe(cloneRecipe(RECIPES[selection.name]));
+    adoptRecipe(cloneRecipe(RECIPES[selection.name]));
     setDirty(false);
-  }, [selection]);
+  }, [adoptRecipe, selection]);
 
   const copyTs = useCallback(async () => {
     const name = slugifyName(draftName) || "custom";
@@ -853,17 +952,10 @@ export function SfxDashboard() {
               }
               exit={
                 reducedMotion
-                  ? {
-                      opacity: 0,
-                      transition: { duration: durations.fast, ease: panelEase },
-                    }
-                  : {
-                      height: 0,
-                      opacity: 0,
-                      transition: { duration: durations.fast, ease: panelEase },
-                    }
+                  ? { opacity: 0 }
+                  : { height: 0, opacity: 0 }
               }
-              transition={{ duration: durations.ui, ease: panelEase }}
+              transition={collapseTransition(reducedMotion)}
               className="overflow-hidden"
             >
               <p className="sfx-lab-muted mt-1.5 rounded-lg px-2.5 py-1 text-[11px] leading-snug sm:mt-2 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-xs">
@@ -886,20 +978,10 @@ export function SfxDashboard() {
               }
               exit={
                 reducedMotion
-                  ? {
-                      opacity: 0,
-                      transition: { duration: durations.fast, ease: panelEase },
-                    }
-                  : {
-                      height: 0,
-                      opacity: 0,
-                      transition: { duration: durations.fast, ease: panelEase },
-                    }
+                  ? { opacity: 0 }
+                  : { height: 0, opacity: 0 }
               }
-              transition={{
-                duration: reducedMotion ? durations.fast : durations.ui,
-                ease: panelEase,
-              }}
+              transition={collapseTransition(reducedMotion)}
               className="overflow-hidden"
             >
               <p
@@ -1041,7 +1123,8 @@ export function SfxDashboard() {
             min={0.05}
             max={1.4}
             step={0.01}
-            format={(n) => n.toFixed(2)}
+            format={formatGain}
+            valueWidthCh={4}
             onChange={(masterGain) =>
               updateRecipe({
                 ...recipe,
@@ -1087,7 +1170,8 @@ export function SfxDashboard() {
               </h3>
               <LabButton
                 aria-label="Add layer"
-                onClick={() =>
+                onClick={() => {
+                  setLayerKeys((keys) => [...keys, newLayerKey()]);
                   updateRecipe({
                     ...recipe,
                     layers: [
@@ -1101,8 +1185,8 @@ export function SfxDashboard() {
                         peak: 0.06,
                       },
                     ],
-                  })
-                }
+                  });
+                }}
               >
                 <IconPlus />
                 <span>Add</span>
@@ -1116,7 +1200,7 @@ export function SfxDashboard() {
               <AnimatePresence initial={false}>
                 {recipe.layers.map((layer, index) => (
                   <motion.div
-                    key={`layer-${index}`}
+                    key={layerKeys[index] ?? `layer-fallback-${index}`}
                     layout={layoutEnabled}
                     initial={
                       reducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }
@@ -1158,6 +1242,9 @@ export function SfxDashboard() {
                       }}
                       onRemove={() => {
                         if (recipe.layers.length <= 1) return;
+                        setLayerKeys((keys) =>
+                          keys.filter((_, i) => i !== index)
+                        );
                         updateRecipe({
                           ...recipe,
                           layers: recipe.layers.filter((_, i) => i !== index),
@@ -1226,10 +1313,7 @@ export function SfxDashboard() {
                       ? { opacity: 0 }
                       : { height: 0, opacity: 0 }
                   }
-                  transition={{
-                    duration: reducedMotion ? durations.fast : durations.ui,
-                    ease: panelEase,
-                  }}
+                  transition={collapseTransition(reducedMotion)}
                   className="overflow-hidden"
                 >
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -1241,6 +1325,7 @@ export function SfxDashboard() {
                       max={0.4}
                       step={0.01}
                       format={formatSeconds}
+                      valueWidthCh={6}
                       onChange={(delay) =>
                         updateRecipe({
                           ...recipe,
@@ -1258,7 +1343,8 @@ export function SfxDashboard() {
                       min={0.05}
                       max={0.85}
                       step={0.01}
-                      format={(n) => n.toFixed(2)}
+                      format={formatGain}
+                      valueWidthCh={4}
                       onChange={(feedback) =>
                         updateRecipe({
                           ...recipe,
@@ -1276,7 +1362,8 @@ export function SfxDashboard() {
                       min={0.02}
                       max={0.6}
                       step={0.01}
-                      format={(n) => n.toFixed(2)}
+                      format={formatGain}
+                      valueWidthCh={4}
                       onChange={(wet) =>
                         updateRecipe({
                           ...recipe,
@@ -1295,6 +1382,7 @@ export function SfxDashboard() {
                       max={10000}
                       step={50}
                       format={formatHz}
+                      valueWidthCh={7}
                       onChange={(lowpass) =>
                         updateRecipe({
                           ...recipe,

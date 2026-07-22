@@ -550,6 +550,8 @@ code {
   font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 .sfx-lab-range {

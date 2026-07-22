@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatedMetric } from "@/components/sfx/AnimatedMetric";
 import { cn } from "@/lib/utils/cn";
 
 export function SliderField({
@@ -11,6 +12,8 @@ export function SliderField({
   max,
   step,
   format = (n) => String(n),
+  /** Fixed character width — keep stable so digit-count changes never reflow. */
+  valueWidthCh,
 }: {
   label: string;
   hint: string;
@@ -20,14 +23,15 @@ export function SliderField({
   max: number;
   step: number;
   format?: (value: number) => string;
+  valueWidthCh: number;
 }) {
+  const widthCh = valueWidthCh;
+
   return (
     <label className="sfx-lab-slider block">
       <span className="mb-1 flex items-baseline justify-between gap-2">
         <span className="sfx-lab-label mb-0">{label}</span>
-        <span className="sfx-lab-slider-value tabular-nums">
-          {format(value)}
-        </span>
+        <AnimatedMetric value={value} format={format} widthCh={widthCh} />
       </span>
       <input
         type="range"
