@@ -52,7 +52,7 @@ const FILTER_TYPES: BiquadFilterType[] = [
 
 const fieldClass =
   "sfx-lab-field min-h-11 w-full px-2.5 py-2 text-base focus:outline-none sm:min-h-0 sm:py-1.5";
-const labelClass = "sfx-lab-label mb-1 block text-[11px] font-medium uppercase";
+const labelClass = "sfx-lab-label mb-1.5 block";
 const btnClass =
   "sfx-lab-btn min-h-9 px-3 py-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-gold)_45%,transparent)] disabled:cursor-not-allowed sm:min-h-0 sm:px-3.5";
 const btnAccentClass =
@@ -124,7 +124,7 @@ function SoundChip({ active, label, onSelect }: SoundChipProps) {
     <motion.button
       type="button"
       className={cn(
-        "sfx-lab-sound flex min-h-11 w-full items-center justify-between gap-2 px-2.5 py-2 text-left text-sm sm:min-h-0 sm:py-1.5",
+        "sfx-lab-sound flex min-h-11 w-full items-center justify-between gap-2 px-2.5 py-2 text-left sm:min-h-0 sm:py-1.5",
         active && "sfx-lab-sound-active"
       )}
       whileHover={reducedMotion ? undefined : { x: 2, scale: 1.01 }}
@@ -134,7 +134,7 @@ function SoundChip({ active, label, onSelect }: SoundChipProps) {
       data-sfx-release
       onClick={onSelect}
     >
-      <span className="font-medium">{label}</span>
+      <span>{label}</span>
     </motion.button>
   );
 }
@@ -244,7 +244,7 @@ function LayerEditor({
       <div className="flex items-center gap-2 px-3 py-2">
         <motion.button
           type="button"
-          className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg text-left"
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg text-left"
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
           whileHover={reducedMotion ? undefined : { x: 1 }}
@@ -252,27 +252,27 @@ function LayerEditor({
           transition={tapSpring}
         >
           <motion.span
-            className="inline-flex size-6 shrink-0 items-center justify-center text-[var(--sfx-ink)]"
+            className="inline-flex size-5 shrink-0 items-center justify-center text-[var(--sfx-ink-soft)]"
             animate={{ rotate: open ? 90 : 0 }}
             transition={reducedMotion ? { duration: 0 } : chevronSpring}
             aria-hidden
           >
             <svg
               viewBox="0 0 24 24"
-              className="size-5"
+              className="size-[1.125rem]"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2.25"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
               <path d="M9 6l6 6-6 6" />
             </svg>
           </motion.span>
-          <span className="text-xs font-semibold text-[var(--sfx-ink)]">
+          <span className="sfx-lab-layer-title shrink-0">
             Layer {index + 1}
           </span>
-          <span className="truncate text-[11px] text-[var(--sfx-ink-soft)]">
+          <span className="sfx-lab-layer-meta min-w-0 truncate">
             {summary}
           </span>
         </motion.button>
@@ -777,7 +777,7 @@ export function SfxDashboard() {
         <aside className="sfx-lab-rail p-3 md:sticky md:top-[6.75rem] md:max-h-[calc(100dvh-7.5rem)] md:overflow-y-auto">
           <div className="space-y-5">
             <section>
-              <h2 className="sfx-lab-section-label mb-2 text-[11px] font-semibold uppercase">
+              <h2 className="sfx-lab-section-label mb-2.5">
                 Built-ins
               </h2>
               <ul className="space-y-0.5">
@@ -799,7 +799,7 @@ export function SfxDashboard() {
             </section>
 
             <section>
-              <h2 className="sfx-lab-section-label mb-2 text-[11px] font-semibold uppercase">
+              <h2 className="sfx-lab-section-label mb-2.5">
                 Custom
               </h2>
               <ul className="space-y-0.5">
@@ -867,7 +867,7 @@ export function SfxDashboard() {
               />
             </label>
             {selection.kind === "builtin" && (
-              <p className="text-xs text-[var(--sfx-ink-soft)]">
+              <p className="sfx-lab-blurb">
                 {SOUND_BLURBS[selection.name]}
               </p>
             )}
@@ -889,7 +889,7 @@ export function SfxDashboard() {
 
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="sfx-lab-section-label text-[11px] font-semibold uppercase">
+              <h3 className="sfx-lab-section-label">
                 Layers
               </h3>
               <LabButton
@@ -976,7 +976,7 @@ export function SfxDashboard() {
 
           <div className="sfx-lab-layer space-y-3 p-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="sfx-lab-section-label text-[11px] font-semibold uppercase">
+              <h3 className="sfx-lab-section-label">
                 Shimmer
               </h3>
               {recipe.shimmer ? (
@@ -1105,7 +1105,7 @@ export function SfxDashboard() {
             <textarea
               className={cn(
                 fieldClass,
-                "min-h-32 font-mono text-[11px] leading-relaxed"
+                "min-h-32 font-mono text-xs leading-relaxed tracking-normal"
               )}
               readOnly
               value={tsSnippet}

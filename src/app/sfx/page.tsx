@@ -24,7 +24,7 @@ export default function SfxPage() {
         <header className="sfx-lab-portal-header px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="sfx-lab-kicker text-[11px] font-medium uppercase">
+              <p className="sfx-lab-kicker">
                 Studio
               </p>
               <h1
@@ -40,7 +40,7 @@ export default function SfxPage() {
             </div>
           </div>
           <div className="sfx-lab-path mt-3 max-w-[12rem]" aria-hidden />
-          <p className="sfx-lab-lede mt-3 max-w-prose text-sm leading-relaxed">
+          <p className="sfx-lab-lede mt-3 max-w-prose text-pretty text-sm leading-relaxed tracking-tight">
             A small sound atelier — pick a voice on the left, paint layers on
             the right. Preview stays within reach while you work.
           </p>
