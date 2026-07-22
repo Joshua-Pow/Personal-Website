@@ -13,6 +13,7 @@ import {
   SOUND_BLURBS,
   cloneRecipe,
   createBlankRecipe,
+  getSoundVisual,
   play,
   playRecipe,
   sounds,
@@ -22,6 +23,7 @@ import {
   type SoundRecipe,
   type ToneLayer,
 } from "@/lib/sfx";
+import { SoundMark } from "@/components/sfx/SoundMark";
 import {
   getDraftsServerSnapshot,
   getDraftsSnapshot,
@@ -160,21 +162,33 @@ function LabButton({
 }
 
 type SoundChipProps = {
+  name: string;
+  kind: "builtin" | "draft";
   active: boolean;
-  label: string;
   onSelect: () => void;
 };
 
-function SoundChip({ active, label, onSelect }: SoundChipProps) {
+function SoundChip({ name, kind, active, onSelect }: SoundChipProps) {
   const reducedMotion = useReducedMotion();
+  const visual = getSoundVisual(name, kind);
+  const accent = `oklch(62% 0.12 ${visual.hue})`;
+  const wash = `oklch(94% 0.035 ${visual.hue})`;
+  const washStrong = `oklch(90% 0.055 ${visual.hue})`;
 
   return (
     <motion.button
       type="button"
       className={cn(
-        "sfx-lab-sound flex min-h-10 w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left sm:min-h-0",
+        "sfx-lab-sound flex min-h-11 w-full items-center gap-2.5 px-2 py-1.5 text-left sm:min-h-0 sm:py-1.5",
         active && "sfx-lab-sound-active"
       )}
+      style={
+        {
+          "--sound-accent": accent,
+          "--sound-wash": wash,
+          "--sound-wash-strong": washStrong,
+        } as React.CSSProperties
+      }
       whileHover={reducedMotion ? undefined : { x: 2, scale: 1.01 }}
       whileTap={reducedMotion ? undefined : { scale: 0.96 }}
       transition={tapSpring}
@@ -182,7 +196,15 @@ function SoundChip({ active, label, onSelect }: SoundChipProps) {
       data-sfx-release
       onClick={onSelect}
     >
-      <span>{label}</span>
+      <span className="sfx-lab-sound-mark" aria-hidden>
+        <SoundMark mark={visual.mark} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="sfx-lab-sound-title block truncate">
+          {visual.title}
+        </span>
+        <span className="sfx-lab-sound-cue block truncate">{visual.cue}</span>
+      </span>
     </motion.button>
   );
 }
@@ -641,6 +663,11 @@ export function SfxDashboard() {
     [draftName, recipe]
   );
 
+  const selectedVisual = getSoundVisual(
+    selection.kind === "builtin" ? selection.name : draftName,
+    selection.kind
+  );
+
 
   return (
     <div className="pb-6">
@@ -842,7 +869,8 @@ export function SfxDashboard() {
                 {sounds.map((name) => (
                   <li key={name}>
                     <SoundChip
-                      label={name}
+                      name={name}
+                      kind="builtin"
                       active={
                         selection.kind === "builtin" && selection.name === name
                       }
@@ -892,7 +920,8 @@ export function SfxDashboard() {
                       transition={{ duration: durations.ui, ease: easeOut }}
                     >
                       <SoundChip
-                        label={name}
+                        name={name}
+                        kind="draft"
                         active={
                           selection.kind === "draft" && selection.name === name
                         }
@@ -911,24 +940,42 @@ export function SfxDashboard() {
         </aside>
 
         <div className="sfx-lab-canvas min-w-0 space-y-4 p-4 sm:p-5">
-          <div className="space-y-2">
-            <label className="block">
-              <span className={labelClass}>Name</span>
-              <input
-                className={fieldClass}
-                value={draftName}
-                onChange={(event) => {
-                  setDraftName(event.target.value);
-                  setDirty(true);
-                }}
-                spellCheck={false}
-              />
-            </label>
-            {selection.kind === "builtin" && (
-              <p className="sfx-lab-blurb">
-                {SOUND_BLURBS[selection.name]}
-              </p>
-            )}
+          <div
+            className="flex items-start gap-3"
+            style={
+              {
+                "--sound-accent": `oklch(58% 0.12 ${selectedVisual.hue})`,
+                "--sound-wash": `oklch(94% 0.04 ${selectedVisual.hue})`,
+              } as React.CSSProperties
+            }
+          >
+            <span
+              className="sfx-lab-sound-mark sfx-lab-sound-mark-lg mt-5 shrink-0"
+              aria-hidden
+            >
+              <SoundMark mark={selectedVisual.mark} className="size-4" />
+            </span>
+            <div className="min-w-0 flex-1 space-y-2">
+              <label className="block">
+                <span className={labelClass}>Name</span>
+                <input
+                  className={fieldClass}
+                  value={draftName}
+                  onChange={(event) => {
+                    setDraftName(event.target.value);
+                    setDirty(true);
+                  }}
+                  spellCheck={false}
+                />
+              </label>
+              {selection.kind === "builtin" ? (
+                <p className="sfx-lab-blurb">
+                  {SOUND_BLURBS[selection.name]}
+                </p>
+              ) : (
+                <p className="sfx-lab-blurb">{selectedVisual.cue}</p>
+              )}
+            </div>
           </div>
 
           <NumberField

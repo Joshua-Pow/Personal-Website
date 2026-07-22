@@ -27,5 +27,12 @@ export {
   isSoundName,
   sounds,
 } from "./sounds/recipes";
+export {
+  DRAFT_VISUAL,
+  SOUND_VISUALS,
+  getSoundVisual,
+  type SoundMarkId,
+  type SoundVisual,
+} from "./sounds/visuals";
 export { isEnabled, play, playRecipe, setEnabled } from "./audio/engine";
 export { bind } from "./interactions/bind";
