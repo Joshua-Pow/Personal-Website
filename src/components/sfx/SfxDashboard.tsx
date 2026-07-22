@@ -587,7 +587,7 @@ export function SfxDashboard() {
   return (
     <div className="pb-6">
       <div className="sfx-lab-toolbar sticky top-3 z-20 mb-4 border px-2.5 py-2 backdrop-blur-md supports-[backdrop-filter]:bg-[color-mix(in_oklch,var(--sfx-linen)_78%,transparent)] sm:top-4 sm:mb-5 sm:px-3 sm:py-2.5">
-        <div className="sfx-lab-toolbar-actions grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
+        <div className="sfx-lab-toolbar-actions relative grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
           <LabButton
             variant="play"
             className="col-span-2 sm:col-auto"
@@ -619,7 +619,13 @@ export function SfxDashboard() {
           >
             Save draft
           </LabButton>
-          <AnimatePresence initial={false}>
+          {/*
+            popLayout: pop exiting Reset/Delete out of flow immediately so
+            siblings (e.g. Copy TS) can layout-animate into the freed cell.
+            Default sync mode keeps the exiting button in-flow until unmount,
+            so Copy TS only snaps after the fade finishes.
+          */}
+          <AnimatePresence initial={false} mode="popLayout">
             {selection.kind === "builtin" && dirty && (
               <LabButton
                 key="reset-builtin"
