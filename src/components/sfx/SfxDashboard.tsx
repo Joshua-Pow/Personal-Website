@@ -465,7 +465,6 @@ export function SfxDashboard() {
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
 
-  const statusVisible = muted || Boolean(copyStatus);
   const layoutEnabled = !reducedMotion;
 
   const persistDrafts = useCallback((next: SfxDraftMap) => {
@@ -693,72 +692,79 @@ export function SfxDashboard() {
             <span className="hidden sm:inline">Copy as TypeScript</span>
           </LabButton>
         </div>
-        <div
-          className={cn(
-            "space-y-1",
-            statusVisible ? "mt-1.5 sm:mt-2" : "mt-0"
-          )}
-        >
-          <AnimatePresence initial={false}>
-            {muted && (
-              <motion.p
-                key="mute-banner"
-                className="sfx-lab-muted rounded-lg px-2.5 py-1 text-[11px] leading-snug sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-xs"
-                initial={
-                  reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }
-                }
-                animate={{ opacity: 1, y: 0 }}
-                exit={
-                  reducedMotion
-                    ? {
-                        opacity: 0,
-                        transition: { duration: durations.fast, ease: easeOut },
-                      }
-                    : {
-                        opacity: 0,
-                        y: -4,
-                        transition: { duration: durations.fast, ease: easeOut },
-                      }
-                }
-                transition={{ duration: durations.ui, ease: easeOut }}
-              >
+        <AnimatePresence initial={false}>
+          {muted && (
+            <motion.div
+              key="mute-banner"
+              initial={
+                reducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }
+              }
+              animate={
+                reducedMotion
+                  ? { opacity: 1 }
+                  : { height: "auto", opacity: 1 }
+              }
+              exit={
+                reducedMotion
+                  ? {
+                      opacity: 0,
+                      transition: { duration: durations.fast, ease: panelEase },
+                    }
+                  : {
+                      height: 0,
+                      opacity: 0,
+                      transition: { duration: durations.fast, ease: panelEase },
+                    }
+              }
+              transition={{ duration: durations.ui, ease: panelEase }}
+              className="overflow-hidden"
+            >
+              <p className="sfx-lab-muted mt-1.5 rounded-lg px-2.5 py-1 text-[11px] leading-snug sm:mt-2 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-xs">
                 Sound is muted. Use the speaker toggle to unmute previews.
-              </motion.p>
-            )}
-          </AnimatePresence>
-          <AnimatePresence initial={false}>
-            {copyStatus && (
-              <motion.p
-                key="copy-status"
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <AnimatePresence initial={false}>
+          {copyStatus && (
+            <motion.div
+              key="copy-status"
+              initial={
+                reducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }
+              }
+              animate={
+                reducedMotion
+                  ? { opacity: 1 }
+                  : { height: "auto", opacity: 1 }
+              }
+              exit={
+                reducedMotion
+                  ? {
+                      opacity: 0,
+                      transition: { duration: durations.fast, ease: panelEase },
+                    }
+                  : {
+                      height: 0,
+                      opacity: 0,
+                      transition: { duration: durations.fast, ease: panelEase },
+                    }
+              }
+              transition={{
+                duration: reducedMotion ? durations.fast : durations.ui,
+                ease: panelEase,
+              }}
+              className="overflow-hidden"
+            >
+              <p
                 role="status"
-                className="text-[11px] text-[var(--sfx-ink-soft)] sm:text-xs"
-                initial={
-                  reducedMotion ? { opacity: 0 } : { opacity: 0, y: 4 }
-                }
-                animate={{ opacity: 1, y: 0 }}
-                exit={
-                  reducedMotion
-                    ? {
-                        opacity: 0,
-                        transition: { duration: durations.fast, ease: easeOut },
-                      }
-                    : {
-                        opacity: 0,
-                        y: 2,
-                        transition: { duration: durations.fast, ease: easeOut },
-                      }
-                }
-                transition={{
-                  duration: reducedMotion ? durations.fast : durations.ui,
-                  ease: easeOut,
-                }}
+                className="mt-1.5 text-[11px] text-[var(--sfx-ink-soft)] sm:mt-2 sm:text-xs"
               >
                 {copyStatus}
                 {dirty ? " · unsaved edits" : ""}
-              </motion.p>
-            )}
-          </AnimatePresence>
-        </div>
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="grid items-start gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
