@@ -317,15 +317,16 @@ code {
   transition-property: background-color, border-color, color, box-shadow;
   transition-duration: 160ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
 }
 
-.sfx-lab-btn:hover {
-  background: oklch(100% 0.01 95);
-  border-color: color-mix(in oklch, var(--sfx-gold-deep) 45%, var(--sfx-stroke));
-  box-shadow:
-    0 1px 0 oklch(100% 0 0 / 75%) inset,
-    0 6px 14px oklch(45% 0.06 80 / 12%);
+@media (hover: hover) and (pointer: fine) {
+  .sfx-lab-btn:hover {
+    background: oklch(100% 0.01 95);
+    border-color: color-mix(in oklch, var(--sfx-gold-deep) 45%, var(--sfx-stroke));
+    box-shadow:
+      0 1px 0 oklch(100% 0 0 / 75%) inset,
+      0 6px 14px oklch(45% 0.06 80 / 12%);
+  }
 }
 
 .sfx-lab-btn:disabled {
@@ -349,14 +350,15 @@ code {
   transition-property: box-shadow, filter;
   transition-duration: 160ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
 }
 
-.sfx-lab-btn-play:hover {
-  filter: brightness(1.05);
-  box-shadow:
-    0 1px 0 oklch(100% 0 0 / 32%) inset,
-    0 10px 22px oklch(45% 0.14 28 / 30%);
+@media (hover: hover) and (pointer: fine) {
+  .sfx-lab-btn-play:hover {
+    filter: brightness(1.05);
+    box-shadow:
+      0 1px 0 oklch(100% 0 0 / 32%) inset,
+      0 10px 22px oklch(45% 0.14 28 / 30%);
+  }
 }
 
 .sfx-lab-rail,
@@ -387,7 +389,6 @@ code {
   transition-property: background-color, color, box-shadow;
   transition-duration: 160ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
 }
 
 .sfx-lab-sound-mark {
@@ -427,13 +428,15 @@ code {
   line-height: 1.3;
 }
 
-.sfx-lab-sound:hover {
-  background: color-mix(in oklch, var(--sound-wash, var(--sfx-gold)) 55%, transparent);
-  color: var(--sfx-ink);
-}
+@media (hover: hover) and (pointer: fine) {
+  .sfx-lab-sound:hover {
+    background: color-mix(in oklch, var(--sound-wash, var(--sfx-gold)) 55%, transparent);
+    color: var(--sfx-ink);
+  }
 
-.sfx-lab-sound:hover .sfx-lab-sound-mark {
-  background: var(--sound-wash-strong, var(--sound-wash));
+  .sfx-lab-sound:hover .sfx-lab-sound-mark {
+    background: var(--sound-wash-strong, var(--sound-wash));
+  }
 }
 
 .sfx-lab-sound-active {
@@ -636,9 +639,11 @@ code {
   line-height: 1.25;
 }
 
-.sfx-lab-choice-option:hover {
-  border-color: color-mix(in oklch, var(--sfx-gold-deep) 40%, var(--sfx-stroke));
-  background: oklch(100% 0.01 95);
+@media (hover: hover) and (pointer: fine) {
+  .sfx-lab-choice-option:hover {
+    border-color: color-mix(in oklch, var(--sfx-gold-deep) 40%, var(--sfx-stroke));
+    background: oklch(100% 0.01 95);
+  }
 }
 
 .sfx-lab-choice-option-active {

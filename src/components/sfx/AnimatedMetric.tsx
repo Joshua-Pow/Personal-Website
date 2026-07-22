@@ -119,7 +119,7 @@ function MetricGlyph({
     return (
       <span className="relative inline-block h-[1.15em] w-[1ch] overflow-hidden">
         <motion.span
-          className="absolute left-0 top-0 flex flex-col will-change-transform"
+          className="absolute left-0 top-0 flex flex-col"
           animate={{ y: `${-digit * 1.15}em` }}
           transition={reducedMotion ? { duration: 0 } : DIGIT_SPRING}
         >

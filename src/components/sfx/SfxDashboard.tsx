@@ -13,6 +13,7 @@ import {
   useReducedMotion,
   type Transition,
 } from "motion/react";
+import { useCanHover } from "@/lib/use-can-hover";
 import {
   RECIPES,
   SOUND_BLURBS,
@@ -65,27 +66,33 @@ const btnIconClass =
 const tapSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
 /** Accordion chevron — same spring family as toolbar buttons. */
 const chevronSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
-const panelEase = [0.16, 1, 0.3, 1] as const;
-/** Layout reflow for list/toolbar membership changes. */
+/** Layout reflow (FLIP via transforms) for size/position membership changes. */
 const layoutSpring = { type: "spring" as const, stiffness: 420, damping: 32 };
-/**
- * Expand/collapse size motion — spring so rapid open/close retargets instead of
- * restarting a timed height tween from 0 (review-animations: interruptibility).
- */
-const collapseSpring = {
-  type: "spring" as const,
-  stiffness: 420,
-  damping: 36,
-  mass: 0.32,
-} as const;
 
-function collapseTransition(reduced: boolean | null): Transition {
+/**
+ * Enter/exit for mounting panels — opacity + y only (GPU).
+ * Size continuity comes from a parent `layout` spring (FLIP), not height tweens
+ * (ui-skills review-animations + fixing-motion-performance).
+ */
+function presenceProps(reduced: boolean | null): {
+  initial: { opacity: number; y?: number };
+  animate: { opacity: number; y?: number };
+  exit: { opacity: number; y?: number };
+  transition: Transition;
+} {
   if (reduced) {
-    return { duration: durations.fast, ease: panelEase };
+    return {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+      transition: { duration: durations.fast, ease: easeOut },
+    };
   }
   return {
-    height: collapseSpring,
-    opacity: { duration: durations.ui, ease: panelEase },
+    initial: { opacity: 0, y: -4 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -4 },
+    transition: { duration: durations.ui, ease: easeOut },
   };
 }
 
@@ -153,6 +160,7 @@ function LabButton({
   ...props
 }: LabButtonProps) {
   const reducedMotion = useReducedMotion();
+  const canHover = useCanHover();
   const inert = Boolean(disabled || reducedMotion);
   const variantClass =
     variant === "play"
@@ -168,7 +176,7 @@ function LabButton({
       disabled={disabled}
       className={cn(variantClass, className)}
       whileHover={
-        inert
+        inert || !canHover
           ? undefined
           : variant === "icon"
             ? { scale: 1.04 }
@@ -193,6 +201,7 @@ type SoundChipProps = {
 
 function SoundChip({ name, kind, active, onSelect }: SoundChipProps) {
   const reducedMotion = useReducedMotion();
+  const canHover = useCanHover();
   const visual = getSoundVisual(name, kind);
   const accent = `oklch(62% 0.12 ${visual.hue})`;
   const wash = `oklch(94% 0.035 ${visual.hue})`;
@@ -212,7 +221,9 @@ function SoundChip({ name, kind, active, onSelect }: SoundChipProps) {
           "--sound-wash-strong": washStrong,
         } as React.CSSProperties
       }
-      whileHover={reducedMotion ? undefined : { x: 2, scale: 1.01 }}
+      whileHover={
+        reducedMotion || !canHover ? undefined : { x: 2, scale: 1.01 }
+      }
       whileTap={reducedMotion ? undefined : { scale: 0.96 }}
       transition={tapSpring}
       onClick={onSelect}
@@ -334,6 +345,8 @@ function LayerEditor({
       : `${layer.filterType} · ${Math.round(layer.filterFrequency)}Hz`;
 
   const reducedMotion = useReducedMotion();
+  const canHover = useCanHover();
+  const bodyPresence = presenceProps(reducedMotion);
 
   return (
     <div className="sfx-lab-layer">
@@ -343,7 +356,7 @@ function LayerEditor({
           className="flex min-w-0 flex-1 items-center gap-2 rounded-lg text-left"
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
-          whileHover={reducedMotion ? undefined : { x: 1 }}
+          whileHover={reducedMotion || !canHover ? undefined : { x: 1 }}
           whileTap={reducedMotion ? undefined : { scale: 0.98 }}
           transition={tapSpring}
         >
@@ -387,21 +400,10 @@ function LayerEditor({
         {open && (
           <motion.div
             key="layer-body"
-            initial={
-              reducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }
-            }
-            animate={
-              reducedMotion
-                ? { opacity: 1 }
-                : { height: "auto", opacity: 1 }
-            }
-            exit={
-              reducedMotion
-                ? { opacity: 0 }
-                : { height: 0, opacity: 0 }
-            }
-            transition={collapseTransition(reducedMotion)}
-            className="overflow-hidden"
+            initial={bodyPresence.initial}
+            animate={bodyPresence.animate}
+            exit={bodyPresence.exit}
+            transition={bodyPresence.transition}
           >
             <div className="space-y-4 border-t border-[var(--sfx-stroke)] px-3 py-3">
               <ChoiceField
@@ -546,23 +548,10 @@ function LayerEditor({
                     {layer.glideTo !== undefined ? (
                       <motion.div
                         key="glide-fields"
-                        initial={
-                          reducedMotion
-                            ? { opacity: 0 }
-                            : { height: 0, opacity: 0 }
-                        }
-                        animate={
-                          reducedMotion
-                            ? { opacity: 1 }
-                            : { height: "auto", opacity: 1 }
-                        }
-                        exit={
-                          reducedMotion
-                            ? { opacity: 0 }
-                            : { height: 0, opacity: 0 }
-                        }
-                        transition={collapseTransition(reducedMotion)}
-                        className="overflow-hidden"
+                        initial={bodyPresence.initial}
+                        animate={bodyPresence.animate}
+                        exit={bodyPresence.exit}
+                        transition={bodyPresence.transition}
                       >
                         <div className="grid gap-3 sm:grid-cols-2">
                           <SliderField
@@ -816,9 +805,15 @@ export function SfxDashboard() {
   );
 
 
+  const statusPresence = presenceProps(reducedMotion);
+
   return (
     <div className="pb-6">
-      <div className="sfx-lab-toolbar sticky top-3 z-20 mb-4 border px-2.5 py-2 backdrop-blur-md supports-[backdrop-filter]:bg-[color-mix(in_oklch,var(--sfx-linen)_78%,transparent)] sm:top-4 sm:mb-5 sm:px-3 sm:py-2.5">
+      <motion.div
+        layout={layoutEnabled}
+        transition={{ layout: layoutSpring }}
+        className="sfx-lab-toolbar sticky top-3 z-20 mb-4 border px-2.5 py-2 backdrop-blur-md supports-[backdrop-filter]:bg-[color-mix(in_oklch,var(--sfx-linen)_78%,transparent)] sm:top-4 sm:mb-5 sm:px-3 sm:py-2.5"
+      >
         <div className="sfx-lab-toolbar-actions relative grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
           <LabButton
             variant="play"
@@ -942,21 +937,14 @@ export function SfxDashboard() {
           {muted && (
             <motion.div
               key="mute-banner"
-              initial={
-                reducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }
-              }
-              animate={
-                reducedMotion
-                  ? { opacity: 1 }
-                  : { height: "auto", opacity: 1 }
-              }
-              exit={
-                reducedMotion
-                  ? { opacity: 0 }
-                  : { height: 0, opacity: 0 }
-              }
-              transition={collapseTransition(reducedMotion)}
-              className="overflow-hidden"
+              layout={layoutEnabled}
+              initial={statusPresence.initial}
+              animate={statusPresence.animate}
+              exit={statusPresence.exit}
+              transition={{
+                ...statusPresence.transition,
+                layout: layoutSpring,
+              }}
             >
               <p className="sfx-lab-muted mt-1.5 rounded-lg px-2.5 py-1 text-[11px] leading-snug sm:mt-2 sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-xs">
                 Sound is muted. Use the speaker toggle to unmute previews.
@@ -968,21 +956,14 @@ export function SfxDashboard() {
           {copyStatus && (
             <motion.div
               key="copy-status"
-              initial={
-                reducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }
-              }
-              animate={
-                reducedMotion
-                  ? { opacity: 1 }
-                  : { height: "auto", opacity: 1 }
-              }
-              exit={
-                reducedMotion
-                  ? { opacity: 0 }
-                  : { height: 0, opacity: 0 }
-              }
-              transition={collapseTransition(reducedMotion)}
-              className="overflow-hidden"
+              layout={layoutEnabled}
+              initial={statusPresence.initial}
+              animate={statusPresence.animate}
+              exit={statusPresence.exit}
+              transition={{
+                ...statusPresence.transition,
+                layout: layoutSpring,
+              }}
             >
               <p
                 role="status"
@@ -994,7 +975,7 @@ export function SfxDashboard() {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       <div className="grid items-start gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
         <aside className="sfx-lab-rail p-3 md:sticky md:top-[6.75rem] md:max-h-[calc(100dvh-7.5rem)] md:overflow-y-auto">
@@ -1031,9 +1012,17 @@ export function SfxDashboard() {
                   {draftNames.length === 0 && (
                     <motion.li
                       key="drafts-empty"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
+                      initial={
+                        reducedMotion
+                          ? { opacity: 0 }
+                          : { opacity: 0, y: 4 }
+                      }
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={
+                        reducedMotion
+                          ? { opacity: 0 }
+                          : { opacity: 0, y: 4 }
+                      }
                       transition={{ duration: durations.fast, ease: easeOut }}
                     >
                       <p className="px-2 text-xs text-[var(--sfx-ink-soft)]">
@@ -1217,7 +1206,7 @@ export function SfxDashboard() {
                           }
                         : {
                             opacity: 0,
-                            y: -4,
+                            y: 6,
                             transition: {
                               duration: durations.fast,
                               ease: easeOut,
@@ -1257,7 +1246,11 @@ export function SfxDashboard() {
             </div>
           </div>
 
-          <div className="sfx-lab-layer space-y-3 p-3">
+          <motion.div
+            layout={layoutEnabled}
+            transition={{ layout: layoutSpring }}
+            className="sfx-lab-layer space-y-3 p-3"
+          >
             <div className="flex items-center justify-between gap-2">
               <h3 className="sfx-lab-section-label">
                 Shimmer
@@ -1300,21 +1293,10 @@ export function SfxDashboard() {
               {recipe.shimmer && (
                 <motion.div
                   key="shimmer-fields"
-                  initial={
-                    reducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }
-                  }
-                  animate={
-                    reducedMotion
-                      ? { opacity: 1 }
-                      : { height: "auto", opacity: 1 }
-                  }
-                  exit={
-                    reducedMotion
-                      ? { opacity: 0 }
-                      : { height: 0, opacity: 0 }
-                  }
-                  transition={collapseTransition(reducedMotion)}
-                  className="overflow-hidden"
+                  initial={statusPresence.initial}
+                  animate={statusPresence.animate}
+                  exit={statusPresence.exit}
+                  transition={statusPresence.transition}
                 >
                   <div className="grid gap-3 sm:grid-cols-2">
                     <SliderField
@@ -1397,7 +1379,7 @@ export function SfxDashboard() {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
 
           <label className="block">
             <span className={labelClass}>TypeScript export</span>
