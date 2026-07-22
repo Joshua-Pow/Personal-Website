@@ -402,6 +402,8 @@ code {
   background: color-mix(in oklch, white 72%, var(--sfx-linen));
   color: var(--sfx-ink);
   box-shadow: 0 1px 0 oklch(100% 0 0 / 55%) inset;
+  /* iOS Safari zooms focused inputs under 16px — keep at least that size */
+  font-size: max(16px, 1em);
 }
 
 .sfx-lab-field:focus {

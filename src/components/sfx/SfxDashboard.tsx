@@ -51,7 +51,7 @@ const FILTER_TYPES: BiquadFilterType[] = [
 ];
 
 const fieldClass =
-  "sfx-lab-field min-h-11 w-full px-2.5 py-2 text-sm focus:outline-none sm:min-h-0 sm:py-1.5";
+  "sfx-lab-field min-h-11 w-full px-2.5 py-2 text-base focus:outline-none sm:min-h-0 sm:py-1.5";
 const labelClass = "sfx-lab-label mb-1 block text-[11px] font-medium uppercase";
 const btnClass =
   "sfx-lab-btn min-h-9 px-3 py-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklch,var(--sfx-gold)_45%,transparent)] disabled:cursor-not-allowed sm:min-h-0 sm:px-3.5";
