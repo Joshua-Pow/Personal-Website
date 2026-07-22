@@ -1,6 +1,6 @@
 # 003 — Animate sfx layer list add/remove
 
-- **Status**: TODO
+- **Status**: DONE
 - **Commit**: `9d471c4`
 - **Severity**: MEDIUM
 - **Category**: Missed opportunities (Preventing a jarring change + Spatial consistency)

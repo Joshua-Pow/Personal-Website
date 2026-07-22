@@ -1,6 +1,6 @@
 # 006 — Animate empty drafts → first draft chip
 
-- **Status**: TODO
+- **Status**: DONE
 - **Commit**: `9d471c4`
 - **Severity**: LOW
 - **Category**: Missed opportunities (Delight + Preventing a jarring change)

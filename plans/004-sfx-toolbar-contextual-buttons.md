@@ -1,6 +1,6 @@
 # 004 — Animate sfx toolbar contextual actions
 
-- **Status**: TODO
+- **Status**: DONE
 - **Commit**: `9d471c4`
 - **Severity**: LOW
 - **Category**: Missed opportunities (State indication + Preventing a jarring change)

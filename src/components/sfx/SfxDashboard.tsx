@@ -35,6 +35,7 @@ import {
   getTickSoundMutedSnapshot,
   subscribeTickSoundMuted,
 } from "@/lib/tick-sound";
+import { durations, easeOut } from "@/lib/motion";
 import { cn } from "@/lib/utils/cn";
 
 type Selection =
@@ -62,6 +63,8 @@ const tapSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
 /** Accordion chevron — same spring family as toolbar buttons. */
 const chevronSpring = { type: "spring" as const, stiffness: 420, damping: 28 };
 const panelEase = [0.16, 1, 0.3, 1] as const;
+/** Layout reflow for list/toolbar membership changes. */
+const layoutSpring = { type: "spring" as const, stiffness: 420, damping: 32 };
 
 function slugifyName(value: string): string {
   return value
@@ -82,6 +85,7 @@ function LabButton({
   className,
   children,
   disabled,
+  transition,
   ...props
 }: LabButtonProps) {
   const reducedMotion = useReducedMotion();
@@ -98,7 +102,7 @@ function LabButton({
       )}
       whileHover={inert ? undefined : { y: -1.5, scale: 1.03 }}
       whileTap={inert ? undefined : { y: 0, scale: 0.96 }}
-      transition={tapSpring}
+      transition={transition ? { ...tapSpring, ...transition } : tapSpring}
       data-sfx-press
       data-sfx-release
     >
@@ -437,6 +441,7 @@ function LayerEditor({
 }
 
 export function SfxDashboard() {
+  const reducedMotion = useReducedMotion();
   const muted = useSyncExternalStore(
     subscribeTickSoundMuted,
     getTickSoundMutedSnapshot,
@@ -459,6 +464,9 @@ export function SfxDashboard() {
   const [draftName, setDraftName] = useState("tick");
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
+
+  const statusVisible = muted || Boolean(copyStatus);
+  const layoutEnabled = !reducedMotion;
 
   const persistDrafts = useCallback((next: SfxDraftMap) => {
     writeDrafts(next);
@@ -584,47 +592,173 @@ export function SfxDashboard() {
           <LabButton
             variant="play"
             className="col-span-2 sm:col-auto"
+            layout={layoutEnabled}
+            transition={{ layout: layoutSpring }}
             onClick={preview}
           >
             Play preview
           </LabButton>
-          <LabButton onClick={createNew}>New sound</LabButton>
-          <LabButton onClick={duplicateAsDraft}>Duplicate</LabButton>
-          <LabButton onClick={saveDraft} disabled={!slugifyName(draftName)}>
+          <LabButton
+            layout={layoutEnabled}
+            transition={{ layout: layoutSpring }}
+            onClick={createNew}
+          >
+            New sound
+          </LabButton>
+          <LabButton
+            layout={layoutEnabled}
+            transition={{ layout: layoutSpring }}
+            onClick={duplicateAsDraft}
+          >
+            Duplicate
+          </LabButton>
+          <LabButton
+            layout={layoutEnabled}
+            transition={{ layout: layoutSpring }}
+            onClick={saveDraft}
+            disabled={!slugifyName(draftName)}
+          >
             Save draft
           </LabButton>
-          {selection.kind === "builtin" && dirty && (
-            <LabButton onClick={resetBuiltin}>
-              <span className="sm:hidden">Reset</span>
-              <span className="hidden sm:inline">Reset to builtin</span>
-            </LabButton>
-          )}
-          {selection.kind === "draft" && drafts[selection.name] && (
-            <LabButton onClick={deleteDraft}>
-              <span className="sm:hidden">Delete</span>
-              <span className="hidden sm:inline">Delete draft</span>
-            </LabButton>
-          )}
-          <LabButton onClick={copyTs}>
+          <AnimatePresence initial={false}>
+            {selection.kind === "builtin" && dirty && (
+              <LabButton
+                key="reset-builtin"
+                layout={layoutEnabled}
+                initial={
+                  reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97 }
+                }
+                animate={{ opacity: 1, scale: 1 }}
+                exit={
+                  reducedMotion
+                    ? {
+                        opacity: 0,
+                        transition: { duration: durations.fast, ease: easeOut },
+                      }
+                    : {
+                        opacity: 0,
+                        scale: 0.97,
+                        transition: { duration: durations.fast, ease: easeOut },
+                      }
+                }
+                transition={{
+                  duration: 0.16,
+                  ease: easeOut,
+                  layout: layoutSpring,
+                }}
+                onClick={resetBuiltin}
+              >
+                <span className="sm:hidden">Reset</span>
+                <span className="hidden sm:inline">Reset to builtin</span>
+              </LabButton>
+            )}
+            {selection.kind === "draft" && drafts[selection.name] && (
+              <LabButton
+                key="delete-draft"
+                layout={layoutEnabled}
+                initial={
+                  reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97 }
+                }
+                animate={{ opacity: 1, scale: 1 }}
+                exit={
+                  reducedMotion
+                    ? {
+                        opacity: 0,
+                        transition: { duration: durations.fast, ease: easeOut },
+                      }
+                    : {
+                        opacity: 0,
+                        scale: 0.97,
+                        transition: { duration: durations.fast, ease: easeOut },
+                      }
+                }
+                transition={{
+                  duration: 0.16,
+                  ease: easeOut,
+                  layout: layoutSpring,
+                }}
+                onClick={deleteDraft}
+              >
+                <span className="sm:hidden">Delete</span>
+                <span className="hidden sm:inline">Delete draft</span>
+              </LabButton>
+            )}
+          </AnimatePresence>
+          <LabButton
+            layout={layoutEnabled}
+            transition={{ layout: layoutSpring }}
+            onClick={copyTs}
+          >
             <span className="sm:hidden">Copy TS</span>
             <span className="hidden sm:inline">Copy as TypeScript</span>
           </LabButton>
         </div>
-        {(muted || copyStatus) && (
-          <div className="mt-1.5 space-y-1 sm:mt-2">
+        <div
+          className={cn(
+            "space-y-1",
+            statusVisible ? "mt-1.5 sm:mt-2" : "mt-0"
+          )}
+        >
+          <AnimatePresence initial={false}>
             {muted && (
-              <p className="sfx-lab-muted rounded-lg px-2.5 py-1 text-[11px] leading-snug sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-xs">
+              <motion.p
+                key="mute-banner"
+                className="sfx-lab-muted rounded-lg px-2.5 py-1 text-[11px] leading-snug sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-xs"
+                initial={
+                  reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }
+                }
+                animate={{ opacity: 1, y: 0 }}
+                exit={
+                  reducedMotion
+                    ? {
+                        opacity: 0,
+                        transition: { duration: durations.fast, ease: easeOut },
+                      }
+                    : {
+                        opacity: 0,
+                        y: -4,
+                        transition: { duration: durations.fast, ease: easeOut },
+                      }
+                }
+                transition={{ duration: durations.ui, ease: easeOut }}
+              >
                 Sound is muted. Use the speaker toggle to unmute previews.
-              </p>
+              </motion.p>
             )}
+          </AnimatePresence>
+          <AnimatePresence initial={false}>
             {copyStatus && (
-              <p className="text-[11px] text-[var(--sfx-ink-soft)] sm:text-xs" role="status">
+              <motion.p
+                key="copy-status"
+                role="status"
+                className="text-[11px] text-[var(--sfx-ink-soft)] sm:text-xs"
+                initial={
+                  reducedMotion ? { opacity: 0 } : { opacity: 0, y: 4 }
+                }
+                animate={{ opacity: 1, y: 0 }}
+                exit={
+                  reducedMotion
+                    ? {
+                        opacity: 0,
+                        transition: { duration: durations.fast, ease: easeOut },
+                      }
+                    : {
+                        opacity: 0,
+                        y: 2,
+                        transition: { duration: durations.fast, ease: easeOut },
+                      }
+                }
+                transition={{
+                  duration: reducedMotion ? durations.fast : durations.ui,
+                  ease: easeOut,
+                }}
+              >
                 {copyStatus}
                 {dirty ? " · unsaved edits" : ""}
-              </p>
+              </motion.p>
             )}
-          </div>
-        )}
+          </AnimatePresence>
+        </div>
       </div>
 
       <div className="grid items-start gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
@@ -656,14 +790,37 @@ export function SfxDashboard() {
               <h2 className="sfx-lab-section-label mb-2 text-[11px] font-semibold uppercase">
                 Custom
               </h2>
-              {draftNames.length === 0 ? (
-                <p className="px-2 text-xs text-[var(--sfx-ink-soft)]">
-                  No drafts yet.
-                </p>
-              ) : (
-                <ul className="space-y-0.5">
+              <ul className="space-y-0.5">
+                <AnimatePresence initial={false}>
+                  {draftNames.length === 0 && (
+                    <motion.li
+                      key="drafts-empty"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: durations.fast, ease: easeOut }}
+                    >
+                      <p className="px-2 text-xs text-[var(--sfx-ink-soft)]">
+                        No drafts yet.
+                      </p>
+                    </motion.li>
+                  )}
                   {draftNames.map((name) => (
-                    <li key={name}>
+                    <motion.li
+                      key={name}
+                      initial={
+                        reducedMotion
+                          ? { opacity: 0 }
+                          : { opacity: 0, scale: 0.97 }
+                      }
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={
+                        reducedMotion
+                          ? { opacity: 0 }
+                          : { opacity: 0, scale: 0.97 }
+                      }
+                      transition={{ duration: durations.ui, ease: easeOut }}
+                    >
                       <SoundChip
                         label={name}
                         active={
@@ -675,10 +832,10 @@ export function SfxDashboard() {
                           if (draft) playRecipe(draft.recipe);
                         }}
                       />
-                    </li>
+                    </motion.li>
                   ))}
-                </ul>
-              )}
+                </AnimatePresence>
+              </ul>
             </section>
           </div>
         </aside>
@@ -744,26 +901,65 @@ export function SfxDashboard() {
                 Add layer
               </LabButton>
             </div>
-            {recipe.layers.map((layer, index) => (
-              <LayerEditor
-                key={`${selection.kind}-${selection.name}-layer-${index}`}
-                layer={layer}
-                index={index}
-                defaultOpen={index === 0 || recipe.layers.length <= 2}
-                onChange={(nextLayer) => {
-                  const layers = recipe.layers.slice();
-                  layers[index] = nextLayer;
-                  updateRecipe({ ...recipe, layers });
-                }}
-                onRemove={() => {
-                  if (recipe.layers.length <= 1) return;
-                  updateRecipe({
-                    ...recipe,
-                    layers: recipe.layers.filter((_, i) => i !== index),
-                  });
-                }}
-              />
-            ))}
+            {/* Remount Presence per selection so switching sounds doesn't parade enters */}
+            <div
+              key={`${selection.kind}-${selection.name}-layers`}
+              className="space-y-3"
+            >
+              <AnimatePresence initial={false}>
+                {recipe.layers.map((layer, index) => (
+                  <motion.div
+                    key={`layer-${index}`}
+                    layout={layoutEnabled}
+                    initial={
+                      reducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }
+                    }
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={
+                      reducedMotion
+                        ? {
+                            opacity: 0,
+                            transition: {
+                              duration: durations.fast,
+                              ease: easeOut,
+                            },
+                          }
+                        : {
+                            opacity: 0,
+                            y: -4,
+                            transition: {
+                              duration: durations.fast,
+                              ease: easeOut,
+                            },
+                          }
+                    }
+                    transition={{
+                      duration: durations.ui,
+                      ease: easeOut,
+                      layout: layoutSpring,
+                    }}
+                  >
+                    <LayerEditor
+                      layer={layer}
+                      index={index}
+                      defaultOpen={index === 0 || recipe.layers.length <= 2}
+                      onChange={(nextLayer) => {
+                        const layers = recipe.layers.slice();
+                        layers[index] = nextLayer;
+                        updateRecipe({ ...recipe, layers });
+                      }}
+                      onRemove={() => {
+                        if (recipe.layers.length <= 1) return;
+                        updateRecipe({
+                          ...recipe,
+                          layers: recipe.layers.filter((_, i) => i !== index),
+                        });
+                      }}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
           </div>
 
           <div className="sfx-lab-layer space-y-3 p-3">
@@ -800,72 +996,96 @@ export function SfxDashboard() {
                 </LabButton>
               )}
             </div>
-            {recipe.shimmer && (
-              <div className="grid grid-cols-2 gap-2">
-                <NumberField
-                  label="Delay"
-                  value={recipe.shimmer.delay}
-                  step={0.01}
-                  min={0}
-                  onChange={(delay) =>
-                    updateRecipe({
-                      ...recipe,
-                      shimmer: {
-                        ...recipe.shimmer!,
-                        delay: delay ?? recipe.shimmer!.delay,
-                      },
-                    })
+            <AnimatePresence initial={false}>
+              {recipe.shimmer && (
+                <motion.div
+                  key="shimmer-fields"
+                  initial={
+                    reducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }
                   }
-                />
-                <NumberField
-                  label="Feedback"
-                  value={recipe.shimmer.feedback}
-                  step={0.01}
-                  min={0}
-                  max={0.95}
-                  onChange={(feedback) =>
-                    updateRecipe({
-                      ...recipe,
-                      shimmer: {
-                        ...recipe.shimmer!,
-                        feedback: feedback ?? recipe.shimmer!.feedback,
-                      },
-                    })
+                  animate={
+                    reducedMotion
+                      ? { opacity: 1 }
+                      : { height: "auto", opacity: 1 }
                   }
-                />
-                <NumberField
-                  label="Wet"
-                  value={recipe.shimmer.wet}
-                  step={0.01}
-                  min={0}
-                  max={1}
-                  onChange={(wet) =>
-                    updateRecipe({
-                      ...recipe,
-                      shimmer: {
-                        ...recipe.shimmer!,
-                        wet: wet ?? recipe.shimmer!.wet,
-                      },
-                    })
+                  exit={
+                    reducedMotion
+                      ? { opacity: 0 }
+                      : { height: 0, opacity: 0 }
                   }
-                />
-                <NumberField
-                  label="Lowpass"
-                  value={recipe.shimmer.lowpass}
-                  step={10}
-                  min={100}
-                  onChange={(lowpass) =>
-                    updateRecipe({
-                      ...recipe,
-                      shimmer: {
-                        ...recipe.shimmer!,
-                        lowpass: lowpass ?? recipe.shimmer!.lowpass,
-                      },
-                    })
-                  }
-                />
-              </div>
-            )}
+                  transition={{
+                    duration: reducedMotion ? durations.fast : durations.ui,
+                    ease: panelEase,
+                  }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid grid-cols-2 gap-2">
+                    <NumberField
+                      label="Delay"
+                      value={recipe.shimmer.delay}
+                      step={0.01}
+                      min={0}
+                      onChange={(delay) =>
+                        updateRecipe({
+                          ...recipe,
+                          shimmer: {
+                            ...recipe.shimmer!,
+                            delay: delay ?? recipe.shimmer!.delay,
+                          },
+                        })
+                      }
+                    />
+                    <NumberField
+                      label="Feedback"
+                      value={recipe.shimmer.feedback}
+                      step={0.01}
+                      min={0}
+                      max={0.95}
+                      onChange={(feedback) =>
+                        updateRecipe({
+                          ...recipe,
+                          shimmer: {
+                            ...recipe.shimmer!,
+                            feedback: feedback ?? recipe.shimmer!.feedback,
+                          },
+                        })
+                      }
+                    />
+                    <NumberField
+                      label="Wet"
+                      value={recipe.shimmer.wet}
+                      step={0.01}
+                      min={0}
+                      max={1}
+                      onChange={(wet) =>
+                        updateRecipe({
+                          ...recipe,
+                          shimmer: {
+                            ...recipe.shimmer!,
+                            wet: wet ?? recipe.shimmer!.wet,
+                          },
+                        })
+                      }
+                    />
+                    <NumberField
+                      label="Lowpass"
+                      value={recipe.shimmer.lowpass}
+                      step={10}
+                      min={100}
+                      onChange={(lowpass) =>
+                        updateRecipe({
+                          ...recipe,
+                          shimmer: {
+                            ...recipe.shimmer!,
+                            lowpass: lowpass ?? recipe.shimmer!.lowpass,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <label className="block">

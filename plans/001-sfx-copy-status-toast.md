@@ -1,6 +1,6 @@
 # 001 — Animate sfx lab copy-status feedback
 
-- **Status**: TODO
+- **Status**: DONE
 - **Commit**: `9d471c4`
 - **Severity**: MEDIUM
 - **Category**: Missed opportunities (Feedback + Preventing a jarring change)

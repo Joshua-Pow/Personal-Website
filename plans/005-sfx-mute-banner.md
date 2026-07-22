@@ -1,6 +1,6 @@
 # 005 — Animate sfx mute toolbar banner
 
-- **Status**: TODO
+- **Status**: DONE
 - **Commit**: `9d471c4`
 - **Severity**: LOW
 - **Category**: Missed opportunities (State indication)

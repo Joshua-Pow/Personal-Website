@@ -1,6 +1,6 @@
 # 002 — Animate sfx shimmer controls open/close
 
-- **Status**: TODO
+- **Status**: DONE
 - **Commit**: `9d471c4`
 - **Severity**: MEDIUM
 - **Category**: Missed opportunities (State indication + Preventing a jarring change)

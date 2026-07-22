@@ -10,12 +10,12 @@ Plans produced from the `find-animation-opportunities` sweep of `/sfx`, written 
 
 | # | File | Title | Severity | Status | Depends on |
 | --- | --- | --- | --- | --- | --- |
-| 001 | `001-sfx-copy-status-toast.md` | Animate copy-status feedback | MEDIUM | TODO | — |
-| 002 | `002-sfx-shimmer-panel.md` | Animate shimmer controls open/close | MEDIUM | TODO | — |
-| 003 | `003-sfx-layer-list-presence.md` | Animate layer list add/remove | MEDIUM | TODO | — |
-| 004 | `004-sfx-toolbar-contextual-buttons.md` | Animate toolbar Reset/Delete | LOW | TODO | — |
-| 005 | `005-sfx-mute-banner.md` | Animate mute toolbar banner | LOW | TODO | 001 (shared status slot) |
-| 006 | `006-sfx-empty-drafts-delight.md` | Empty drafts → first chip | LOW | TODO | — |
+| 001 | `001-sfx-copy-status-toast.md` | Animate copy-status feedback | MEDIUM | DONE | — |
+| 002 | `002-sfx-shimmer-panel.md` | Animate shimmer controls open/close | MEDIUM | DONE | — |
+| 003 | `003-sfx-layer-list-presence.md` | Animate layer list add/remove | MEDIUM | DONE | — |
+| 004 | `004-sfx-toolbar-contextual-buttons.md` | Animate toolbar Reset/Delete | LOW | DONE | — |
+| 005 | `005-sfx-mute-banner.md` | Animate mute toolbar banner | LOW | DONE | 001 (shared status slot) |
+| 006 | `006-sfx-empty-drafts-delight.md` | Empty drafts → first chip | LOW | DONE | — |
 
 ## Recommended execution order
 
