@@ -24,6 +24,8 @@ import {
   type ToneLayer,
 } from "@/lib/sfx";
 import { SoundMark } from "@/components/sfx/SoundMark";
+import { ChoiceField, SliderField } from "@/components/sfx/SfxControls";
+import { createRandomRecipe } from "@/lib/sfx/randomize";
 import {
   getDraftsServerSnapshot,
   getDraftsSnapshot,
@@ -43,14 +45,6 @@ import { cn } from "@/lib/utils/cn";
 type Selection =
   | { kind: "builtin"; name: SoundName }
   | { kind: "draft"; name: string };
-
-const WAVEFORMS: OscillatorType[] = ["sine", "triangle", "square", "sawtooth"];
-const FILTER_TYPES: BiquadFilterType[] = [
-  "lowpass",
-  "highpass",
-  "bandpass",
-  "notch",
-];
 
 const fieldClass =
   "sfx-lab-field min-h-10 w-full px-2.5 py-1.5 text-sm focus:outline-none sm:min-h-0 sm:py-1.5";
@@ -192,8 +186,6 @@ function SoundChip({ name, kind, active, onSelect }: SoundChipProps) {
       whileHover={reducedMotion ? undefined : { x: 2, scale: 1.01 }}
       whileTap={reducedMotion ? undefined : { scale: 0.96 }}
       transition={tapSpring}
-      data-sfx-press
-      data-sfx-release
       onClick={onSelect}
     >
       <span className="sfx-lab-sound-mark" aria-hidden>
@@ -209,72 +201,54 @@ function SoundChip({ name, kind, active, onSelect }: SoundChipProps) {
   );
 }
 
-function NumberField({
-  label,
-  value,
-  onChange,
-  min,
-  max,
-  step,
-}: {
-  label: string;
-  value: number | undefined;
-  onChange: (value: number | undefined) => void;
-  min?: number;
-  max?: number;
-  step?: number;
-}) {
+function IconShuffle({ className }: { className?: string }) {
   return (
-    <label className="block">
-      <span className={labelClass}>{label}</span>
-      <input
-        type="number"
-        className={fieldClass}
-        value={value ?? ""}
-        min={min}
-        max={max}
-        step={step ?? "any"}
-        onChange={(event) => {
-          const raw = event.target.value;
-          if (raw === "") {
-            onChange(undefined);
-            return;
-          }
-          const next = Number(raw);
-          if (!Number.isNaN(next)) onChange(next);
-        }}
-      />
-    </label>
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden
+      className={cn("size-3.5", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M16 3h5v5" />
+      <path d="M4 20 20 4" />
+      <path d="M21 16v5h-5" />
+      <path d="M15 15l6 6" />
+      <path d="M4 4l5 5" />
+    </svg>
   );
 }
 
-function SelectField<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: T;
-  options: readonly T[];
-  onChange: (value: T) => void;
-}) {
-  return (
-    <label className="block">
-      <span className={labelClass}>{label}</span>
-      <select
-        className={fieldClass}
-        value={value}
-        onChange={(event) => onChange(event.target.value as T)}
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
+const KIND_OPTIONS = [
+  { value: "tone" as const, title: "Tone", cue: "Pitched note" },
+  { value: "noise" as const, title: "Noise", cue: "Airy texture" },
+];
+
+const WAVEFORM_OPTIONS = [
+  { value: "sine" as const, title: "Sine", cue: "Soft" },
+  { value: "triangle" as const, title: "Triangle", cue: "Mellow" },
+  { value: "square" as const, title: "Square", cue: "Hollow" },
+  { value: "sawtooth" as const, title: "Saw", cue: "Bright" },
+];
+
+const FILTER_OPTIONS = [
+  { value: "lowpass" as const, title: "Low", cue: "Muffled" },
+  { value: "highpass" as const, title: "High", cue: "Thin" },
+  { value: "bandpass" as const, title: "Band", cue: "Telephone" },
+  { value: "notch" as const, title: "Notch", cue: "Hollow cut" },
+];
+
+function formatSeconds(value: number): string {
+  if (value < 0.01) return `${Math.round(value * 1000)}ms`;
+  if (value < 1) return `${value.toFixed(3).replace(/0+$/, "").replace(/\.$/, "")}s`;
+  return `${value.toFixed(2)}s`;
+}
+
+function formatHz(value: number): string {
+  return `${Math.round(value)}Hz`;
 }
 
 function LayerEditor({
@@ -375,11 +349,12 @@ function LayerEditor({
             transition={{ duration: 0.2, ease: panelEase }}
             className="overflow-hidden"
           >
-            <div className="space-y-3 border-t border-[var(--sfx-stroke)] px-3 py-3">
-              <SelectField
+            <div className="space-y-4 border-t border-[var(--sfx-stroke)] px-3 py-3">
+              <ChoiceField
                 label="Kind"
+                hint="Tone is a pitched note. Noise is a soft textured bed."
                 value={layer.kind}
-                options={["tone", "noise"] as const}
+                options={KIND_OPTIONS}
                 onChange={(kind) => {
                   if (kind === layer.kind) return;
                   if (kind === "tone") {
@@ -407,109 +382,164 @@ function LayerEditor({
                 }}
               />
 
-              <div className="grid grid-cols-2 gap-2">
-                <NumberField
+              <div className="grid gap-3 sm:grid-cols-2">
+                <SliderField
                   label="Offset"
-                  value={layer.offset}
-                  step={0.001}
+                  hint="Delay before this layer starts."
+                  value={layer.offset ?? 0}
                   min={0}
-                  onChange={(offset) => onChange({ ...layer, offset })}
+                  max={0.4}
+                  step={0.001}
+                  format={formatSeconds}
+                  onChange={(offset) =>
+                    onChange({
+                      ...layer,
+                      offset: offset === 0 ? undefined : offset,
+                    })
+                  }
                 />
-                <NumberField
+                <SliderField
                   label="Attack"
+                  hint="How quickly the sound fades in."
                   value={layer.attack}
+                  min={0.001}
+                  max={0.4}
                   step={0.001}
-                  min={0}
-                  onChange={(attack) =>
-                    onChange({ ...layer, attack: attack ?? layer.attack })
-                  }
+                  format={formatSeconds}
+                  onChange={(attack) => onChange({ ...layer, attack })}
                 />
-                <NumberField
+                <SliderField
                   label="Decay"
+                  hint="How long it takes to fade out."
                   value={layer.decay}
+                  min={0.02}
+                  max={0.8}
                   step={0.001}
-                  min={0}
-                  onChange={(decay) =>
-                    onChange({ ...layer, decay: decay ?? layer.decay })
-                  }
+                  format={formatSeconds}
+                  onChange={(decay) => onChange({ ...layer, decay })}
                 />
-                <NumberField
+                <SliderField
                   label="Peak"
+                  hint="How loud this layer gets (0–1)."
                   value={layer.peak}
+                  min={0.01}
+                  max={0.3}
                   step={0.001}
-                  min={0}
-                  max={1}
-                  onChange={(peak) =>
-                    onChange({ ...layer, peak: peak ?? layer.peak })
-                  }
+                  format={(n) => n.toFixed(3)}
+                  onChange={(peak) => onChange({ ...layer, peak })}
                 />
               </div>
 
               {layer.kind === "tone" ? (
-                <div className="grid grid-cols-2 gap-2">
-                  <SelectField
+                <div className="space-y-4">
+                  <ChoiceField
                     label="Waveform"
+                    hint="The shape of the pitched tone."
                     value={layer.waveform}
-                    options={WAVEFORMS}
+                    options={WAVEFORM_OPTIONS}
                     onChange={(waveform) => setTone({ waveform })}
                   />
-                  <NumberField
-                    label="Frequency"
-                    value={layer.frequency}
-                    step={1}
-                    min={20}
-                    onChange={(frequency) =>
-                      setTone({ frequency: frequency ?? layer.frequency })
-                    }
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <SliderField
+                      label="Frequency"
+                      hint="Pitch in hertz — higher is brighter."
+                      value={layer.frequency}
+                      min={80}
+                      max={3200}
+                      step={1}
+                      format={formatHz}
+                      onChange={(frequency) => setTone({ frequency })}
+                    />
+                    <SliderField
+                      label="Detune"
+                      hint="Slight pitch drift in cents for chorus."
+                      value={layer.detune ?? 0}
+                      min={-40}
+                      max={40}
+                      step={1}
+                      format={(n) => `${n > 0 ? "+" : ""}${n}¢`}
+                      onChange={(detune) =>
+                        setTone({ detune: detune === 0 ? undefined : detune })
+                      }
+                    />
+                  </div>
+                  <ChoiceField
+                    label="Glide"
+                    hint="Slide the pitch from start to another note."
+                    value={layer.glideTo === undefined ? "off" : "on"}
+                    options={[
+                      { value: "off", title: "Off", cue: "Fixed pitch" },
+                      { value: "on", title: "On", cue: "Slide pitch" },
+                    ]}
+                    onChange={(mode) => {
+                      if (mode === "off") {
+                        setTone({ glideTo: undefined, glideTime: undefined });
+                      } else {
+                        setTone({
+                          glideTo: Math.max(80, Math.round(layer.frequency * 0.55)),
+                          glideTime: layer.glideTime ?? 0.12,
+                        });
+                      }
+                    }}
                   />
-                  <NumberField
-                    label="Detune"
-                    value={layer.detune}
-                    step={1}
-                    onChange={(detune) => setTone({ detune })}
-                  />
-                  <NumberField
-                    label="Glide to"
-                    value={layer.glideTo}
-                    step={1}
-                    min={20}
-                    onChange={(glideTo) => setTone({ glideTo })}
-                  />
-                  <NumberField
-                    label="Glide time"
-                    value={layer.glideTime}
-                    step={0.001}
-                    min={0}
-                    onChange={(glideTime) => setTone({ glideTime })}
-                  />
+                  {layer.glideTo !== undefined && (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <SliderField
+                        label="Glide to"
+                        hint="Where the pitch slides."
+                        value={layer.glideTo}
+                        min={80}
+                        max={3200}
+                        step={1}
+                        format={formatHz}
+                        onChange={(glideTo) => setTone({ glideTo })}
+                      />
+                      <SliderField
+                        label="Glide time"
+                        hint="How long the slide takes."
+                        value={layer.glideTime ?? 0.12}
+                        min={0.01}
+                        max={0.5}
+                        step={0.001}
+                        format={formatSeconds}
+                        onChange={(glideTime) => setTone({ glideTime })}
+                      />
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <SelectField
+                <div className="space-y-4">
+                  <ChoiceField
                     label="Filter"
+                    hint="Shapes the noise — which frequencies stay."
                     value={layer.filterType}
-                    options={FILTER_TYPES}
+                    options={FILTER_OPTIONS}
                     onChange={(filterType) => setNoise({ filterType })}
                   />
-                  <NumberField
-                    label="Filter Hz"
-                    value={layer.filterFrequency}
-                    step={1}
-                    min={20}
-                    onChange={(filterFrequency) =>
-                      setNoise({
-                        filterFrequency:
-                          filterFrequency ?? layer.filterFrequency,
-                      })
-                    }
-                  />
-                  <NumberField
-                    label="Filter Q"
-                    value={layer.filterQ}
-                    step={0.1}
-                    min={0}
-                    onChange={(filterQ) => setNoise({ filterQ })}
-                  />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <SliderField
+                      label="Filter Hz"
+                      hint="Center or cutoff of the filter."
+                      value={layer.filterFrequency}
+                      min={200}
+                      max={8000}
+                      step={10}
+                      format={formatHz}
+                      onChange={(filterFrequency) =>
+                        setNoise({ filterFrequency })
+                      }
+                    />
+                    <SliderField
+                      label="Filter Q"
+                      hint="How narrow the filter focus is."
+                      value={layer.filterQ ?? 1}
+                      min={0.2}
+                      max={12}
+                      step={0.1}
+                      format={(n) => n.toFixed(1)}
+                      onChange={(filterQ) => setNoise({ filterQ })}
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -544,6 +574,7 @@ export function SfxDashboard() {
   const [draftName, setDraftName] = useState("tick");
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
+  const [showGuide, setShowGuide] = useState(true);
 
   const layoutEnabled = !reducedMotion;
 
@@ -635,6 +666,23 @@ export function SfxDashboard() {
     setCopyStatus(null);
   }, [drafts]);
 
+  const shuffleRecipe = useCallback(() => {
+    let candidate = "shuffle";
+    let i = 2;
+    while (drafts[candidate] || (sounds as readonly string[]).includes(candidate)) {
+      candidate = `shuffle-${i}`;
+      i += 1;
+    }
+    const next = createRandomRecipe();
+    setSelection({ kind: "draft", name: candidate });
+    setDraftName(candidate);
+    setRecipe(next);
+    setDirty(true);
+    setCopyStatus("Shuffled a new sound — hit Play preview");
+    setShowGuide(false);
+    if (!muted) playRecipe(next);
+  }, [drafts, muted]);
+
   const resetBuiltin = useCallback(() => {
     if (selection.kind !== "builtin") return;
     setRecipe(cloneRecipe(RECIPES[selection.name]));
@@ -688,6 +736,14 @@ export function SfxDashboard() {
             onClick={createNew}
           >
             New sound
+          </LabButton>
+          <LabButton
+            layout={layoutEnabled}
+            transition={{ layout: layoutSpring }}
+            onClick={shuffleRecipe}
+          >
+            <IconShuffle />
+            <span>Shuffle</span>
           </LabButton>
           <LabButton
             layout={layoutEnabled}
@@ -978,19 +1034,51 @@ export function SfxDashboard() {
             </div>
           </div>
 
-          <NumberField
+          <SliderField
             label="Master gain"
+            hint="Overall loudness of this recipe."
             value={recipe.masterGain}
-            min={0}
-            max={2}
+            min={0.05}
+            max={1.4}
             step={0.01}
+            format={(n) => n.toFixed(2)}
             onChange={(masterGain) =>
               updateRecipe({
                 ...recipe,
-                masterGain: masterGain ?? recipe.masterGain,
+                masterGain,
               })
             }
           />
+
+          <div className="sfx-lab-guide">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="sfx-lab-section-label mb-1.5">How to sculpt</p>
+                {showGuide ? (
+                  <ol className="sfx-lab-guide-list">
+                    <li>Pick a built-in on the left, or hit Shuffle for a surprise.</li>
+                    <li>Drag the sliders — each one shows what it changes and its range.</li>
+                    <li>Tap the choice chips for tone vs noise, waveforms, and filters.</li>
+                    <li>Play preview often, then Save draft when you like it.</li>
+                  </ol>
+                ) : (
+                  <p className="sfx-lab-hint">
+                    Sliders show ranges. Choice chips reveal the options. Shuffle invents a starting point.
+                  </p>
+                )}
+              </div>
+              <LabButton
+                variant="icon"
+                aria-label={showGuide ? "Hide guide" : "Show guide"}
+                title={showGuide ? "Hide guide" : "Show guide"}
+                onClick={() => setShowGuide((value) => !value)}
+              >
+                <span className="text-[11px] font-semibold" aria-hidden>
+                  ?
+                </span>
+              </LabButton>
+            </div>
+          </div>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
@@ -1144,65 +1232,75 @@ export function SfxDashboard() {
                   }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-2 gap-2">
-                    <NumberField
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <SliderField
                       label="Delay"
+                      hint="Space between echo repeats."
                       value={recipe.shimmer.delay}
+                      min={0.02}
+                      max={0.4}
                       step={0.01}
-                      min={0}
+                      format={formatSeconds}
                       onChange={(delay) =>
                         updateRecipe({
                           ...recipe,
                           shimmer: {
                             ...recipe.shimmer!,
-                            delay: delay ?? recipe.shimmer!.delay,
+                            delay,
                           },
                         })
                       }
                     />
-                    <NumberField
+                    <SliderField
                       label="Feedback"
+                      hint="How long the echo trails."
                       value={recipe.shimmer.feedback}
+                      min={0.05}
+                      max={0.85}
                       step={0.01}
-                      min={0}
-                      max={0.95}
+                      format={(n) => n.toFixed(2)}
                       onChange={(feedback) =>
                         updateRecipe({
                           ...recipe,
                           shimmer: {
                             ...recipe.shimmer!,
-                            feedback: feedback ?? recipe.shimmer!.feedback,
+                            feedback,
                           },
                         })
                       }
                     />
-                    <NumberField
+                    <SliderField
                       label="Wet"
+                      hint="How much echo you hear."
                       value={recipe.shimmer.wet}
+                      min={0.02}
+                      max={0.6}
                       step={0.01}
-                      min={0}
-                      max={1}
+                      format={(n) => n.toFixed(2)}
                       onChange={(wet) =>
                         updateRecipe({
                           ...recipe,
                           shimmer: {
                             ...recipe.shimmer!,
-                            wet: wet ?? recipe.shimmer!.wet,
+                            wet,
                           },
                         })
                       }
                     />
-                    <NumberField
+                    <SliderField
                       label="Lowpass"
+                      hint="Darkens the echo tail."
                       value={recipe.shimmer.lowpass}
-                      step={10}
-                      min={100}
+                      min={400}
+                      max={10000}
+                      step={50}
+                      format={formatHz}
                       onChange={(lowpass) =>
                         updateRecipe({
                           ...recipe,
                           shimmer: {
                             ...recipe.shimmer!,
-                            lowpass: lowpass ?? recipe.shimmer!.lowpass,
+                            lowpass,
                           },
                         })
                       }

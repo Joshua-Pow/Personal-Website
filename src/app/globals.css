@@ -536,6 +536,140 @@ code {
   color: var(--sfx-ink);
 }
 
+/* Interactive sculpting controls */
+.sfx-lab-hint {
+  color: var(--sfx-ink-soft);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.sfx-lab-slider-value {
+  color: var(--sfx-ink);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.sfx-lab-range {
+  display: block;
+  width: 100%;
+  height: 1.6rem;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sfx-lab-range:focus-visible {
+  outline: none;
+}
+
+.sfx-lab-range::-webkit-slider-runnable-track {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--sfx-stroke) 70%, var(--sfx-linen));
+}
+
+.sfx-lab-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  margin-top: -0.325rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--sfx-gold-deep) 45%, var(--sfx-stroke));
+  background: linear-gradient(
+    165deg,
+    oklch(99% 0.01 95),
+    color-mix(in oklch, var(--sfx-gold) 35%, white)
+  );
+  box-shadow: 0 1px 3px oklch(40% 0.04 80 / 18%);
+}
+
+.sfx-lab-range::-moz-range-track {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--sfx-stroke) 70%, var(--sfx-linen));
+}
+
+.sfx-lab-range::-moz-range-thumb {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklch, var(--sfx-gold-deep) 45%, var(--sfx-stroke));
+  background: color-mix(in oklch, var(--sfx-gold) 35%, white);
+  box-shadow: 0 1px 3px oklch(40% 0.04 80 / 18%);
+}
+
+.sfx-lab-choice-option {
+  display: inline-flex;
+  min-width: 4.5rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  border-radius: 0.65rem;
+  corner-shape: squircle;
+  border: 1px solid var(--sfx-stroke);
+  background: color-mix(in oklch, var(--sfx-panel) 90%, white);
+  padding: 0.45rem 0.65rem;
+  text-align: left;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sfx-lab-choice-title {
+  color: var(--sfx-ink);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.sfx-lab-choice-cue {
+  color: var(--sfx-ink-soft);
+  font-size: 0.625rem;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.sfx-lab-choice-option:hover {
+  border-color: color-mix(in oklch, var(--sfx-gold-deep) 40%, var(--sfx-stroke));
+  background: oklch(100% 0.01 95);
+}
+
+.sfx-lab-choice-option-active {
+  border-color: color-mix(in oklch, var(--sfx-gold-deep) 55%, var(--sfx-stroke));
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklch, var(--sfx-gold) 28%, transparent),
+    color-mix(in oklch, var(--sfx-violet) 12%, transparent)
+  );
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--sfx-gold-deep) 20%, transparent);
+}
+
+.sfx-lab-guide {
+  border-radius: 0.85rem;
+  border: 1px solid var(--sfx-stroke);
+  background: color-mix(in oklch, var(--sfx-sky) 35%, var(--sfx-panel));
+  padding: 0.75rem 0.85rem;
+  box-shadow: 0 1px 0 oklch(100% 0 0 / 45%) inset;
+}
+
+.sfx-lab-guide-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--sfx-ink-soft);
+  font-size: 0.75rem;
+  letter-spacing: -0.01em;
+  line-height: 1.45;
+}
+
+.sfx-lab-guide-list li + li {
+  margin-top: 0.25rem;
+}
+
 .sfx-lab-path {
   height: 3px;
   border-radius: 999px;
