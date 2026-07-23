@@ -101,7 +101,7 @@ code {
   }
 }
 
-/* Shared element: Joshua Pow morphs between home header and subpage back link */
+/* Shared elements: name + mute morph across page navigations */
 @supports (view-transition-name: none) {
   ::view-transition {
     background-color: var(--page-bg);
@@ -111,20 +111,27 @@ code {
     view-transition-name: pow;
   }
 
-  ::view-transition-group(pow) {
+  .vt-mute {
+    view-transition-name: mute;
+  }
+
+  ::view-transition-group(pow),
+  ::view-transition-group(mute) {
     animation-duration: 0.5s;
     animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
   }
 
   ::view-transition-old(pow),
-  ::view-transition-new(pow) {
+  ::view-transition-new(pow),
+  ::view-transition-old(mute),
+  ::view-transition-new(mute) {
     mix-blend-mode: normal;
     width: auto;
     height: auto;
     object-fit: none;
   }
 
-  /* Keep root static — only the shared name morphs */
+  /* Keep root static — only shared chrome morphs */
   ::view-transition-group(root),
   ::view-transition-old(root),
   ::view-transition-new(root) {
