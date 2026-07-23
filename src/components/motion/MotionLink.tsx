@@ -34,10 +34,17 @@ export function MotionLink({
     rel ?? (target === "_blank" ? "noopener noreferrer" : undefined);
   const mergedClassName = cn(accent && interactiveLink(), className);
 
+  const sfxAttrs = {
+    "data-sfx-hover": "tick",
+    "data-sfx-press": true,
+    "data-sfx-release": true,
+  } as const;
+
   const motionProps = {
     whileTap: { scale: 0.98 },
     transition: { duration: durations.fast },
     className: mergedClassName,
+    ...sfxAttrs,
   };
 
   if (isExternal) {

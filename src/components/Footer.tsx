@@ -171,6 +171,9 @@ export function Footer() {
                   "focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
                   "data-kbd-focus:focus-visible:ring-2 data-kbd-focus:focus-visible:ring-accent-bright data-kbd-focus:focus-visible:ring-offset-2 data-kbd-focus:focus-visible:ring-offset-surface-offset"
                 )}
+                data-sfx-hover="tick"
+                data-sfx-press
+                data-sfx-release
                 onMouseEnter={() => handleLinkEnter(link)}
                 onMouseLeave={(event) => event.currentTarget.blur()}
                 onFocus={(event) => {
