@@ -26,9 +26,8 @@ const instrumentSerif = Instrument_Serif({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  alternates: {
-    canonical: "/",
-  },
+  // Canonical and og:url are set per-page so nested routes / 404s do not
+  // inherit the homepage as their preferred URL.
   title: {
     default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
@@ -37,13 +36,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: SITE_URL,
     siteName: SITE_NAME,
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
     images: [
       {
         url: "/icon.png",
+        width: 512,
+        height: 512,
         alt: SITE_NAME,
       },
     ],
@@ -54,9 +54,15 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: ["/icon.png"],
   },
+  // Prefer /favicon.ico so Googlebot (and browsers) find a root favicon.
+  // Also expose sized PNGs; Google recommends a square icon larger than 48px.
   icons: {
-    icon: "/icon.png",
-    apple: "/icon.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/favicon-96x96.png", type: "image/png", sizes: "96x96" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 

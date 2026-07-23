@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { SiteHeader } from "@/components/SiteHeader";
 import { HomeIntro } from "@/components/HomeIntro";
 import { HomePageWidgets } from "@/components/HomePageWidgets";
@@ -7,11 +8,21 @@ import {
   SITE_URL,
 } from "@/lib/site-metadata";
 
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    url: SITE_URL,
+  },
+};
+
 const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: SITE_NAME,
   url: SITE_URL,
+  image: `${SITE_URL}/icon.png`,
   description: SITE_DESCRIPTION,
   jobTitle: "Computer Engineer",
   alumniOf: {
