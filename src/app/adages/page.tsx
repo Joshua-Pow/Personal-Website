@@ -7,6 +7,9 @@ export const metadata = {
   alternates: {
     canonical: "/adages",
   },
+  openGraph: {
+    url: "/adages",
+  },
 };
 
 const page = () => {

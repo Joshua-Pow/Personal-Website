@@ -6,6 +6,9 @@ export const metadata = {
   alternates: {
     canonical: "/history",
   },
+  openGraph: {
+    url: "/history",
+  },
 };
 
 const page = () => {

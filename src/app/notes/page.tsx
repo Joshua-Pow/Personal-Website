@@ -5,6 +5,9 @@ export const metadata = {
   alternates: {
     canonical: "/notes",
   },
+  openGraph: {
+    url: "/notes",
+  },
 };
 
 const page = () => {

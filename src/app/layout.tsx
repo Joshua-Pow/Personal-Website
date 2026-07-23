@@ -26,9 +26,8 @@ const instrumentSerif = Instrument_Serif({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  alternates: {
-    canonical: "/",
-  },
+  // Canonical and og:url are set per-page so nested routes / 404s do not
+  // inherit the homepage as their preferred URL.
   title: {
     default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
@@ -37,7 +36,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: SITE_URL,
     siteName: SITE_NAME,
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
