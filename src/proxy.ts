@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SITE_URL } from "@/lib/site-metadata";
+import { SITE_REDIRECT_HOSTS, SITE_URL } from "@/lib/site-metadata";
 
-const canonicalHost = new URL(SITE_URL).host;
+const redirectHosts = new Set<string>(SITE_REDIRECT_HOSTS);
 
 /**
- * Prefer a single hostname so Google does not treat www + apex as duplicates.
- * Canonical tags alone produce "Alternate page with proper canonical tag" in GSC;
- * a 308 consolidates signals onto the preferred host.
+ * Prefer joshuapow.ca as the canonical host.
+ * Redirect .com (and www variants) with a 308 so Google consolidates ranking
+ * signals onto .ca instead of treating them as alternate canonicals.
  */
 export function proxy(request: NextRequest) {
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
 
-  if (host === `www.${canonicalHost}`) {
+  if (host && redirectHosts.has(host)) {
     const destination = new URL(
       `${request.nextUrl.pathname}${request.nextUrl.search}`,
       SITE_URL,
