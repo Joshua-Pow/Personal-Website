@@ -19,7 +19,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://joshuapow.com"),
+  metadataBase: new URL("https://joshuapow.ca"),
   alternates: {
     canonical: "/",
   },
