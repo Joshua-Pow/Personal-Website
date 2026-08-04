@@ -12,6 +12,7 @@ import {
   animate,
   motion,
   useMotionValue,
+  useMotionValueEvent,
   useTransform,
   type MotionValue,
 } from "motion/react";
@@ -125,6 +126,16 @@ export const EdgeBorderEffect = ({
   );
   const isMobileActiveRef = useRef(false);
   const [isMobileActive, setIsMobileActive] = useState(false);
+  /** Keep ProgressiveBlur unmounted at rest — 8× backdrop-filter is costly on mobile. */
+  const [blurActive, setBlurActive] = useState(false);
+
+  useMotionValueEvent(intensity, "change", (value) => {
+    // Update after the Motion render batch to avoid setState during another
+    // component's render/commit cycle.
+    queueMicrotask(() => {
+      setBlurActive(value > 0.01);
+    });
+  });
 
   useEffect(() => {
     const updateRootFontSize = () => {
@@ -450,7 +461,7 @@ export const EdgeBorderEffect = ({
               {children}
             </div>
 
-            {blurSlot ? (
+            {blurSlot && blurActive ? (
               <motion.div
                 className="pointer-events-none absolute inset-0 z-[25] overflow-hidden"
                 style={{ borderRadius }}

@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 import { useReducedMotion } from "motion/react";
 
 type PageEnterContextValue = {
@@ -14,6 +15,9 @@ type PageEnterContextValue = {
 };
 
 const PageEnterContext = createContext<PageEnterContextValue>({ ready: true });
+
+/** Max wait for a View Transition before revealing content anyway (mobile Safari can hang). */
+const VIEW_TRANSITION_READY_TIMEOUT_MS = 800;
 
 function getActiveViewTransition() {
   if (!("activeViewTransition" in document)) {
@@ -39,35 +43,61 @@ function afterNextPaint(callback: () => void) {
 
 /**
  * Gates page-enter reveals until after an active view transition finishes
- * (or after the first paint on cold loads).
+ * (or after the first paint on cold loads). Re-arms on every pathname change
+ * so client navigations don't start Motion reveals during the shared-element VT.
+ *
+ * Always includes a timeout fallback — if a VT stalls (common on mobile), content
+ * must still become visible.
  */
 export function PageEnterProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const reducedMotion = useReducedMotion();
-  const [ready, setReady] = useState(false);
+  /** Path the gate has cleared — compared to `pathname` so ready flips false immediately on nav. */
+  const [readyPath, setReadyPath] = useState<string | null>(null);
+  const ready = readyPath === pathname;
 
   useEffect(() => {
+    let cancelled = false;
+    let cancelPaint: (() => void) | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const markReady = () => {
+      if (cancelled) return;
+      setReadyPath(pathname);
+    };
+
+    const armTimeout = () => {
+      timeoutId = setTimeout(markReady, VIEW_TRANSITION_READY_TIMEOUT_MS);
+    };
+
+    const cleanup = () => {
+      cancelled = true;
+      cancelPaint?.();
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
+
     if (reducedMotion) {
-      return afterNextPaint(() => setReady(true));
+      cancelPaint = afterNextPaint(markReady);
+      return cleanup;
     }
 
     const activeTransition = getActiveViewTransition();
     if (activeTransition) {
-      let cancelled = false;
-      let cancelPaint: (() => void) | undefined;
-      void activeTransition.finished.then(() => {
-        if (cancelled) return;
-        cancelPaint = afterNextPaint(() => {
-          if (!cancelled) setReady(true);
+      armTimeout();
+      void activeTransition.finished
+        .catch(() => {
+          // VT can abort (timeout in DOM update); fall through to reveal.
+        })
+        .then(() => {
+          if (cancelled) return;
+          cancelPaint = afterNextPaint(markReady);
         });
-      });
-      return () => {
-        cancelled = true;
-        cancelPaint?.();
-      };
+      return cleanup;
     }
 
-    return afterNextPaint(() => setReady(true));
-  }, [reducedMotion]);
+    cancelPaint = afterNextPaint(markReady);
+    return cleanup;
+  }, [pathname, reducedMotion]);
 
   return (
     <PageEnterContext.Provider value={{ ready }}>

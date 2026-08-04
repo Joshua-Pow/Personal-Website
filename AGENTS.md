@@ -27,6 +27,8 @@ There is a single service: the Next.js app.
 - Local dev degrades external integrations gracefully:
   - `POST /api/visitor-location` mocks the location as "Toronto, Ontario 🇨🇦" when
     `NODE_ENV=development` and uses an in-memory store instead of Cloudflare KV.
+  - `/api/adages-images/*` tries R2 first, then `adages-images/web/<slug>.webp` on
+    disk, then proxies from production (`SITE_URL`) and caches into that folder.
   - `/api/spotify` returns HTTP 500 without Spotify secrets; this is expected locally.
  To enable it, provide `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, and
  `SPOTIFY_REFRESH_TOKEN`. `src/lib/spotify.ts` reads them straight from `process.env`,
