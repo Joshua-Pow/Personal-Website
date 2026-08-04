@@ -1,6 +1,6 @@
 "use client";
 
-import { Children, isValidElement } from "react";
+import { Children, isValidElement, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import {
   durations,
@@ -19,6 +19,34 @@ type RevealStaggerProps = {
   /** Gap between items (ms). */
   stagger?: number;
 };
+
+function StaggerItem({
+  child,
+  delay,
+  ready,
+}: {
+  child: React.ReactElement;
+  delay: number;
+  ready: boolean;
+}) {
+  const [promoting, setPromoting] = useState(false);
+  const transition = getTransition(durations.reveal, false, delay);
+
+  return (
+    <motion.div
+      initial={fadeUp.initial}
+      animate={ready ? fadeUp.animate : fadeUp.initial}
+      transition={transition}
+      onAnimationStart={() => {
+        if (ready) setPromoting(true);
+      }}
+      onAnimationComplete={() => setPromoting(false)}
+      style={{ willChange: promoting ? "opacity, transform" : "auto" }}
+    >
+      {child}
+    </motion.div>
+  );
+}
 
 /**
  * Staggers each child with the shared text-enter Motion recipe.
@@ -42,18 +70,13 @@ export function RevealStagger({
     <div className={className}>
       {items.map((child, index) => {
         const delay = baseDelay + index * stagger;
-        const transition = getTransition(durations.reveal, false, delay);
-
         return (
-          <motion.div
+          <StaggerItem
             key={child.key ?? index}
-            initial={fadeUp.initial}
-            animate={ready ? fadeUp.animate : fadeUp.initial}
-            transition={transition}
-            style={{ willChange: "opacity, transform, filter" }}
-          >
-            {child}
-          </motion.div>
+            child={child}
+            delay={delay}
+            ready={ready}
+          />
         );
       })}
     </div>

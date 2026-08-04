@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
+import { useState } from "react";
 import {
   getTransition,
   getVariantTransition,
@@ -43,6 +44,7 @@ export function Reveal({
     duration !== undefined
       ? getTransition(duration, reducedMotion ?? false, delay)
       : getVariantTransition(variant, delay, reducedMotion ?? false);
+  const [promoting, setPromoting] = useState(false);
 
   return (
     <Component
@@ -51,11 +53,12 @@ export function Reveal({
       transition={transition}
       className={className}
       data-vt={dataVt}
+      onAnimationStart={() => {
+        if (!reducedMotion && ready) setPromoting(true);
+      }}
+      onAnimationComplete={() => setPromoting(false)}
       style={{
-        willChange:
-          variant === "blurUp" || variant === "blurUpLg" || variant === "focusIn"
-            ? "opacity, transform"
-            : "opacity, transform, filter",
+        willChange: promoting ? "opacity, transform" : "auto",
       }}
     >
       {children}

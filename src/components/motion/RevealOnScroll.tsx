@@ -1,12 +1,13 @@
 "use client";
 
 import { motion, useInView, useReducedMotion } from "motion/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   getVariantTransition,
   variants,
   type VariantName,
 } from "@/lib/motion";
+import { usePageEnterReady } from "@/components/motion/PageEnterProvider";
 
 type RevealOnScrollProps = {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ export function RevealOnScroll({
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
   const reducedMotion = useReducedMotion();
+  const pageReady = usePageEnterReady();
   const Component = motion[as];
   const v = variants[variant];
   const transition = getVariantTransition(
@@ -34,7 +36,10 @@ export function RevealOnScroll({
     delay,
     reducedMotion ?? false
   );
-  const shouldReveal = Boolean(reducedMotion || isInView);
+  // Wait for page-enter (post view-transition) so first-viewport cards don't
+  // animate during the shared-element morph.
+  const shouldReveal = Boolean(reducedMotion || (isInView && pageReady));
+  const [promoting, setPromoting] = useState(false);
 
   return (
     <Component
@@ -43,11 +48,12 @@ export function RevealOnScroll({
       animate={shouldReveal ? v.animate : v.initial}
       transition={transition}
       className={className}
+      onAnimationStart={() => {
+        if (!reducedMotion && shouldReveal) setPromoting(true);
+      }}
+      onAnimationComplete={() => setPromoting(false)}
       style={{
-        willChange:
-          variant === "blurUp" || variant === "blurUpLg" || variant === "focusIn"
-            ? "opacity, transform"
-            : "opacity, transform, filter",
+        willChange: promoting ? "opacity, transform" : "auto",
       }}
     >
       {children}

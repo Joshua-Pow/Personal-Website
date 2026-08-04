@@ -7,6 +7,9 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 
 const nextConfig: NextConfig = {
+  // Phone / LAN testing hits the dev server by IP; without this, Next 16 blocks
+  // /_next/* chunks (403) so the page shell SSR's but client Motion stays at opacity 0.
+  allowedDevOrigins: ["192.168.*.*"],
   experimental: {
     optimizePackageImports: ["motion", "@base-ui/react", "swr"],
   },
