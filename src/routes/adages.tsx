@@ -7,12 +7,11 @@ import { buildPageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/adages")({
   head: () => buildPageHead({ title: "Adages", path: "/adages" }),
-  loader: () => getAdages(),
   component: AdagesPage,
 });
 
 function AdagesPage() {
-  const adages = Route.useLoaderData();
+  const adages = getAdages();
 
   return (
     <SubpageLayout
