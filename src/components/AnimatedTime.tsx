@@ -1,7 +1,11 @@
-"use client";
-
-import React, { useEffect, useSyncExternalStore, useState, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import React, {
+  useEffect,
+  useSyncExternalStore,
+  useState,
+  useRef,
+} from "react";
+
 import { playRecipe, RECIPES } from "@/lib/sfx";
 import type { SoundRecipe } from "@/lib/sfx";
 import {
@@ -15,14 +19,14 @@ interface Props {
   graduationDate: Date;
 }
 
-type TimeElapsed = {
+interface TimeElapsed {
   years: number;
   months: number;
   days: number;
   hours: number;
   minutes: number;
   seconds: number;
-};
+}
 
 /** Least-significant unit first so rollovers cascade like a flip board. */
 const FLIP_UNITS = [
@@ -54,11 +58,11 @@ const FLIP_CLICK: SoundRecipe = {
   masterGain: RECIPES.toggle.masterGain * 1.55,
 };
 
-type DigitFlip = {
+interface DigitFlip {
   key: string;
   unit: (typeof FLIP_UNITS)[number];
   index: number;
-};
+}
 
 /**
  * Ease-in stagger: early flips close together, later ones breathe —
@@ -66,7 +70,9 @@ type DigitFlip = {
  * stacked toggle hits don’t smear into one sound.
  */
 function cascadeDelayMs(index: number, count: number): number {
-  if (count <= 1) return 0;
+  if (count <= 1) {
+    return 0;
+  }
   const t = index / (count - 1);
   return ROLLOVER_MS * t * t;
 }
@@ -82,7 +88,9 @@ function collectDigitFlips(prev: TimeElapsed, next: TimeElapsed): DigitFlip[] {
   for (const unit of FLIP_UNITS) {
     const prevDigits = prev[unit].toString().padStart(2, "0");
     const nextDigits = next[unit].toString().padStart(2, "0");
-    if (prevDigits === nextDigits) continue;
+    if (prevDigits === nextDigits) {
+      continue;
+    }
 
     for (let index = nextDigits.length - 1; index >= 0; index -= 1) {
       if (prevDigits[index] !== nextDigits[index]) {
@@ -158,7 +166,9 @@ function AnimatedTime({ graduationDate }: Props) {
 
   useEffect(() => {
     const clearSoundTimeouts = () => {
-      soundTimeoutsRef.current.forEach((id) => window.clearTimeout(id));
+      for (const id of soundTimeoutsRef.current) {
+        window.clearTimeout(id);
+      }
       soundTimeoutsRef.current = [];
     };
 
@@ -168,7 +178,9 @@ function AnimatedTime({ graduationDate }: Props) {
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     const tick = () => {
-      if (document.hidden) return;
+      if (document.hidden) {
+        return;
+      }
 
       const now = new Date();
       const diff = now.getTime() - graduationDate.getTime();
@@ -193,7 +205,7 @@ function AnimatedTime({ graduationDate }: Props) {
       if (hasTickedRef.current && flips.length > 0 && isVisibleRef.current) {
         const delays: Record<string, number> = {};
 
-        flips.forEach((flip, index) => {
+        for (const [index, flip] of flips.entries()) {
           const delayMs = reducedMotion
             ? 0
             : cascadeDelayMs(index, flips.length);
@@ -209,7 +221,7 @@ function AnimatedTime({ graduationDate }: Props) {
               soundTimeoutsRef.current.push(timeoutId);
             }
           }
-        });
+        }
 
         setFlipDelays(reducedMotion ? {} : delays);
       } else {
@@ -243,21 +255,17 @@ function AnimatedTime({ graduationDate }: Props) {
           <span key={unit} className="flex flex-col items-center">
             <span className="relative flex items-center justify-center rounded-md bg-elevated px-1 shadow-sm">
               <span className="flex h-full items-center">
-                {value
-                  .toString()
-                  .padStart(2, "0")
-                  .split("")
-                  .map((digit, idx) => {
-                    const key = `${unit}-${idx}`;
-                    return (
-                      <DigitColumn
-                        key={key}
-                        digit={parseInt(digit, 10)}
-                        reducedMotion={reducedMotion ?? false}
-                        delay={flipDelays[key] ?? 0}
-                      />
-                    );
-                  })}
+                {[...value.toString().padStart(2, "0")].map((digit, idx) => {
+                  const key = `${unit}-${idx}`;
+                  return (
+                    <DigitColumn
+                      key={key}
+                      digit={Math.trunc(Number(digit))}
+                      reducedMotion={reducedMotion ?? false}
+                      delay={flipDelays[key] ?? 0}
+                    />
+                  );
+                })}
               </span>
             </span>
             <span className="mt-1 text-[8px] sm:text-xs">{unit}</span>

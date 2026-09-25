@@ -1,16 +1,15 @@
-"use client";
-
-import { useState } from "react";
 import { Popover } from "@base-ui/react/popover";
 import { AnimatePresence, useReducedMotion } from "motion/react";
+import { useState } from "react";
+
 import { PopoverSurface } from "@/components/motion/PopoverSurface";
 import { wordTrigger } from "@/lib/interactive";
 import { play } from "@/lib/sfx";
 
-type WordPopoverProps = {
+interface WordPopoverProps {
   term: string;
   definition: string;
-};
+}
 
 const popupClassName =
   "z-50 flex w-[min(18rem,calc(100vw-4rem))] origin-[var(--transform-origin)] gap-3 rounded-xl border border-[var(--popover-border)] bg-[var(--popover-bg)] px-4 py-3.5 shadow-[0_10px_30px_rgba(26,18,16,0.08),0_2px_8px_rgba(26,18,16,0.05)] backdrop-blur-md supports-[backdrop-filter]:bg-[var(--popover-bg)]";
@@ -29,11 +28,7 @@ export function WordPopover({ term, definition }: WordPopoverProps) {
         setOpen(next);
       }}
     >
-      <Popover.Trigger
-        className={wordTrigger}
-        data-sfx-press
-        data-sfx-release
-      >
+      <Popover.Trigger className={wordTrigger} data-sfx-press data-sfx-release>
         {term}
       </Popover.Trigger>
       <AnimatePresence>
@@ -43,9 +38,7 @@ export function WordPopover({ term, definition }: WordPopoverProps) {
               <Popover.Popup
                 className={popupClassName}
                 render={
-                  <PopoverSurface
-                    reducedMotion={reducedMotion ?? false}
-                  />
+                  <PopoverSurface reducedMotion={reducedMotion ?? false} />
                 }
               >
                 <span

@@ -1,64 +1,37 @@
-"use client";
+import { useQuery } from "@tanstack/react-query";
+import { lazy, Suspense } from "react";
 
-import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
-import { VisitorData } from "./LastVisitor";
-import { getOrCreateVisitorId } from "@/lib/visitor-id";
-import type { VisitorLocationResponse } from "@/app/api/visitor-location/route";
+import { ClientOnly } from "@/components/ClientOnly";
+import {
+  fetchVisitorLocation,
+  selectPreviousVisitor,
+  visitorLocationQueryKey,
+} from "@/lib/visitor-location";
 
-const Globe = dynamic(() => import("./Globe"), { ssr: false });
+const Globe = lazy(() => import("./Globe"));
+
+const globeFallback = (
+  <div
+    className="mb-8 flex h-[300px] w-[300px] items-center justify-center"
+    aria-hidden
+  />
+);
 
 export default function VisitorGlobe() {
-  const [visitorData, setVisitorData] = useState<VisitorData | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchVisitorInfo() {
-      try {
-        const visitorId = getOrCreateVisitorId();
-
-        const recordResponse = await fetch("/api/visitor-location", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ visitorId }),
-        });
-
-        if (!recordResponse.ok) {
-          throw new Error(`HTTP error! status: ${recordResponse.status}`);
-        }
-
-        const data: VisitorLocationResponse = await recordResponse.json();
-
-        if (
-          data.previousLocation &&
-          data.previousLatitude &&
-          data.previousLongitude
-        ) {
-          setVisitorData({
-            location: data.previousLocation,
-            latitude: data.previousLatitude,
-            longitude: data.previousLongitude,
-          });
-        } else {
-          setVisitorData(undefined);
-        }
-      } catch (error) {
-        console.error("Error fetching visitor location:", error);
-        setVisitorData(undefined);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchVisitorInfo();
-  }, []);
+  const { data, isLoading } = useQuery({
+    queryKey: visitorLocationQueryKey,
+    queryFn: fetchVisitorLocation,
+  });
+  const visitorData = data ? selectPreviousVisitor(data) : undefined;
 
   return (
     <div className="mb-8 flex flex-col items-center justify-center">
       <div className="flex h-[300px] w-[300px] items-center justify-center">
-        <Globe visitorData={visitorData} />
+        <ClientOnly fallback={globeFallback}>
+          <Suspense fallback={globeFallback}>
+            <Globe visitorData={visitorData} />
+          </Suspense>
+        </ClientOnly>
       </div>
       {!isLoading && visitorData ? (
         <p className="mt-2 text-center text-xs text-subtle">

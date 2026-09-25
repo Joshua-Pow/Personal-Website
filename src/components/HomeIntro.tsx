@@ -1,7 +1,8 @@
-import { Link } from "next-view-transitions";
+import { Link } from "@tanstack/react-router";
+
 import AnimatedTime from "@/components/AnimatedTime";
-import { RevealStagger } from "@/components/motion/RevealStagger";
 import { MotionLink } from "@/components/motion/MotionLink";
+import { RevealStagger } from "@/components/motion/RevealStagger";
 import { WordPopover } from "@/components/WordPopover";
 import { interactiveLink } from "@/lib/interactive";
 import { cn } from "@/lib/utils/cn";
@@ -26,9 +27,9 @@ export function HomeIntro() {
 
       <p className="text-pretty">
         I&apos;m a computer engineer from the{" "}
-        <span className="text-nowrap font-medium">University of Toronto </span>
+        <span className="font-medium text-nowrap">University of Toronto </span>
         and an aspiring{" "}
-        <span className="text-nowrap font-medium">Design Engineer</span>.
+        <span className="font-medium text-nowrap">Design Engineer</span>.
       </p>
 
       <p className="flex flex-row flex-wrap justify-start gap-1 text-pretty">
@@ -41,7 +42,7 @@ export function HomeIntro() {
 
       <p className="text-pretty">
         Since then, I&apos;ve been{" "}
-        <Link href="/history" className={tapLinkClassName} {...navSfxProps}>
+        <Link to="/history" className={tapLinkClassName} {...navSfxProps}>
           working
         </Link>{" "}
         at{" "}
@@ -52,10 +53,8 @@ export function HomeIntro() {
           Nuclear Promise X
         </MotionLink>
         , a nuclear innovation company, helping to modernize the industry one{" "}
-        <code className="rounded px-1 py-0.5 shadow-sm">
-          {"<div/>"}
-        </code>{" "}
-        at a time.
+        <code className="rounded px-1 py-0.5 shadow-sm">{"<div/>"}</code> at a
+        time.
       </p>
 
       <p className="text-pretty">
@@ -80,7 +79,7 @@ export function HomeIntro() {
           definition="Short, memorable statements of truth or wisdom, often passed down rather than authored."
         />{" "}
         that survive scrutiny end up in my{" "}
-        <Link href="/adages" className={tapLinkClassName} {...navSfxProps}>
+        <Link to="/adages" className={tapLinkClassName} {...navSfxProps}>
           adages
         </Link>
         .

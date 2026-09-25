@@ -1,8 +1,6 @@
-"use client";
-
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useSyncExternalStore } from "react";
-import { cn } from "@/lib/utils/cn";
+
 import { easeOut } from "@/lib/motion";
 import {
   getTickSoundMutedServerSnapshot,
@@ -10,6 +8,7 @@ import {
   subscribeTickSoundMuted,
   toggleTickSoundMuted,
 } from "@/lib/tick-sound";
+import { cn } from "@/lib/utils/cn";
 
 /** Lucide speaker body — shared by volume / volume-x. */
 const SPEAKER_PATH =
@@ -40,7 +39,7 @@ export function TickSoundToggle() {
         "vt-mute group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10",
         "text-on-surface-muted transition-[color,transform] duration-150 ease-out",
         "hover:text-accent-bright",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+        "focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-1 focus-visible:ring-offset-background focus-visible:outline-none",
         "active:scale-[0.98] motion-reduce:transition-none"
       )}
     >
@@ -60,11 +59,7 @@ export function TickSoundToggle() {
           {muted ? (
             <motion.g
               key="muted"
-              initial={
-                reducedMotion
-                  ? false
-                  : { opacity: 0 }
-              }
+              initial={reducedMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration, ease: easeOut }}
@@ -74,26 +69,26 @@ export function TickSoundToggle() {
                 x2="16"
                 y1="9"
                 y2="15"
-                initial={
-                  reducedMotion
-                    ? false
-                    : { pathLength: 0, opacity: 0 }
-                }
+                initial={reducedMotion ? false : { pathLength: 0, opacity: 0 }}
                 animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration, delay: reducedMotion ? 0 : 0.04, ease: easeOut }}
+                transition={{
+                  duration,
+                  delay: reducedMotion ? 0 : 0.04,
+                  ease: easeOut,
+                }}
               />
               <motion.line
                 x1="16"
                 x2="22"
                 y1="9"
                 y2="15"
-                initial={
-                  reducedMotion
-                    ? false
-                    : { pathLength: 0, opacity: 0 }
-                }
+                initial={reducedMotion ? false : { pathLength: 0, opacity: 0 }}
                 animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration, delay: reducedMotion ? 0 : 0.1, ease: easeOut }}
+                transition={{
+                  duration,
+                  delay: reducedMotion ? 0 : 0.1,
+                  ease: easeOut,
+                }}
               />
             </motion.g>
           ) : (

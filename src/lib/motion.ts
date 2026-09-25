@@ -52,10 +52,10 @@ export const popupVisible = {
   filter: "blur(0px)",
 } as const;
 
-type MotionVariant = {
+interface MotionVariant {
   initial: TargetAndTransition;
   animate: TargetAndTransition;
-};
+}
 
 /** Canonical text enter — blur 6px + y 8px over 700ms. */
 export const fadeUp: MotionVariant = {

@@ -1,15 +1,16 @@
-"use client";
-
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { durations } from "@/lib/motion";
-import { interactiveLink } from "@/lib/interactive";
-import { cn } from "@/lib/utils/cn";
+
 import { LinkPreviewPopover } from "@/components/LinkPreviewPopover";
+import { interactiveLink } from "@/lib/interactive";
+import { durations } from "@/lib/motion";
+import { cn } from "@/lib/utils/cn";
 
-const MotionNextLink = motion.create(Link);
+const MotionRouterLink = motion.create(Link);
 
-type MotionLinkProps = {
+type InternalPath = "/" | "/history" | "/adages" | "/notes";
+
+interface MotionLinkProps {
   href: string;
   children: React.ReactNode;
   className?: string;
@@ -18,7 +19,16 @@ type MotionLinkProps = {
   preview?: boolean;
   /** When false, skips default orange link text color */
   accent?: boolean;
-};
+}
+
+function isInternalPath(href: string): href is InternalPath {
+  return (
+    href === "/" ||
+    href === "/history" ||
+    href === "/adages" ||
+    href === "/notes"
+  );
+}
 
 export function MotionLink({
   href,
@@ -62,20 +72,23 @@ export function MotionLink({
     }
 
     return (
-      <motion.a
-        href={href}
-        target={target}
-        rel={resolvedRel}
-        {...motionProps}
-      >
+      <motion.a href={href} target={target} rel={resolvedRel} {...motionProps}>
+        {children}
+      </motion.a>
+    );
+  }
+
+  if (!isInternalPath(href)) {
+    return (
+      <motion.a href={href} target={target} rel={resolvedRel} {...motionProps}>
         {children}
       </motion.a>
     );
   }
 
   return (
-    <MotionNextLink href={href} {...motionProps}>
+    <MotionRouterLink to={href} {...motionProps}>
       {children}
-    </MotionNextLink>
+    </MotionRouterLink>
   );
 }

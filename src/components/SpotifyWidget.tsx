@@ -1,16 +1,22 @@
-"use client";
-
-import Image from "next/image";
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+
 import { MotionLink } from "@/components/motion/MotionLink";
-import { durations, easeOut, getExitTransition, getTransition } from "@/lib/motion";
+import {
+  durations,
+  easeOut,
+  getExitTransition,
+  getTransition,
+} from "@/lib/motion";
 import type {
-  SpotifyApiResponse,
   CurrentlyPlayingResponse,
   RecentlyPlayedResponse,
-} from "@/lib/spotify";
-import { toDisplayItem } from "@/lib/spotify";
+} from "@/lib/spotify-display";
+import {
+  fetchSpotifyData,
+  spotifyQueryKey,
+  toDisplayItem,
+} from "@/lib/spotify-display";
 
 const NOW_PLAYING_TRANSITION = {
   duration: 1.5,
@@ -25,7 +31,9 @@ const PULSE_TRANSITION = {
 } as const;
 
 function formatLastPlayedTime(timestamp: string | undefined) {
-  if (!timestamp) return "";
+  if (!timestamp) {
+    return "";
+  }
 
   const date = new Date(timestamp);
   const timeZone = "America/New_York";
@@ -46,14 +54,6 @@ function formatLastPlayedTime(timestamp: string | undefined) {
     .pop();
   return `${formatted} ${tzString}`;
 }
-
-const fetcher = async (url: string): Promise<SpotifyApiResponse> => {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`HTTP error! status: ${res.status}`);
-  }
-  return res.json();
-};
 
 function NowPlayingDot() {
   const reducedMotion = useReducedMotion();
@@ -83,11 +83,16 @@ function SpotifyContent({
   const playable = fromPlayer ?? lastPlayed?.track ?? null;
   const item = playable ? toDisplayItem(playable) : null;
 
-  if (!item) return null;
+  if (!item) {
+    return null;
+  }
 
   const itemKey = `${item.kind}-${item.name}-${item.subtitle}`;
   const enterTransition = getTransition(durations.ui, reducedMotion ?? false);
-  const exitTransition = getExitTransition(durations.ui, reducedMotion ?? false);
+  const exitTransition = getExitTransition(
+    durations.ui,
+    reducedMotion ?? false
+  );
   const isPlaying = Boolean(currentlyPlaying?.is_playing && fromPlayer);
 
   let status: string;
@@ -116,12 +121,12 @@ function SpotifyContent({
         >
           <div className="relative mb-1 flex items-center gap-4 rounded-md bg-gradient-to-br from-[var(--surface-inset-from)] via-[var(--surface-inset-via)] to-[var(--surface-inset-to)] p-1 shadow-[inset_0_1px_2px_rgba(26,18,16,0.08)]">
             <div className="relative h-16 w-16 flex-shrink-0">
-              <Image
+              <img
                 src={item.imageUrl}
                 alt={item.imageAlt}
-                className="rounded-md"
-                fill
-                sizes="64px"
+                width={64}
+                height={64}
+                className="size-16 rounded-md object-cover"
               />
             </div>
 
@@ -192,18 +197,20 @@ function SpotifyWidgetSkeleton() {
 }
 
 export default function SpotifyWidget() {
-  const { data, isLoading } = useSWR<SpotifyApiResponse>(
-    "/api/spotify",
-    fetcher,
-    {
-      refreshInterval: 30000,
-      revalidateOnFocus: true,
-      refreshWhenHidden: false,
-    }
-  );
+  const { data, isLoading } = useQuery({
+    queryKey: spotifyQueryKey,
+    queryFn: fetchSpotifyData,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: false,
+  });
 
-  if (isLoading) return <SpotifyWidgetSkeleton />;
-  if (!data) return null;
+  if (isLoading) {
+    return <SpotifyWidgetSkeleton />;
+  }
+  if (!data) {
+    return null;
+  }
 
   return <SpotifyContent {...data} />;
 }

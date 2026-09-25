@@ -1,21 +1,25 @@
-"use client";
-
 import type { ReactNode } from "react";
+
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
-import { formatAdageDate, type AdageData } from "@/lib/adages-types";
+import { formatAdageDate } from "@/lib/adages-types";
+import type { AdageData } from "@/lib/adages-types";
 import { textRevealStaggerMs } from "@/lib/motion";
 
-type AdageCardProps = {
+interface AdageCardProps {
   adage: AdageData & { content: ReactNode };
   index: number;
-};
+}
 
 export function AdageCard({ adage, index }: AdageCardProps) {
   const baseDelay = Math.min(index, 5) * textRevealStaggerMs;
   const isShortQuote = adage.quote.length < 80;
 
   return (
-    <RevealOnScroll variant="blurUp" delay={baseDelay} className="flex flex-col gap-6">
+    <RevealOnScroll
+      variant="blurUp"
+      delay={baseDelay}
+      className="flex flex-col gap-6"
+    >
       <div className="relative flex min-h-[420px] flex-col items-center justify-center overflow-hidden rounded-2xl px-10 py-14">
         {/* Plain img avoids Cloudflare IMAGES binding transform fees */}
         <img
@@ -44,16 +48,16 @@ export function AdageCard({ adage, index }: AdageCardProps) {
             isShortQuote ? "text-[2.25rem]" : "text-[1.875rem]"
           }`}
         >
-          &ldquo;{adage.quote.replace(/^"|"$/g, "")}&rdquo;
+          &ldquo;{adage.quote.replaceAll(/^"|"$/gu, "")}&rdquo;
         </blockquote>
-        <p className="relative z-10 mt-6 text-center font-instrument text-lg italic leading-7 tracking-[0.01em] text-[#F5F0E8]/75">
+        <p className="relative z-10 mt-6 text-center font-instrument text-lg leading-7 tracking-[0.01em] text-[#F5F0E8]/75 italic">
           {adage.attribution}
         </p>
       </div>
 
       <div className="flex flex-col gap-3 px-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-subtle">
+          <span className="text-[11px] font-medium tracking-[0.08em] text-subtle uppercase">
             Heard from
           </span>
           <span className="text-sm font-medium tracking-tight text-on-surface">

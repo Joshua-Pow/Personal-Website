@@ -1,18 +1,11 @@
-"use client";
-
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
-import { usePathname } from "next/navigation";
+import { useRouterState } from "@tanstack/react-router";
 import { useReducedMotion } from "motion/react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
-type PageEnterContextValue = {
+interface PageEnterContextValue {
   ready: boolean;
-};
+}
 
 const PageEnterContext = createContext<PageEnterContextValue>({ ready: true });
 
@@ -24,21 +17,20 @@ function getActiveViewTransition() {
     return null;
   }
 
-  return (
-    document as Document & { activeViewTransition?: ViewTransition | null }
-  ).activeViewTransition;
+  // SAFETY: Chromium exposes `document.activeViewTransition` after we confirmed
+  // the property exists; lib.dom's Document type does not include it yet.
+  const { activeViewTransition } = document as Document & {
+    activeViewTransition?: ViewTransition | null;
+  };
+  return activeViewTransition;
 }
 
-function afterNextPaint(callback: () => void) {
-  let outer = 0;
-  let inner = 0;
-  outer = requestAnimationFrame(() => {
-    inner = requestAnimationFrame(callback);
-  });
-  return () => {
-    cancelAnimationFrame(outer);
-    cancelAnimationFrame(inner);
-  };
+async function whenViewTransitionFinishes(transition: ViewTransition) {
+  try {
+    await transition.finished;
+  } catch {
+    // VT can abort (timeout in DOM update); fall through to reveal.
+  }
 }
 
 /**
@@ -50,57 +42,67 @@ function afterNextPaint(callback: () => void) {
  * must still become visible.
  */
 export function PageEnterProvider({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
   const reducedMotion = useReducedMotion();
   /** Path the gate has cleared — compared to `pathname` so ready flips false immediately on nav. */
   const [readyPath, setReadyPath] = useState<string | null>(null);
   const ready = readyPath === pathname;
+  const contextValue = useMemo(() => ({ ready }), [ready]);
 
   useEffect(() => {
     let cancelled = false;
-    let cancelPaint: (() => void) | undefined;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let outerFrame = 0;
+    let innerFrame = 0;
 
     const markReady = () => {
-      if (cancelled) return;
+      if (cancelled) {
+        return;
+      }
       setReadyPath(pathname);
     };
 
-    const armTimeout = () => {
-      timeoutId = setTimeout(markReady, VIEW_TRANSITION_READY_TIMEOUT_MS);
+    const revealAfterPaint = () => {
+      outerFrame = requestAnimationFrame(() => {
+        innerFrame = requestAnimationFrame(markReady);
+      });
     };
 
     const cleanup = () => {
       cancelled = true;
-      cancelPaint?.();
-      if (timeoutId !== undefined) clearTimeout(timeoutId);
+      cancelAnimationFrame(outerFrame);
+      cancelAnimationFrame(innerFrame);
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
     };
 
     if (reducedMotion) {
-      cancelPaint = afterNextPaint(markReady);
+      revealAfterPaint();
       return cleanup;
     }
 
     const activeTransition = getActiveViewTransition();
     if (activeTransition) {
-      armTimeout();
-      void activeTransition.finished
-        .catch(() => {
-          // VT can abort (timeout in DOM update); fall through to reveal.
-        })
-        .then(() => {
-          if (cancelled) return;
-          cancelPaint = afterNextPaint(markReady);
-        });
+      timeoutId = setTimeout(markReady, VIEW_TRANSITION_READY_TIMEOUT_MS);
+      void (async () => {
+        await whenViewTransitionFinishes(activeTransition);
+        if (cancelled) {
+          return;
+        }
+        revealAfterPaint();
+      })();
       return cleanup;
     }
 
-    cancelPaint = afterNextPaint(markReady);
+    revealAfterPaint();
     return cleanup;
   }, [pathname, reducedMotion]);
 
   return (
-    <PageEnterContext.Provider value={{ ready }}>
+    <PageEnterContext.Provider value={contextValue}>
       {children}
     </PageEnterContext.Provider>
   );

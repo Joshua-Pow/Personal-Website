@@ -20,7 +20,7 @@ if (!fs.existsSync(imagesDir)) {
 const images = fs
   .readdirSync(imagesDir)
   .filter((file) => file.endsWith(".webp"))
-  .sort();
+  .toSorted();
 
 if (images.length === 0) {
   process.exit(0);
@@ -35,7 +35,7 @@ for (const file of images) {
   const result = spawnSync(
     "node",
     ["scripts/upload-adage-image.mjs", slug, filePath],
-    { stdio: "inherit" },
+    { stdio: "inherit" }
   );
 
   if (result.status !== 0) {

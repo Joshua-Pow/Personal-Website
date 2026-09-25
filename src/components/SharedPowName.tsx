@@ -1,14 +1,13 @@
-import { Link } from "next-view-transitions";
+import { Link } from "@tanstack/react-router";
+import type { CSSProperties } from "react";
+
 import { durations, nameLetterStagger } from "@/lib/motion";
-import {
-  DISPLAY_NAME,
-  NAME_COLORS,
-} from "@/lib/shared-name";
+import { DISPLAY_NAME, NAME_COLORS } from "@/lib/shared-name";
 
 const HOVER_NAME = "joshpow";
 
-const displayLetters = DISPLAY_NAME.split("");
-const hoverLetters = HOVER_NAME.split("");
+const displayLetters = [...DISPLAY_NAME];
+const hoverLetters = [...HOVER_NAME];
 const letterDurationMs = durations.nameLetter * 1000;
 const letterStaggerMs = nameLetterStagger * 1000;
 
@@ -19,10 +18,23 @@ function letterDelays(index: number, count: number) {
   };
 }
 
+function letterStyle(delays: {
+  forward: number;
+  reverse: number;
+}): CSSProperties {
+  // SAFETY: CSS custom properties are valid inline styles; CSSProperties does
+  // not declare `--delay-*` keys in this TypeScript DOM lib.
+  return {
+    transitionDuration: `${letterDurationMs}ms`,
+    "--delay-forward": `${delays.forward}ms`,
+    "--delay-reverse": `${delays.reverse}ms`,
+  } as CSSProperties;
+}
+
 function PowNameLabel({ color }: { color: string }) {
   return (
     <span
-      className="vt-pow inline-block whitespace-nowrap font-medium"
+      className="vt-pow inline-block font-medium whitespace-nowrap"
       style={{ color }}
     >
       {DISPLAY_NAME}
@@ -40,35 +52,23 @@ function LetterScrollName() {
           return (
             <span
               key={`display-${index}`}
-              className="inline-block transition-transform ease-out motion-reduce:transition-none [transition-delay:var(--delay-reverse)] group-hover:-translate-y-full group-hover:[transition-delay:var(--delay-forward)]"
-              style={
-                {
-                  transitionDuration: `${letterDurationMs}ms`,
-                  "--delay-forward": `${delays.forward}ms`,
-                  "--delay-reverse": `${delays.reverse}ms`,
-                } as React.CSSProperties
-              }
+              className="inline-block transition-transform [transition-delay:var(--delay-reverse)] ease-out group-hover:-translate-y-full group-hover:[transition-delay:var(--delay-forward)] motion-reduce:transition-none"
+              style={letterStyle(delays)}
             >
               {letter === " " ? "\u00A0" : letter}
             </span>
           );
         })}
       </span>
-      <span className="absolute left-0 top-0 inline-block" aria-hidden="true">
+      <span className="absolute top-0 left-0 inline-block" aria-hidden="true">
         {hoverLetters.map((letter, index) => {
           const delays = letterDelays(index, hoverLetters.length);
 
           return (
             <span
               key={`hover-${index}`}
-              className="inline-block translate-y-full transition-transform ease-out motion-reduce:transition-none [transition-delay:var(--delay-reverse)] group-hover:translate-y-0 group-hover:[transition-delay:var(--delay-forward)]"
-              style={
-                {
-                  transitionDuration: `${letterDurationMs}ms`,
-                  "--delay-forward": `${delays.forward}ms`,
-                  "--delay-reverse": `${delays.reverse}ms`,
-                } as React.CSSProperties
-              }
+              className="inline-block translate-y-full transition-transform [transition-delay:var(--delay-reverse)] ease-out group-hover:translate-y-0 group-hover:[transition-delay:var(--delay-forward)] motion-reduce:transition-none"
+              style={letterStyle(delays)}
             >
               {letter}
             </span>
@@ -84,7 +84,7 @@ function HeaderName() {
     <>
       <span className="sr-only">{DISPLAY_NAME}</span>
       <span
-        className="vt-pow group relative inline-block overflow-hidden whitespace-nowrap font-medium"
+        className="vt-pow group relative inline-block overflow-hidden font-medium whitespace-nowrap"
         style={{ color: NAME_COLORS.header }}
         data-sfx-hover="sparkle"
       >
@@ -97,7 +97,7 @@ function HeaderName() {
 function BackLinkName({ color }: { color?: string }) {
   return (
     <Link
-      href="/"
+      to="/"
       className="inline-block rounded-sm"
       data-sfx-hover="tick"
       data-sfx-press
@@ -108,11 +108,11 @@ function BackLinkName({ color }: { color?: string }) {
   );
 }
 
-type SharedPowNameProps = {
+interface SharedPowNameProps {
   variant: "header" | "back-link";
   /** Override label color (back-link only). Useful on tinted surfaces. */
   color?: string;
-};
+}
 
 export function SharedPowName({ variant, color }: SharedPowNameProps) {
   return variant === "header" ? <HeaderName /> : <BackLinkName color={color} />;

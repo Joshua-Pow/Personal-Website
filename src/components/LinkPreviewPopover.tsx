@@ -1,26 +1,25 @@
-"use client";
-
-import { useState } from "react";
 import { Popover } from "@base-ui/react/popover";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { PopoverSurface } from "@/components/motion/PopoverSurface";
-import { LinkPreviewPanel } from "@/components/link-preview/LinkPreviewPanel";
+import { useState } from "react";
+
 import { isBareEmbedPreview } from "@/components/link-preview/layouts";
+import { LinkPreviewPanel } from "@/components/link-preview/LinkPreviewPanel";
 import {
   bareEmbedPopupClassName,
   bareEmbedPositionerClassName,
   morphingPreviewPopupClassName,
   morphingPreviewPositionerClassName,
 } from "@/components/link-preview/shared";
+import { PopoverSurface } from "@/components/motion/PopoverSurface";
 import { durations } from "@/lib/motion";
 
-type LinkPreviewPopoverProps = {
+interface LinkPreviewPopoverProps {
   href: string;
   children: React.ReactNode;
   className?: string;
   target?: string;
   rel?: string;
-};
+}
 
 export function LinkPreviewPopover({
   href,
@@ -63,11 +62,17 @@ export function LinkPreviewPopover({
               sideOffset={8}
               align="start"
               className={
-                isBare ? bareEmbedPositionerClassName : morphingPreviewPositionerClassName
+                isBare
+                  ? bareEmbedPositionerClassName
+                  : morphingPreviewPositionerClassName
               }
             >
               <Popover.Popup
-                className={isBare ? bareEmbedPopupClassName : morphingPreviewPopupClassName}
+                className={
+                  isBare
+                    ? bareEmbedPopupClassName
+                    : morphingPreviewPopupClassName
+                }
                 render={
                   <PopoverSurface reducedMotion={reducedMotion ?? false} />
                 }

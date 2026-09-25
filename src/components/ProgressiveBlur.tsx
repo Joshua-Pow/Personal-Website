@@ -1,125 +1,162 @@
-"use client";
+import { motion, useTransform } from "motion/react";
+import type { MotionValue } from "motion/react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { cn } from "@/lib/utils/cn";
-import React from "react";
-import { motion, useTransform } from "motion/react";
+
 import { useEdgeIntensity } from "./EdgeBorderEffect";
+
+const DEFAULT_BLUR_LEVELS = [0.5, 1, 2, 4, 8, 16, 32, 64];
+
+type BlurPosition = "top" | "bottom" | "both";
 
 export interface ProgressiveBlurProps {
   className?: string;
   height?: string;
-  position?: "top" | "bottom" | "both";
+  position?: BlurPosition;
   blurLevels?: number[];
-  children?: React.ReactNode;
+  children?: ReactNode;
+}
+
+function radiusStyleFor(
+  position: BlurPosition,
+  borderRadius: MotionValue<string>
+) {
+  if (position === "top") {
+    return {
+      borderTopLeftRadius: borderRadius,
+      borderTopRightRadius: borderRadius,
+    };
+  }
+  if (position === "bottom") {
+    return {
+      borderBottomLeftRadius: borderRadius,
+      borderBottomRightRadius: borderRadius,
+    };
+  }
+  return { borderRadius };
+}
+
+function positionClassName(position: BlurPosition) {
+  if (position === "top") {
+    return "top-0";
+  }
+  if (position === "bottom") {
+    return "bottom-0";
+  }
+  return "inset-y-0";
+}
+
+function bothMask() {
+  return "linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, rgba(0,0,0,0) 100%)";
+}
+
+function directionalMask(
+  position: BlurPosition,
+  start: string,
+  mid: string,
+  end: string,
+  fade: string
+) {
+  if (position === "both") {
+    return bothMask();
+  }
+  const direction = position === "bottom" ? "to bottom" : "to top";
+  return `linear-gradient(${direction}, rgba(0,0,0,0) ${start}, rgba(0,0,0,1) ${mid}, rgba(0,0,0,1) ${end}, rgba(0,0,0,0) ${fade})`;
+}
+
+function firstLayerMask(position: BlurPosition) {
+  return directionalMask(position, "0%", "12.5%", "25%", "37.5%");
+}
+
+function lastLayerMask(position: BlurPosition) {
+  if (position === "both") {
+    return bothMask();
+  }
+  const direction = position === "bottom" ? "to bottom" : "to top";
+  return `linear-gradient(${direction}, rgba(0,0,0,0) 87.5%, rgba(0,0,0,1) 100%)`;
+}
+
+function layerMask(position: BlurPosition, blurIndex: number) {
+  const startPercent = blurIndex * 12.5;
+  const midPercent = (blurIndex + 1) * 12.5;
+  const endPercent = (blurIndex + 2) * 12.5;
+  return directionalMask(
+    position,
+    `${startPercent}%`,
+    `${midPercent}%`,
+    `${endPercent}%`,
+    `${endPercent + 12.5}%`
+  );
+}
+
+function blurLayerStyle(
+  zIndex: number,
+  blurPx: number,
+  maskImage: string
+): CSSProperties {
+  return {
+    zIndex,
+    backdropFilter: `blur(${blurPx}px)`,
+    WebkitBackdropFilter: `blur(${blurPx}px)`,
+    maskImage,
+    WebkitMaskImage: maskImage,
+  };
 }
 
 export function ProgressiveBlur({
   className,
   height = "30%",
   position = "bottom",
-  blurLevels = [0.5, 1, 2, 4, 8, 16, 32, 64],
+  blurLevels = DEFAULT_BLUR_LEVELS,
 }: ProgressiveBlurProps) {
   const { intensity } = useEdgeIntensity();
   const borderRadius = useTransform(intensity, (v) => `${v * 16}px`);
-
-  const radiusStyle =
-    position === "top"
-      ? { borderTopLeftRadius: borderRadius, borderTopRightRadius: borderRadius }
-      : position === "bottom"
-        ? {
-            borderBottomLeftRadius: borderRadius,
-            borderBottomRightRadius: borderRadius,
-          }
-        : { borderRadius };
-
-  const divElements = Array(blurLevels.length - 2).fill(null);
+  const innerCount = Math.max(0, blurLevels.length - 2);
+  const innerIndexes = Array.from({ length: innerCount }, (_, index) => index);
+  const firstBlur = blurLevels[0] ?? 0;
+  const lastBlur = blurLevels.at(-1) ?? 0;
 
   return (
     <motion.div
       className={cn(
         "gradient-blur pointer-events-none absolute inset-x-0 z-10",
         className,
-        position === "top"
-          ? "top-0"
-          : position === "bottom"
-            ? "bottom-0"
-            : "inset-y-0"
+        positionClassName(position)
       )}
       style={{
         height: position === "both" ? "100%" : height,
         overflow: "hidden",
-        ...radiusStyle,
+        ...radiusStyleFor(position, borderRadius),
       }}
     >
       <div className="absolute inset-0">
         <div
           className="absolute inset-0"
-          style={{
-            zIndex: 1,
-            backdropFilter: `blur(${blurLevels[0]}px)`,
-            WebkitBackdropFilter: `blur(${blurLevels[0]}px)`,
-            maskImage:
-              position === "bottom"
-                ? `linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 12.5%, rgba(0,0,0,1) 25%, rgba(0,0,0,0) 37.5%)`
-                : position === "top"
-                  ? `linear-gradient(to top, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 12.5%, rgba(0,0,0,1) 25%, rgba(0,0,0,0) 37.5%)`
-                  : `linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, rgba(0,0,0,0) 100%)`,
-            WebkitMaskImage:
-              position === "bottom"
-                ? `linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 12.5%, rgba(0,0,0,1) 25%, rgba(0,0,0,0) 37.5%)`
-                : position === "top"
-                  ? `linear-gradient(to top, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 12.5%, rgba(0,0,0,1) 25%, rgba(0,0,0,0) 37.5%)`
-                  : `linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, rgba(0,0,0,0) 100%)`,
-          }}
+          style={blurLayerStyle(1, firstBlur, firstLayerMask(position))}
         />
 
-        {divElements.map((_, index) => {
+        {innerIndexes.map((index) => {
           const blurIndex = index + 1;
-          const startPercent = blurIndex * 12.5;
-          const midPercent = (blurIndex + 1) * 12.5;
-          const endPercent = (blurIndex + 2) * 12.5;
-
-          const maskGradient =
-            position === "bottom"
-              ? `linear-gradient(to bottom, rgba(0,0,0,0) ${startPercent}%, rgba(0,0,0,1) ${midPercent}%, rgba(0,0,0,1) ${endPercent}%, rgba(0,0,0,0) ${endPercent + 12.5}%)`
-              : position === "top"
-                ? `linear-gradient(to top, rgba(0,0,0,0) ${startPercent}%, rgba(0,0,0,1) ${midPercent}%, rgba(0,0,0,1) ${endPercent}%, rgba(0,0,0,0) ${endPercent + 12.5}%)`
-                : `linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, rgba(0,0,0,0) 100%)`;
+          const blurPx = blurLevels[blurIndex] ?? 0;
+          const maskGradient = layerMask(position, blurIndex);
 
           return (
             <div
               key={`blur-${index}`}
               className="absolute inset-0"
-              style={{
-                zIndex: index + 2,
-                backdropFilter: `blur(${blurLevels[blurIndex]}px)`,
-                WebkitBackdropFilter: `blur(${blurLevels[blurIndex]}px)`,
-                maskImage: maskGradient,
-                WebkitMaskImage: maskGradient,
-              }}
+              style={blurLayerStyle(index + 2, blurPx, maskGradient)}
             />
           );
         })}
 
         <div
           className="absolute inset-0"
-          style={{
-            zIndex: blurLevels.length,
-            backdropFilter: `blur(${blurLevels[blurLevels.length - 1]}px)`,
-            WebkitBackdropFilter: `blur(${blurLevels[blurLevels.length - 1]}px)`,
-            maskImage:
-              position === "bottom"
-                ? `linear-gradient(to bottom, rgba(0,0,0,0) 87.5%, rgba(0,0,0,1) 100%)`
-                : position === "top"
-                  ? `linear-gradient(to top, rgba(0,0,0,0) 87.5%, rgba(0,0,0,1) 100%)`
-                  : `linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, rgba(0,0,0,0) 100%)`,
-            WebkitMaskImage:
-              position === "bottom"
-                ? `linear-gradient(to bottom, rgba(0,0,0,0) 87.5%, rgba(0,0,0,1) 100%)`
-                : position === "top"
-                  ? `linear-gradient(to top, rgba(0,0,0,0) 87.5%, rgba(0,0,0,1) 100%)`
-                  : `linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, rgba(0,0,0,0) 100%)`,
-          }}
+          style={blurLayerStyle(
+            blurLevels.length,
+            lastBlur,
+            lastLayerMask(position)
+          )}
         />
       </div>
     </motion.div>

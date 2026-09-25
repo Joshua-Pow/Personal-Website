@@ -1,28 +1,29 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
 import { Popover } from "@base-ui/react/popover";
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+
 import type { LinkPreviewData } from "@/lib/link-preview";
+
+import {
+  getPreviewEmbedConfig,
+  getSpotifyEmbedConfig,
+  shouldShowIframePreview,
+} from "./embed-url";
+import { getPreviewLayout, previewShellWidthClass } from "./layouts";
+import type { PreviewLayout } from "./layouts";
 import {
   IFRAME_HEIGHT,
   IFRAME_WIDTH,
   PREVIEW_HEIGHT,
   PREVIEW_SCALE,
   SPOTIFY_EMBED_HEIGHT,
+  linkPreviewQueryKey,
   previewFetcher,
 } from "./shared";
 import { SpotifyEmbedPreview } from "./SpotifyEmbedPreview";
-import {
-  getPreviewEmbedConfig,
-  getSpotifyEmbedConfig,
-  shouldShowIframePreview,
-} from "./embed-url";
-import {
-  getPreviewLayout,
-  previewShellWidthClass,
-  type PreviewLayout,
-} from "./layouts";
+
+const PREVIEW_IFRAME_SANDBOX =
+  "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-presentation";
 
 function PreviewShell({
   layout,
@@ -38,16 +39,9 @@ function PreviewShell({
   );
 }
 
-function PreviewHeader({
-  favicon,
-  title,
-}: {
-  favicon: string;
-  title: string;
-}) {
+function PreviewHeader({ favicon, title }: { favicon: string; title: string }) {
   return (
     <div className="flex h-7 shrink-0 items-center gap-1 border-b border-[var(--popover-border)] px-2">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={favicon}
         alt=""
@@ -110,7 +104,7 @@ function PreviewLoadingBody({
 
 function PreviewSkeleton({ href }: { href: string }) {
   const layout = getPreviewLayout(href);
-  const hostname = new URL(href).hostname.replace(/^www\./, "");
+  const hostname = new URL(href).hostname.replace(/^www\./u, "");
   const bodyHeight =
     layout === "spotify" ? SPOTIFY_EMBED_HEIGHT : PREVIEW_HEIGHT;
 
@@ -136,83 +130,8 @@ function PreviewSkeleton({ href }: { href: string }) {
   );
 }
 
-function IframePreview({ href, preview }: { href: string; preview: LinkPreviewData }) {
-  const [loaded, setLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const loadedRef = useRef(false);
-  const hostname = new URL(href).hostname.replace(/^www\./, "");
-  const embedConfig = getPreviewEmbedConfig(href);
-  const iframeSrc = embedConfig?.src ?? href;
-  const layout = getPreviewLayout(href);
-  const bodyHeight = embedConfig?.height ?? PREVIEW_HEIGHT;
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      if (!loadedRef.current) {
-        setFailed(true);
-      }
-    }, 4000);
-
-    return () => window.clearTimeout(timeout);
-  }, [href, iframeSrc]);
-
-  if (failed && !loaded) {
-    return <MetadataPreview preview={preview} />;
-  }
-
-  return (
-    <PreviewShell layout={layout}>
-      <PreviewHeader favicon={preview.favicon} title={preview.title} />
-      <div
-        className="relative shrink-0 overflow-hidden bg-[#121212]"
-        style={{ height: bodyHeight }}
-      >
-        {!loaded && (
-          <PreviewLoadingBody hostname={hostname} height={bodyHeight} />
-        )}
-        {embedConfig?.native ? (
-          <iframe
-            src={iframeSrc}
-            title={`Preview of ${preview.title}`}
-            width={embedConfig.width}
-            height={embedConfig.height}
-            className={`block border-0 transition-opacity duration-200 motion-reduce:transition-none ${loaded ? "opacity-100" : "opacity-0"}`}
-            allow={embedConfig.allow}
-            loading="lazy"
-            onLoad={() => {
-              loadedRef.current = true;
-              setLoaded(true);
-            }}
-            onError={() => setFailed(true)}
-            tabIndex={-1}
-          />
-        ) : (
-          <iframe
-            src={iframeSrc}
-            title={`Preview of ${preview.title}`}
-            className={`pointer-events-none absolute left-0 top-0 border-0 transition-opacity duration-200 motion-reduce:transition-none ${loaded ? "opacity-100" : "opacity-0"}`}
-            style={{
-              width: IFRAME_WIDTH,
-              height: IFRAME_HEIGHT,
-              transform: `scale(${PREVIEW_SCALE})`,
-              transformOrigin: "top left",
-            }}
-            onLoad={() => {
-              loadedRef.current = true;
-              setLoaded(true);
-            }}
-            onError={() => setFailed(true)}
-            tabIndex={-1}
-          />
-        )}
-      </div>
-      <PreviewFooter>{hostname}</PreviewFooter>
-    </PreviewShell>
-  );
-}
-
 function MetadataPreview({ preview }: { preview: LinkPreviewData }) {
-  const hostname = new URL(preview.url).hostname.replace(/^www\./, "");
+  const hostname = new URL(preview.url).hostname.replace(/^www\./u, "");
 
   return (
     <PreviewShell layout="default">
@@ -222,7 +141,6 @@ function MetadataPreview({ preview }: { preview: LinkPreviewData }) {
         style={{ height: PREVIEW_HEIGHT }}
       >
         {preview.image ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={preview.image}
             alt=""
@@ -251,17 +169,99 @@ function MetadataPreview({ preview }: { preview: LinkPreviewData }) {
   );
 }
 
+function IframePreview({
+  href,
+  preview,
+}: {
+  href: string;
+  preview: LinkPreviewData;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const loadedRef = useRef(false);
+  const hostname = new URL(href).hostname.replace(/^www\./u, "");
+  const embedConfig = getPreviewEmbedConfig(href);
+  const iframeSrc = embedConfig?.src ?? href;
+  const layout = getPreviewLayout(href);
+  const bodyHeight = embedConfig?.height ?? PREVIEW_HEIGHT;
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      if (!loadedRef.current) {
+        setFailed(true);
+      }
+    }, 4000);
+
+    return () => window.clearTimeout(timeout);
+  }, []);
+
+  if (failed && !loaded) {
+    return <MetadataPreview preview={preview} />;
+  }
+
+  return (
+    <PreviewShell layout={layout}>
+      <PreviewHeader favicon={preview.favicon} title={preview.title} />
+      <div
+        className="relative shrink-0 overflow-hidden bg-[#121212]"
+        style={{ height: bodyHeight }}
+      >
+        {!loaded && (
+          <PreviewLoadingBody hostname={hostname} height={bodyHeight} />
+        )}
+        {embedConfig?.native ? (
+          <iframe
+            src={iframeSrc}
+            title={`Preview of ${preview.title}`}
+            width={embedConfig.width}
+            height={embedConfig.height}
+            className={`block border-0 transition-opacity duration-200 motion-reduce:transition-none ${loaded ? "opacity-100" : "opacity-0"}`}
+            allow={embedConfig.allow}
+            sandbox={PREVIEW_IFRAME_SANDBOX}
+            loading="lazy"
+            onLoad={() => {
+              loadedRef.current = true;
+              setLoaded(true);
+            }}
+            onError={() => setFailed(true)}
+            tabIndex={-1}
+          />
+        ) : (
+          <iframe
+            src={iframeSrc}
+            title={`Preview of ${preview.title}`}
+            className={`pointer-events-none absolute top-0 left-0 border-0 transition-opacity duration-200 motion-reduce:transition-none ${loaded ? "opacity-100" : "opacity-0"}`}
+            style={{
+              width: IFRAME_WIDTH,
+              height: IFRAME_HEIGHT,
+              transform: `scale(${PREVIEW_SCALE})`,
+              transformOrigin: "top left",
+            }}
+            sandbox={PREVIEW_IFRAME_SANDBOX}
+            onLoad={() => {
+              loadedRef.current = true;
+              setLoaded(true);
+            }}
+            onError={() => setFailed(true)}
+            tabIndex={-1}
+          />
+        )}
+      </div>
+      <PreviewFooter>{hostname}</PreviewFooter>
+    </PreviewShell>
+  );
+}
+
 export function LinkPreviewPanel({ href }: { href: string }) {
   const spotifyEmbed = getSpotifyEmbedConfig(href);
 
-  const { data, isLoading } = useSWR<LinkPreviewData>(
-    spotifyEmbed ? null : href,
-    previewFetcher,
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 60_000,
-    }
-  );
+  const { data, isLoading } = useQuery({
+    queryKey: linkPreviewQueryKey(href),
+    queryFn: () => previewFetcher(href),
+    enabled: !spotifyEmbed,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
 
   if (spotifyEmbed) {
     return <SpotifyEmbedPreview href={href} />;

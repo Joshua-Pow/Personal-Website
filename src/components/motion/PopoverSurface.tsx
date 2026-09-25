@@ -1,7 +1,7 @@
-"use client";
-
+import { motion, useIsPresent } from "motion/react";
+import type { HTMLMotionProps } from "motion/react";
 import { forwardRef } from "react";
-import { motion, useIsPresent, type HTMLMotionProps } from "motion/react";
+
 import {
   durations,
   getExitTransition,
@@ -15,10 +15,7 @@ type PopoverSurfaceProps = HTMLMotionProps<"div"> & {
 };
 
 export const PopoverSurface = forwardRef<HTMLDivElement, PopoverSurfaceProps>(
-  function PopoverSurface(
-    { reducedMotion, className, children, style, ...props },
-    ref
-  ) {
+  ({ reducedMotion, className, children, style, ...props }, ref) => {
     const isPresent = useIsPresent();
     const enterTransition = getTransition(durations.ui, reducedMotion);
     const exitTransition = getExitTransition(durations.ui, reducedMotion);
@@ -42,3 +39,4 @@ export const PopoverSurface = forwardRef<HTMLDivElement, PopoverSurfaceProps>(
     );
   }
 );
+PopoverSurface.displayName = "PopoverSurface";

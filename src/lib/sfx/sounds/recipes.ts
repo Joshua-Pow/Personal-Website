@@ -3,7 +3,7 @@
  * Adapted from Cuelume (MIT, Daniel Belyi). See ../NOTICE.
  */
 
-type BaseLayer = {
+interface BaseLayer {
   /** Seconds after the trigger that this layer starts. */
   offset?: number;
   /** Fade-in time, in seconds. */
@@ -12,7 +12,7 @@ type BaseLayer = {
   decay: number;
   /** Peak volume reached at the end of the attack. */
   peak: number;
-};
+}
 
 /** A single note — the building block for chimes, arpeggios, and pads. */
 export type ToneLayer = BaseLayer & {
@@ -38,18 +38,18 @@ export type NoiseLayer = BaseLayer & {
 export type SoundLayer = ToneLayer | NoiseLayer;
 
 /** A soft, spacious echo tail applied to the whole sound — the "magic dust". */
-export type Shimmer = {
+export interface Shimmer {
   delay: number;
   feedback: number;
   wet: number;
   lowpass: number;
-};
+}
 
-export type SoundRecipe = {
+export interface SoundRecipe {
   masterGain: number;
   layers: SoundLayer[];
   shimmer?: Shimmer;
-};
+}
 
 export const RECIPES = {
   /** A soft two-note ascending bell, like an iOS/macOS confirmation tink. */
@@ -427,13 +427,11 @@ export const RECIPES = {
 export type SoundName = keyof typeof RECIPES;
 
 export function isSoundName(value: unknown): value is SoundName {
-  return (
-    typeof value === "string" &&
-    Object.prototype.hasOwnProperty.call(RECIPES, value)
-  );
+  return typeof value === "string" && Object.hasOwn(RECIPES, value);
 }
 
 /** All available sound names, derived from the recipe palette. */
+// SAFETY: RECIPES is a const object whose keys are exactly SoundName.
 export const sounds = Object.keys(RECIPES) as readonly SoundName[];
 
 export const SOUND_BLURBS: Record<SoundName, string> = {

@@ -1,28 +1,31 @@
 import { SPOTIFY_EMBED_HEIGHT, SPOTIFY_EMBED_WIDTH } from "./shared";
 
-export type EmbedConfig = {
+export interface EmbedConfig {
   src: string;
   native: boolean;
   width: number;
   height: number;
   allow?: string;
-};
+}
 
 export function getSpotifyEmbedConfig(href: string): EmbedConfig | null {
   const match = href.match(
-    /open\.spotify\.com\/(track|album|playlist|artist|episode)\/([a-zA-Z0-9]+)/
+    /open\.spotify\.com\/(?<kind>track|album|playlist|artist|episode)\/(?<id>[a-zA-Z0-9]+)/u
   );
 
-  if (!match) return null;
+  if (!match?.groups) {
+    return null;
+  }
 
-  const [, type, id] = match;
+  const { kind, id } = match.groups;
 
   return {
-    src: `https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0`,
+    src: `https://open.spotify.com/embed/${kind}/${id}?utm_source=generator&theme=0`,
     native: true,
     width: SPOTIFY_EMBED_WIDTH,
     height: SPOTIFY_EMBED_HEIGHT,
-    allow: "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture",
+    allow:
+      "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture",
   };
 }
 

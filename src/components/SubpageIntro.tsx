@@ -1,5 +1,3 @@
-"use client";
-
 import { Reveal } from "@/components/motion/Reveal";
 import { enterDelays } from "@/lib/motion";
 

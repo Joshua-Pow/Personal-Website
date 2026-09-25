@@ -1,21 +1,21 @@
-"use client";
-
 import React from "react";
-import { RevealOnScroll } from "./motion/RevealOnScroll";
-import { Logos } from "./Logos";
-import { LanguageBadge } from "./LanguageBadge";
+
 import { textRevealStaggerMs } from "@/lib/motion";
+
+import { LanguageBadge } from "./LanguageBadge";
+import type { Logos } from "./Logos";
+import { RevealOnScroll } from "./motion/RevealOnScroll";
 
 interface WorkExperienceProps {
   index: number;
   company: string;
-  role: string;
+  jobTitle: string;
   period: string;
   description: React.ReactNode | React.ReactNode[];
-  technologies?: Array<{
+  technologies?: {
     logo: keyof typeof Logos;
     name: string;
-  }>;
+  }[];
 }
 
 function AnimatedParagraphs({
@@ -45,7 +45,7 @@ function AnimatedParagraphs({
 export function WorkExperience({
   index,
   company,
-  role,
+  jobTitle,
   period,
   description,
   technologies,
@@ -54,13 +54,13 @@ export function WorkExperience({
 
   return (
     <RevealOnScroll variant="blurUp" delay={baseDelay} className="mb-8">
-      <h2 className="text-balance text-base font-medium">{company}</h2>
+      <h2 className="text-base font-medium text-balance">{company}</h2>
       <p className="mb-3 text-sm text-subtle">
-        {role}
+        {jobTitle}
         <span aria-hidden="true"> | </span>
         {period}
       </p>
-      <div className="hyphens-auto leading-7">
+      <div className="leading-7 hyphens-auto">
         <AnimatedParagraphs baseDelay={baseDelay}>
           {description}
         </AnimatedParagraphs>

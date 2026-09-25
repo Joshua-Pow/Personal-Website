@@ -1,5 +1,20 @@
-import { cache } from "react";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { getWorkerEnv } from "@/lib/cf";
+import type {
+  CurrentlyPlayingResponse,
+  RecentlyPlayedResponse,
+  SpotifyApiResponse,
+} from "@/lib/spotify-display";
+
+export type {
+  CurrentlyPlayingResponse,
+  RecentlyPlayedResponse,
+  SpotifyApiResponse,
+  SpotifyDisplayItem,
+  SpotifyEpisode,
+  SpotifyPlayableItem,
+  SpotifyTrack,
+} from "@/lib/spotify-display";
+export { toDisplayItem } from "@/lib/spotify-display";
 
 interface SpotifyToken {
   access_token: string;
@@ -8,100 +23,46 @@ interface SpotifyToken {
   scope?: string;
 }
 
-interface SpotifyImage {
-  url: string;
-  height?: number | null;
-  width?: number | null;
-}
-
-export interface SpotifyTrack {
-  type?: "track";
-  name: string;
-  artists: { name: string }[];
-  album: {
-    name: string;
-    images: SpotifyImage[];
-  };
-  external_urls: {
-    spotify: string;
-  };
-}
-
-export interface SpotifyEpisode {
-  type: "episode";
-  name: string;
-  images: SpotifyImage[];
-  external_urls: {
-    spotify: string;
-  };
-  show: {
-    name: string;
-    publisher: string;
-    images: SpotifyImage[];
-  };
-}
-
-export type SpotifyPlayableItem = SpotifyTrack | SpotifyEpisode;
-
-/** Normalized fields for the now-playing / last-played card. */
-export interface SpotifyDisplayItem {
-  name: string;
-  subtitle: string;
-  imageUrl: string;
-  imageAlt: string;
-  url: string;
-  kind: "track" | "episode";
-}
-
-export interface CurrentlyPlayingResponse {
-  is_playing: boolean;
-  currently_playing_type?: "track" | "episode" | "ad" | "unknown";
-  item: SpotifyPlayableItem | null;
-}
-
-export interface RecentlyPlayedResponse {
-  items: {
-    track: SpotifyTrack;
-    played_at: string;
-  }[];
-}
-
-export interface SpotifyApiResponse {
-  currentlyPlaying: CurrentlyPlayingResponse | null;
-  lastPlayed: RecentlyPlayedResponse["items"][0] | null;
-}
-
-type SpotifyCredentials = {
+interface SpotifyCredentials {
   client_id: string;
   client_secret: string;
   refresh_token: string;
-};
+}
 
 const spotifyFetchInit = {
-  // Avoid Next/OpenNext fetch caching of authenticated Spotify responses.
   cache: "no-store" as const,
-  next: { revalidate: 0 },
 };
 
-async function getSpotifyCredentials(): Promise<SpotifyCredentials> {
-  let client_id = process.env.SPOTIFY_CLIENT_ID;
-  let client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-  let refresh_token = process.env.SPOTIFY_REFRESH_TOKEN;
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
+}
 
-  try {
-    const { env } = getCloudflareContext();
-    const cloudflareEnv = env as {
-      SPOTIFY_CLIENT_ID?: string;
-      SPOTIFY_CLIENT_SECRET?: string;
-      SPOTIFY_REFRESH_TOKEN?: string;
-    };
+function isObjectValue(value: unknown): value is object {
+  return value !== null && Object(value) === value && !Array.isArray(value);
+}
 
-    client_id = cloudflareEnv.SPOTIFY_CLIENT_ID ?? client_id;
-    client_secret = cloudflareEnv.SPOTIFY_CLIENT_SECRET ?? client_secret;
-    refresh_token = cloudflareEnv.SPOTIFY_REFRESH_TOKEN ?? refresh_token;
-  } catch {
-    // Local Next.js dev may not have a Cloudflare request context.
+function isSpotifyToken(value: unknown): value is SpotifyToken {
+  if (!isObjectValue(value) || !("access_token" in value)) {
+    return false;
   }
+  return isNonEmptyString(value.access_token);
+}
+
+function readEnvValue(
+  name: "SPOTIFY_CLIENT_ID" | "SPOTIFY_CLIENT_SECRET" | "SPOTIFY_REFRESH_TOKEN"
+) {
+  const workerEnv = getWorkerEnv();
+  if (isNonEmptyString(workerEnv[name])) {
+    return workerEnv[name];
+  }
+  const fromProcess = process.env[name];
+  return isNonEmptyString(fromProcess) ? fromProcess : undefined;
+}
+
+function getSpotifyCredentials(): SpotifyCredentials {
+  const client_id = readEnvValue("SPOTIFY_CLIENT_ID");
+  const client_secret = readEnvValue("SPOTIFY_CLIENT_SECRET");
+  const refresh_token = readEnvValue("SPOTIFY_REFRESH_TOKEN");
 
   if (!client_id || !client_secret || !refresh_token) {
     throw new Error(
@@ -116,42 +77,9 @@ async function getSpotifyCredentials(): Promise<SpotifyCredentials> {
   };
 }
 
-export function toDisplayItem(
-  item: SpotifyPlayableItem
-): SpotifyDisplayItem | null {
-  // Audiobook chapters and podcasts both arrive as EpisodeObjects.
-  if (item.type === "episode" || "show" in item) {
-    const episode = item as SpotifyEpisode;
-    const image = episode.images[0] ?? episode.show.images[0];
-    if (!image?.url) return null;
-
-    return {
-      name: episode.name,
-      subtitle: episode.show.name,
-      imageUrl: image.url,
-      imageAlt: episode.show.name,
-      url: episode.external_urls.spotify,
-      kind: "episode",
-    };
-  }
-
-  const image = item.album.images[0];
-  if (!image?.url) return null;
-
-  return {
-    name: item.name,
-    subtitle: item.artists.map((artist) => artist.name).join(", "),
-    imageUrl: image.url,
-    imageAlt: item.album.name,
-    url: item.external_urls.spotify,
-    kind: "track",
-  };
-}
-
 async function getAccessToken(): Promise<string> {
-  const { client_id, client_secret, refresh_token } =
-    await getSpotifyCredentials();
-  const basic = Buffer.from(`${client_id}:${client_secret}`).toString("base64");
+  const { client_id, client_secret, refresh_token } = getSpotifyCredentials();
+  const basic = btoa(`${client_id}:${client_secret}`);
 
   const response = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
@@ -167,36 +95,48 @@ async function getAccessToken(): Promise<string> {
   });
 
   const rawBody = await response.text();
-  let data: SpotifyToken & { error?: string; error_description?: string };
+  let parsed: unknown;
 
   try {
-    data = JSON.parse(rawBody) as SpotifyToken & {
-      error?: string;
-      error_description?: string;
-    };
+    parsed = JSON.parse(rawBody);
   } catch {
     throw new Error(
       `Spotify token refresh returned non-JSON response (${response.status})`
     );
   }
 
-  const accessToken = data.access_token?.trim();
-  if (!response.ok || !accessToken) {
-    const detail =
-      data.error_description || data.error || rawBody || "unknown error";
+  if (!isSpotifyToken(parsed)) {
+    let detail = rawBody;
+    if (
+      isObjectValue(parsed) &&
+      "error_description" in parsed &&
+      isNonEmptyString(parsed.error_description)
+    ) {
+      detail = parsed.error_description;
+    } else if (
+      isObjectValue(parsed) &&
+      "error" in parsed &&
+      isNonEmptyString(parsed.error)
+    ) {
+      detail = parsed.error;
+    }
     throw new Error(
-      `Spotify token refresh failed (${response.status}): ${detail}`
+      `Spotify token refresh failed (${response.status}): ${detail || "unknown error"}`
     );
   }
 
-  return accessToken;
+  if (!response.ok) {
+    throw new Error(
+      `Spotify token refresh failed (${response.status}): ${rawBody || "unknown error"}`
+    );
+  }
+
+  return parsed.access_token.trim();
 }
 
 async function fetchCurrentlyPlaying(
   token: string
 ): Promise<CurrentlyPlayingResponse | null> {
-  // Without additional_types=episode, Spotify returns currently_playing_type
-  // "episode" (podcasts / audiobook chapters) with item: null.
   const response = await fetch(
     "https://api.spotify.com/v1/me/player/currently-playing?additional_types=episode",
     {
@@ -208,7 +148,9 @@ async function fetchCurrentlyPlaying(
     }
   );
 
-  if (response.status === 204) return null;
+  if (response.status === 204) {
+    return null;
+  }
 
   if (!response.ok) {
     const body = await response.text();
@@ -223,7 +165,6 @@ async function fetchCurrentlyPlaying(
 async function fetchLastPlayed(
   token: string
 ): Promise<RecentlyPlayedResponse["items"][0] | null> {
-  // Recently-played only returns music tracks — not episodes/audiobooks.
   const response = await fetch(
     "https://api.spotify.com/v1/me/player/recently-played?limit=1",
     {
@@ -246,14 +187,17 @@ async function fetchLastPlayed(
   return data.items?.[0] || null;
 }
 
-function reasonMessage(reason: unknown) {
-  return reason instanceof Error ? reason.message : String(reason);
+function errorMessageFromRejection(result: PromiseRejectedResult): string {
+  const { reason } = result;
+  if (reason instanceof Error) {
+    return reason.message;
+  }
+  return String(reason);
 }
 
-export const getSpotifyData = cache(async () => {
+export async function getSpotifyData(): Promise<SpotifyApiResponse> {
   const token = await getAccessToken();
 
-  // Don't fail the whole widget if only one player endpoint errors.
   const [currentlyPlayingResult, lastPlayedResult] = await Promise.allSettled([
     fetchCurrentlyPlaying(token),
     fetchLastPlayed(token),
@@ -262,13 +206,13 @@ export const getSpotifyData = cache(async () => {
   if (currentlyPlayingResult.status === "rejected") {
     console.error(
       "Spotify currently-playing error:",
-      reasonMessage(currentlyPlayingResult.reason)
+      errorMessageFromRejection(currentlyPlayingResult)
     );
   }
   if (lastPlayedResult.status === "rejected") {
     console.error(
       "Spotify recently-played error:",
-      reasonMessage(lastPlayedResult.reason)
+      errorMessageFromRejection(lastPlayedResult)
     );
   }
 
@@ -277,7 +221,7 @@ export const getSpotifyData = cache(async () => {
     lastPlayedResult.status === "rejected"
   ) {
     throw new Error(
-      `Spotify player requests failed: ${reasonMessage(currentlyPlayingResult.reason)}; ${reasonMessage(lastPlayedResult.reason)}`
+      `Spotify player requests failed: ${errorMessageFromRejection(currentlyPlayingResult)}; ${errorMessageFromRejection(lastPlayedResult)}`
     );
   }
 
@@ -288,11 +232,9 @@ export const getSpotifyData = cache(async () => {
   const lastPlayedRaw =
     lastPlayedResult.status === "fulfilled" ? lastPlayedResult.value : null;
 
-  // Prefer a live item; if Spotify says we're playing but item is still null
-  // (ads / unknown), fall back to last played so the card doesn't vanish.
   const hasLiveItem = Boolean(currentlyPlaying?.item);
   const lastPlayed =
     currentlyPlaying?.is_playing && hasLiveItem ? null : lastPlayedRaw;
 
   return { currentlyPlaying, lastPlayed };
-});
+}

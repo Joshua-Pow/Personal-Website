@@ -1,12 +1,12 @@
 import { AnimatedName } from "@/components/AnimatedName";
-import { SubpageTitle } from "@/components/SubpageTitle";
 import { SubpageIntro } from "@/components/SubpageIntro";
+import { SubpageTitle } from "@/components/SubpageTitle";
 
-type SubpageLayoutProps = {
+interface SubpageLayoutProps {
   title: string;
   intro: React.ReactNode;
   children?: React.ReactNode;
-};
+}
 
 export function SubpageLayout({ title, intro, children }: SubpageLayoutProps) {
   return (

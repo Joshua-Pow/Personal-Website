@@ -22,13 +22,19 @@ import path from "node:path";
 import { URL } from "node:url";
 
 function loadEnvFile(filePath) {
-  if (!fs.existsSync(filePath)) return;
-  const text = fs.readFileSync(filePath, "utf8");
-  for (const rawLine of text.split(/\r?\n/)) {
+  if (!fs.existsSync(filePath)) {
+    return;
+  }
+  const text = fs.readFileSync(filePath, "utf-8");
+  for (const rawLine of text.split(/\r?\n/u)) {
     const line = rawLine.trim();
-    if (!line || line.startsWith("#")) continue;
+    if (!line || line.startsWith("#")) {
+      continue;
+    }
     const eq = line.indexOf("=");
-    if (eq <= 0) continue;
+    if (eq <= 0) {
+      continue;
+    }
     const key = line.slice(0, eq).trim();
     let value = line.slice(eq + 1).trim();
     if (
@@ -85,7 +91,9 @@ const server = http.createServer(async (req, res) => {
 
     const error = requestUrl.searchParams.get("error");
     if (error) {
-      res.writeHead(400, { "Content-Type": "text/plain" }).end(`Auth failed: ${error}`);
+      res
+        .writeHead(400, { "Content-Type": "text/plain" })
+        .end(`Auth failed: ${error}`);
       console.error(`Authorization failed: ${error}`);
       server.close();
       process.exit(1);
@@ -97,19 +105,24 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    const basic = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
-    const tokenResponse = await fetch("https://accounts.spotify.com/api/token", {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${basic}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        grant_type: "authorization_code",
-        code,
-        redirect_uri: REDIRECT_URI,
-      }),
-    });
+    const basic = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString(
+      "base64"
+    );
+    const tokenResponse = await fetch(
+      "https://accounts.spotify.com/api/token",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${basic}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
+          code,
+          redirect_uri: REDIRECT_URI,
+        }),
+      }
+    );
 
     const tokenJson = await tokenResponse.json();
     if (!tokenResponse.ok || !tokenJson.refresh_token) {
@@ -120,28 +133,36 @@ const server = http.createServer(async (req, res) => {
       res
         .writeHead(500, { "Content-Type": "text/plain" })
         .end(`Token exchange failed: ${detail}`);
-      console.error(`Token exchange failed (${tokenResponse.status}): ${detail}`);
+      console.error(
+        `Token exchange failed (${tokenResponse.status}): ${detail}`
+      );
       server.close();
       process.exit(1);
     }
 
     res
       .writeHead(200, { "Content-Type": "text/plain" })
-      .end("Refresh token minted. You can close this tab and return to the terminal.");
+      .end(
+        "Refresh token minted. You can close this tab and return to the terminal."
+      );
 
     console.log("\nSuccess. New refresh token:\n");
     console.log(tokenJson.refresh_token);
     console.log("\nTo fix LOCAL only (safe for prod):");
-    console.log("  1. Update SPOTIFY_REFRESH_TOKEN in .env.local (and .env if present)");
+    console.log(
+      "  1. Update SPOTIFY_REFRESH_TOKEN in .env.local (and .env if present)"
+    );
     console.log("  2. Restart `npm run dev`");
-    console.log("  3. Do NOT run wrangler secret put unless you also want to rotate production\n");
+    console.log(
+      "  3. Do NOT run wrangler secret put unless you also want to rotate production\n"
+    );
     console.log("To update PRODUCTION intentionally:");
     console.log("  npx wrangler secret put SPOTIFY_REFRESH_TOKEN\n");
 
     server.close();
     process.exit(0);
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.writeHead(500, { "Content-Type": "text/plain" }).end("Internal error");
     server.close();
     process.exit(1);

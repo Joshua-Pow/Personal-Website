@@ -1,4 +1,4 @@
-export type LinkPreviewData = {
+export interface LinkPreviewData {
   url: string;
   title: string;
   description?: string;
@@ -6,17 +6,12 @@ export type LinkPreviewData = {
   siteName?: string;
   favicon: string;
   embeddable: boolean;
-};
+}
 
-const BLOCKED_HOSTNAMES = new Set([
-  "localhost",
-  "127.0.0.1",
-  "0.0.0.0",
-  "::1",
-]);
+const BLOCKED_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0", "::1"]);
 
 const PRIVATE_IPV4_PATTERN =
-  /^(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})$/;
+  /^(?:10(?:\.\d{1,3}){3}|127(?:\.\d{1,3}){3}|169\.254(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2}|192\.168(?:\.\d{1,3}){2})$/u;
 
 export function validatePreviewUrl(urlString: string): URL {
   let url: URL;
@@ -55,22 +50,24 @@ function extractMetaContent(
   let pattern = regexCache.get(cacheKey);
   if (!pattern) {
     pattern = new RegExp(
-      `<meta[^>]*${attribute}=["']${value}["'][^>]*content=["']([^"']*)["'][^>]*>|<meta[^>]*content=["']([^"']*)["'][^>]*${attribute}=["']${value}["'][^>]*>`,
-      "i"
+      `<meta[^>]*${attribute}=["']${value}["'][^>]*content=["'](?<contentA>[^"']*)["'][^>]*>|<meta[^>]*content=["'](?<contentB>[^"']*)["'][^>]*${attribute}=["']${value}["'][^>]*>`,
+      "iu"
     );
     regexCache.set(cacheKey, pattern);
   }
   const match = html.match(pattern);
-  return match?.[1] || match?.[2] || undefined;
+  return match?.groups?.contentA || match?.groups?.contentB || undefined;
 }
 
 function extractTitle(html: string): string | undefined {
-  const match = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-  return match?.[1]?.trim() || undefined;
+  const match = html.match(/<title[^>]*>(?<title>[^<]*)<\/title>/iu);
+  return match?.groups?.title?.trim() || undefined;
 }
 
 function resolveUrl(base: URL, value?: string): string | undefined {
-  if (!value) return undefined;
+  if (!value) {
+    return undefined;
+  }
 
   try {
     return new URL(value, base).href;
@@ -81,12 +78,12 @@ function resolveUrl(base: URL, value?: string): string | undefined {
 
 function decodeHtmlEntities(value: string): string {
   return value
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#x27;/g, "'");
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&#x27;", "'");
 }
 
 const NON_IFRAME_HOSTS = new Set([
@@ -99,13 +96,17 @@ const NON_IFRAME_HOSTS = new Set([
 ]);
 
 function normalizeHost(hostname: string): string {
-  return hostname.toLowerCase().replace(/^www\./, "");
+  return hostname.toLowerCase().replace(/^www\./u, "");
 }
 
 function canEmbedHost(hostname: string): boolean {
   const host = normalizeHost(hostname);
-  if (NON_IFRAME_HOSTS.has(host)) return false;
-  if (host.endsWith(".linkedin.com")) return false;
+  if (NON_IFRAME_HOSTS.has(host)) {
+    return false;
+  }
+  if (host.endsWith(".linkedin.com")) {
+    return false;
+  }
   return true;
 }
 
@@ -124,10 +125,15 @@ export function isEmbeddable(headers: Headers, hostname: string): boolean {
   ].filter((value): value is string => Boolean(value));
 
   for (const csp of cspHeaders) {
-    const match = csp.match(/frame-ancestors\s+([^;]+)/i);
-    if (!match) continue;
+    const match = csp.match(/frame-ancestors\s+(?<directive>[^;]+)/iu);
+    if (!match) {
+      continue;
+    }
 
-    const directive = match[1].trim().toLowerCase();
+    const directive = match.groups?.directive?.trim().toLowerCase();
+    if (!directive) {
+      continue;
+    }
     if (directive === "'none'" || directive === "none") {
       return false;
     }
@@ -144,7 +150,7 @@ export function isEmbeddable(headers: Headers, hostname: string): boolean {
 
 export function buildFallbackPreview(urlString: string): LinkPreviewData {
   const url = validatePreviewUrl(urlString);
-  const hostname = url.hostname.replace(/^www\./, "");
+  const hostname = url.hostname.replace(/^www\./u, "");
 
   return {
     url: url.href,
@@ -155,7 +161,11 @@ export function buildFallbackPreview(urlString: string): LinkPreviewData {
   };
 }
 
-export function parseLinkPreview(html: string, url: URL, headers: Headers): LinkPreviewData {
+export function parseLinkPreview(
+  html: string,
+  url: URL,
+  headers: Headers
+): LinkPreviewData {
   const title =
     extractMetaContent(html, "property", "og:title") ||
     extractMetaContent(html, "name", "twitter:title") ||
@@ -187,10 +197,11 @@ export function parseLinkPreview(html: string, url: URL, headers: Headers): Link
   };
 }
 
-export async function fetchLinkPreview(urlString: string): Promise<LinkPreviewData> {
-  const { fetchGenericPreview, fetchHostAwarePreview } = await import(
-    "@/lib/link-preview-providers"
-  );
+export async function fetchLinkPreview(
+  urlString: string
+): Promise<LinkPreviewData> {
+  const { fetchGenericPreview, fetchHostAwarePreview } =
+    await import("@/lib/link-preview-providers");
   const url = validatePreviewUrl(urlString);
   const hostPreview = await fetchHostAwarePreview(url);
 

@@ -1,11 +1,10 @@
-"use client";
-
-import { useCallback, useEffect, useRef, useState } from "react";
 import { Popover } from "@base-ui/react/popover";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { durations } from "@/lib/motion";
-import { LinkPreviewPanel } from "@/components/link-preview/LinkPreviewPanel";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { isBareEmbedPreview } from "@/components/link-preview/layouts";
+import { LinkPreviewPanel } from "@/components/link-preview/LinkPreviewPanel";
 import {
   footerMorphingPreviewPositionerClassName,
   footerPreviewPopupClassName,
@@ -13,11 +12,12 @@ import {
   prefetchPreview,
 } from "@/components/link-preview/shared";
 import { interactiveMuted } from "@/lib/interactive";
+import { durations } from "@/lib/motion";
 
-type FooterLink = {
+interface FooterLink {
   href: string;
   label: string;
-};
+}
 
 const links: FooterLink[] = [
   { href: "https://x.com/joshpow_", label: "@JoshPow" },
@@ -31,18 +31,25 @@ const HOVER_OPEN_DELAY = 120;
 const HOVER_CLOSE_DELAY = 400;
 
 function getPreviewAlign(link: FooterLink | null) {
-  if (!link) return "center";
+  if (!link) {
+    return "center";
+  }
   const index = links.findIndex((item) => item.href === link.href);
-  if (index <= 0) return "start";
-  if (index >= links.length - 1) return "end";
+  if (index <= 0) {
+    return "start";
+  }
+  if (index >= links.length - 1) {
+    return "end";
+  }
   return "center";
 }
 
 export function Footer() {
+  const queryClient = useQueryClient();
   const [activeLink, setActiveLink] = useState<FooterLink | null>(null);
   const activeLinkRef = useRef<FooterLink | null>(null);
-  const openTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefetchedLinksRef = useRef<Set<string>>(new Set());
   const openedByPointerRef = useRef(false);
 
@@ -71,20 +78,22 @@ export function Footer() {
   const clearOpenTimer = useCallback(() => {
     if (openTimerRef.current) {
       clearTimeout(openTimerRef.current);
-      openTimerRef.current = undefined;
+      openTimerRef.current = null;
     }
   }, []);
 
   const clearCloseTimer = useCallback(() => {
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = undefined;
+      closeTimerRef.current = null;
     }
   }, []);
 
   const blurFocusedFooterTrigger = useCallback(() => {
     const active = document.activeElement;
-    if (!(active instanceof HTMLElement)) return;
+    if (!(active instanceof HTMLElement)) {
+      return;
+    }
     if (active.closest("footer")) {
       active.blur();
     }
@@ -99,17 +108,24 @@ export function Footer() {
   }, [clearCloseTimer, blurFocusedFooterTrigger]);
 
   useEffect(() => {
-    if (!activeLink || !openedByPointerRef.current) return;
+    if (!activeLink || !openedByPointerRef.current) {
+      return;
+    }
     requestAnimationFrame(() => {
       blurFocusedFooterTrigger();
     });
   }, [activeLink, blurFocusedFooterTrigger]);
 
-  const prefetchLink = useCallback((href: string) => {
-    if (prefetchedLinksRef.current.has(href)) return;
-    prefetchedLinksRef.current.add(href);
-    void prefetchPreview(href);
-  }, []);
+  const prefetchLink = useCallback(
+    (href: string) => {
+      if (prefetchedLinksRef.current.has(href)) {
+        return;
+      }
+      prefetchedLinksRef.current.add(href);
+      void prefetchPreview(queryClient, href);
+    },
+    [queryClient]
+  );
 
   const handleLinkEnter = useCallback(
     (link: FooterLink) => {
@@ -136,22 +152,23 @@ export function Footer() {
     clearOpenTimer();
   }, [clearCloseTimer, clearOpenTimer]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       clearOpenTimer();
       clearCloseTimer();
-    };
-  }, [clearCloseTimer, clearOpenTimer]);
+    },
+    [clearCloseTimer, clearOpenTimer]
+  );
 
   return (
-    <footer
-      className="mb-24 mt-8 flex w-full items-center justify-center"
-      onMouseLeave={() => {
-        scheduleClose();
-        blurFocusedFooterTrigger();
-      }}
-    >
-      <div className="flex items-center gap-2">
+    <footer className="mt-8 mb-24 flex w-full items-center justify-center">
+      <div
+        className="flex items-center gap-2"
+        onMouseLeave={() => {
+          scheduleClose();
+          blurFocusedFooterTrigger();
+        }}
+      >
         {links.map((link) => (
           <Popover.Trigger
             key={link.href}
@@ -182,10 +199,10 @@ export function Footer() {
                     event.currentTarget.blur();
                     return;
                   }
-                  event.currentTarget.setAttribute("data-kbd-focus", "");
+                  event.currentTarget.dataset.kbdFocus = "";
                 }}
                 onBlur={(event) => {
-                  event.currentTarget.removeAttribute("data-kbd-focus");
+                  delete event.currentTarget.dataset.kbdFocus;
                 }}
               />
             }
@@ -229,7 +246,9 @@ export function Footer() {
                   onMouseLeave={scheduleClose}
                 >
                   {payload !== undefined && (
-                    <Popover.Viewport className={footerPreviewViewportSwipeClassName}>
+                    <Popover.Viewport
+                      className={footerPreviewViewportSwipeClassName}
+                    >
                       <LinkPreviewPanel href={payload.href} />
                     </Popover.Viewport>
                   )}

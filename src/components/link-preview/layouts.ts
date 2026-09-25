@@ -3,7 +3,9 @@ import { getSpotifyEmbedConfig } from "./embed-url";
 export type PreviewLayout = "default" | "spotify";
 
 export function getPreviewLayout(href: string): PreviewLayout {
-  if (getSpotifyEmbedConfig(href)) return "spotify";
+  if (getSpotifyEmbedConfig(href)) {
+    return "spotify";
+  }
   return "default";
 }
 

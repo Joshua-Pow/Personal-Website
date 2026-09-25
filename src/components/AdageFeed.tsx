@@ -1,9 +1,7 @@
 import { AdageCard } from "@/components/AdageCard";
-import { getAdages } from "@/lib/adages";
+import type { Adage } from "@/lib/adages";
 
-export async function AdageFeed() {
-  const adages = await getAdages();
-
+export function AdageFeed({ adages }: { adages: Adage[] }) {
   return (
     <div className="flex flex-col gap-16 pb-24">
       {adages.map((adage, index) => (
