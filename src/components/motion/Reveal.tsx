@@ -1,18 +1,13 @@
-"use client";
-
 import { motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
-import {
-  getTransition,
-  getVariantTransition,
-  variants,
-  type VariantName,
-} from "@/lib/motion";
+
 import { usePageEnterReady } from "@/components/motion/PageEnterProvider";
+import { getTransition, getVariantTransition, variants } from "@/lib/motion";
+import type { VariantName } from "@/lib/motion";
 
 type RevealAs = "div" | "p" | "span" | "h1" | "h2" | "section";
 
-type RevealProps = {
+interface RevealProps {
   children: React.ReactNode;
   variant?: VariantName;
   /** Delay in milliseconds. */
@@ -23,7 +18,7 @@ type RevealProps = {
   "data-vt"?: string;
   /** Skip the shared page-enter gate (nested stagger children). */
   skipGate?: boolean;
-};
+}
 
 export function Reveal({
   children,
@@ -41,9 +36,9 @@ export function Reveal({
   const Component = motion[as];
   const v = variants[variant];
   const transition =
-    duration !== undefined
-      ? getTransition(duration, reducedMotion ?? false, delay)
-      : getVariantTransition(variant, delay, reducedMotion ?? false);
+    duration === undefined
+      ? getVariantTransition(variant, delay, reducedMotion ?? false)
+      : getTransition(duration, reducedMotion ?? false, delay);
   const [promoting, setPromoting] = useState(false);
 
   return (
@@ -54,7 +49,9 @@ export function Reveal({
       className={className}
       data-vt={dataVt}
       onAnimationStart={() => {
-        if (!reducedMotion && ready) setPromoting(true);
+        if (!reducedMotion && ready) {
+          setPromoting(true);
+        }
       }}
       onAnimationComplete={() => setPromoting(false)}
       style={{

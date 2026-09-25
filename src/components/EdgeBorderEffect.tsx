@@ -1,21 +1,21 @@
-"use client";
-
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
 import {
   animate,
   motion,
   useMotionValue,
   useMotionValueEvent,
   useTransform,
-  type MotionValue,
 } from "motion/react";
+import type { MotionValue } from "motion/react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import { easeIn, easeOut, durations } from "@/lib/motion";
 
 interface EdgeBorderEffectProps {
@@ -42,9 +42,9 @@ const CARD_GLOW_SHADOW = `
   inset 0 1px 0 rgba(255, 255, 255, 0.15)
 `;
 
-type EdgeIntensityContextValue = {
+interface EdgeIntensityContextValue {
   intensity: MotionValue<number>;
-};
+}
 
 const EdgeIntensityContext = createContext<EdgeIntensityContextValue | null>(
   null
@@ -88,6 +88,27 @@ function calculateDesktopIntensity(
   return Math.min(1, (thresholdPx - minDistance) / effectiveRange);
 }
 
+function detectEdge(
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): "left" | "right" | "top" | "bottom" | null {
+  if (x < CONFIG.edgeThresholdPx) {
+    return "left";
+  }
+  if (x > width - CONFIG.edgeThresholdPx) {
+    return "right";
+  }
+  if (y < CONFIG.edgeThresholdPx) {
+    return "top";
+  }
+  if (y > height - CONFIG.edgeThresholdPx) {
+    return "bottom";
+  }
+  return null;
+}
+
 export const EdgeBorderEffect = ({
   children,
   blurSlot,
@@ -107,7 +128,9 @@ export const EdgeBorderEffect = ({
     intensity,
     (v) => v * CONFIG.maxBorderRadius
   );
-  const textOpacity = useTransform(intensity, (v) => Math.max(0, (v - 0.5) * 2));
+  const textOpacity = useTransform(intensity, (v) =>
+    Math.max(0, (v - 0.5) * 2)
+  );
   const backgroundOpacity = intensity;
   const glowOpacity = intensity;
 
@@ -139,7 +162,7 @@ export const EdgeBorderEffect = ({
 
   useEffect(() => {
     const updateRootFontSize = () => {
-      rootFontSizeRef.current = parseFloat(
+      rootFontSizeRef.current = Number(
         getComputedStyle(document.documentElement).fontSize || "16"
       );
     };
@@ -165,7 +188,9 @@ export const EdgeBorderEffect = ({
 
   const setIntensity = useCallback(
     (target: number) => {
-      if (target === currentIntensityRef.current) return;
+      if (target === currentIntensityRef.current) {
+        return;
+      }
       const previous = currentIntensityRef.current;
       currentIntensityRef.current = target;
       animationRef.current?.stop();
@@ -233,21 +258,11 @@ export const EdgeBorderEffect = ({
     disarmEdge();
   }, [disarmEdge]);
 
-  const detectEdge = (
-    x: number,
-    y: number,
-    width: number,
-    height: number
-  ): "left" | "right" | "top" | "bottom" | null => {
-    if (x < CONFIG.edgeThresholdPx) return "left";
-    if (x > width - CONFIG.edgeThresholdPx) return "right";
-    if (y < CONFIG.edgeThresholdPx) return "top";
-    if (y > height - CONFIG.edgeThresholdPx) return "bottom";
-    return null;
-  };
-
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    const touch = e.touches[0];
+    const [touch] = e.touches;
+    if (!touch) {
+      return;
+    }
     const edge = detectEdge(
       touch.clientX,
       touch.clientY,
@@ -263,26 +278,38 @@ export const EdgeBorderEffect = ({
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
-      if (!touchStartRef.current || !touchStartEdgeRef.current) return;
+      if (!touchStartRef.current || !touchStartEdgeRef.current) {
+        return;
+      }
 
-      const touch = e.touches[0];
+      const [touch] = e.touches;
+      if (!touch) {
+        return;
+      }
       const start = touchStartRef.current;
       const edge = touchStartEdgeRef.current;
 
       let distance = 0;
       switch (edge) {
-        case "left":
+        case "left": {
           distance = touch.clientX - start.x;
           break;
-        case "right":
+        }
+        case "right": {
           distance = start.x - touch.clientX;
           break;
-        case "top":
+        }
+        case "top": {
           distance = touch.clientY - start.y;
           break;
-        case "bottom":
+        }
+        case "bottom": {
           distance = start.y - touch.clientY;
           break;
+        }
+        default: {
+          return;
+        }
       }
 
       if (distance > 0) {
@@ -384,7 +411,9 @@ export const EdgeBorderEffect = ({
   ]);
 
   useEffect(() => {
-    if (!isMobileActive) return;
+    if (!isMobileActive) {
+      return;
+    }
 
     window.addEventListener("touchstart", handleTap);
 
@@ -393,8 +422,10 @@ export const EdgeBorderEffect = ({
     };
   }, [isMobileActive, handleTap]);
 
+  const edgeIntensity = useMemo(() => ({ intensity }), [intensity]);
+
   return (
-    <EdgeIntensityContext.Provider value={{ intensity }}>
+    <EdgeIntensityContext.Provider value={edgeIntensity}>
       <div
         className="fixed inset-0 overflow-hidden"
         style={{

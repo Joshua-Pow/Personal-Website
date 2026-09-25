@@ -1,6 +1,7 @@
+import type { QueryClient } from "@tanstack/react-query";
+
 import type { LinkPreviewData } from "@/lib/link-preview";
 import { buildFallbackPreview } from "@/lib/link-preview";
-import { mutate, preload } from "swr";
 
 export const IFRAME_WIDTH = 1280;
 export const IFRAME_HEIGHT = 720;
@@ -112,7 +113,9 @@ export const previewViewportSwipeClassName = [
 
 export const previewFetcher = async (url: string): Promise<LinkPreviewData> => {
   try {
-    const response = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+    const response = await fetch(
+      `/api/link-preview?url=${encodeURIComponent(url)}`
+    );
 
     if (!response.ok) {
       return buildFallbackPreview(url);
@@ -124,17 +127,29 @@ export const previewFetcher = async (url: string): Promise<LinkPreviewData> => {
   }
 };
 
+export function linkPreviewQueryKey(url: string) {
+  return ["link-preview", url] as const;
+}
+
 function preloadPreviewImage(src: string | undefined) {
-  if (!src || typeof window === "undefined") return;
+  if (!src || typeof window === "undefined") {
+    return;
+  }
 
   const image = new window.Image();
   image.decoding = "async";
   image.src = src;
 }
 
-export async function prefetchPreview(url: string): Promise<LinkPreviewData> {
-  const data = await preload(url, previewFetcher);
+export async function prefetchPreview(
+  queryClient: QueryClient,
+  url: string
+): Promise<LinkPreviewData> {
+  const data = await queryClient.ensureQueryData({
+    queryKey: linkPreviewQueryKey(url),
+    queryFn: () => previewFetcher(url),
+    staleTime: 60_000,
+  });
   preloadPreviewImage(data.image);
-  await mutate(url, data, { revalidate: false });
   return data;
 }

@@ -1,8 +1,8 @@
-"use client";
-
 import { motion } from "motion/react";
-import { Logos } from "./Logos";
+
 import { durations } from "@/lib/motion";
+
+import { Logos } from "./Logos";
 
 interface LanguageBadgeProps {
   logo: keyof typeof Logos;

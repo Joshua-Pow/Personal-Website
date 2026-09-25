@@ -3,5 +3,5 @@ export function adageImageUrl(slug: string) {
 }
 
 export function isAllowedAdageImageKey(key: string) {
-  return /^web\/[a-z0-9-]+\.webp$/.test(key);
+  return /^web\/[a-z0-9-]+\.webp$/u.test(key);
 }

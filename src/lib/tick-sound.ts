@@ -3,7 +3,9 @@ const tickSoundListeners = new Set<() => void>();
 
 export function subscribeAlignedSecondTick(listener: () => void) {
   if (typeof window === "undefined") {
-    return () => {};
+    return function unsubscribeAlignedSecondTick() {
+      return null;
+    };
   }
 
   let intervalId: number | undefined;
@@ -30,7 +32,9 @@ export function subscribeTickSoundMuted(onStoreChange: () => void) {
 }
 
 export function getTickSoundMutedSnapshot() {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined") {
+    return false;
+  }
   try {
     return localStorage.getItem(TICK_SOUND_MUTED_KEY) === "true";
   } catch {
@@ -48,7 +52,9 @@ export function setTickSoundMuted(muted: boolean) {
   } catch {
     // Ignore storage access errors (private browsing, etc.)
   }
-  tickSoundListeners.forEach((listener) => listener());
+  for (const listener of tickSoundListeners) {
+    listener();
+  }
 }
 
 export function toggleTickSoundMuted() {

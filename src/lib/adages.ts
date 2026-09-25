@@ -1,16 +1,21 @@
-import { createElement, type ReactNode } from "react";
+import { createElement } from "react";
+import type { ReactNode } from "react";
+
 import { adageImageUrl } from "@/lib/adages-images";
 import { adages as adageEntries } from "@/lib/adages-manifest";
 import type { AdageData } from "@/lib/adages-types";
 
-export type { AdageData };
+export type { AdageData } from "@/lib/adages-types";
 
 export type Adage = AdageData & {
   content: ReactNode;
 };
 
 function renderBody(body: string): ReactNode {
-  const paragraphs = body.split(/\n\n+/).map((part) => part.trim()).filter(Boolean);
+  const paragraphs = body
+    .split(/\n\n+/u)
+    .map((part) => part.trim())
+    .filter(Boolean);
 
   if (paragraphs.length === 0) {
     return null;
@@ -21,11 +26,11 @@ function renderBody(body: string): ReactNode {
   }
 
   return paragraphs.map((paragraph, index) =>
-    createElement("p", { key: index }, paragraph),
+    createElement("p", { key: index }, paragraph)
   );
 }
 
-export async function getAdages(): Promise<Adage[]> {
+export function getAdages(): Adage[] {
   return adageEntries
     .map((entry) => ({
       slug: entry.slug,
@@ -37,6 +42,6 @@ export async function getAdages(): Promise<Adage[]> {
       content: renderBody(entry.body),
     }))
     .toSorted(
-      (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime(),
+      (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
     );
 }

@@ -1,22 +1,18 @@
-"use client";
-
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { useRef, useState } from "react";
-import {
-  getVariantTransition,
-  variants,
-  type VariantName,
-} from "@/lib/motion";
-import { usePageEnterReady } from "@/components/motion/PageEnterProvider";
 
-type RevealOnScrollProps = {
+import { usePageEnterReady } from "@/components/motion/PageEnterProvider";
+import { getVariantTransition, variants } from "@/lib/motion";
+import type { VariantName } from "@/lib/motion";
+
+interface RevealOnScrollProps {
   children: React.ReactNode;
   variant?: VariantName;
   /** Delay in milliseconds. */
   delay?: number;
   className?: string;
   as?: "div" | "p" | "span" | "h2";
-};
+}
 
 export function RevealOnScroll({
   children,
@@ -49,7 +45,9 @@ export function RevealOnScroll({
       transition={transition}
       className={className}
       onAnimationStart={() => {
-        if (!reducedMotion && shouldReveal) setPromoting(true);
+        if (!reducedMotion && shouldReveal) {
+          setPromoting(true);
+        }
       }}
       onAnimationComplete={() => setPromoting(false)}
       style={{

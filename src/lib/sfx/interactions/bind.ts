@@ -11,7 +11,8 @@
  */
 
 import { play } from "../audio/engine";
-import { isSoundName, type SoundName } from "../sounds/recipes";
+import { isSoundName } from "../sounds/recipes";
+import type { SoundName } from "../sounds/recipes";
 
 const HOVER_GAP_MS = 150;
 const boundRoots = new WeakSet<ParentNode>();
@@ -40,9 +41,17 @@ function findTarget(
   event: Event,
   attr: string
 ): HTMLElement | null {
-  if (!(event.target instanceof Element)) return null;
-  const element = event.target.closest<HTMLElement>(`[${attr}]`);
-  return element && (root as Node).contains(element) ? element : null;
+  if (!(event.target instanceof Element)) {
+    return null;
+  }
+  const element = event.target.closest(`[${attr}]`);
+  if (!(element instanceof HTMLElement)) {
+    return null;
+  }
+  if (!(root instanceof Node) || !root.contains(element)) {
+    return null;
+  }
+  return element;
 }
 
 function listen(
@@ -52,21 +61,30 @@ function listen(
   fallback: SoundName,
   mouseOnly = false
 ): void {
-  (root as EventTarget).addEventListener(
+  if (!(root instanceof EventTarget)) {
+    return;
+  }
+  root.addEventListener(
     eventName,
     (event) => {
       const element = findTarget(root, event, attr);
-      if (!element || handledEvents.has(event)) return;
-      if (mouseOnly && !isMouse(event as PointerEvent)) return;
+      if (!element || handledEvents.has(event)) {
+        return;
+      }
+      if (mouseOnly && (!(event instanceof PointerEvent) || !isMouse(event))) {
+        return;
+      }
 
-      if (eventName === "pointerenter") {
-        const relatedTarget = (event as PointerEvent).relatedTarget;
+      if (eventName === "pointerenter" && event instanceof PointerEvent) {
+        const { relatedTarget } = event;
         if (relatedTarget instanceof Node && element.contains(relatedTarget)) {
           return;
         }
 
         const now = performance.now();
-        if (now - lastHoverTime < HOVER_GAP_MS) return;
+        if (now - lastHoverTime < HOVER_GAP_MS) {
+          return;
+        }
         lastHoverTime = now;
       }
 
@@ -82,9 +100,13 @@ function listen(
  * document). Safe during SSR and safe to call repeatedly for the same root.
  */
 export function bind(root?: ParentNode): void {
-  if (typeof document === "undefined") return;
+  if (typeof document === "undefined") {
+    return;
+  }
   const scope = root ?? document;
-  if (boundRoots.has(scope)) return;
+  if (boundRoots.has(scope)) {
+    return;
+  }
   boundRoots.add(scope);
 
   listen(scope, "pointerenter", "data-sfx-hover", "chime", true);

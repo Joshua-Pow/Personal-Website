@@ -6,11 +6,11 @@ export function formatAdageDate(isoDate: string) {
   }).format(new Date(isoDate));
 }
 
-export type AdageData = {
+export interface AdageData {
   slug: string;
   quote: string;
   attribution: string;
   heardFrom: string;
   addedAt: string;
   imageUrl: string;
-};
+}

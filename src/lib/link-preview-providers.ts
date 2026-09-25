@@ -1,27 +1,24 @@
-import {
-  buildFallbackPreview,
-  parseLinkPreview,
-  type LinkPreviewData,
-} from "@/lib/link-preview";
+import { buildFallbackPreview, parseLinkPreview } from "@/lib/link-preview";
+import type { LinkPreviewData } from "@/lib/link-preview";
 
 export const PREVIEW_USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
-const FETCH_TIMEOUT_MS = 8_000;
+const FETCH_TIMEOUT_MS = 8000;
 
 export function isLinkedInHost(hostname: string): boolean {
-  const normalized = hostname.toLowerCase().replace(/^www\./, "");
+  const normalized = hostname.toLowerCase().replace(/^www\./u, "");
   return normalized === "linkedin.com" || normalized.endsWith(".linkedin.com");
 }
 
 export function isXHost(hostname: string): boolean {
-  const normalized = hostname.toLowerCase().replace(/^www\./, "");
+  const normalized = hostname.toLowerCase().replace(/^www\./u, "");
   return normalized === "x.com" || normalized === "twitter.com";
 }
 
 function formatVanity(vanity: string): string {
   return vanity
-    .split(/[-_]/)
+    .split(/[-_]/u)
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
@@ -57,8 +54,9 @@ async function fetchPreviewHtml(
       return null;
     }
 
+    const htmlText = await response.text();
     return {
-      html: (await response.text()).slice(0, 100_000),
+      html: htmlText.slice(0, 100_000),
       headers: response.headers,
     };
   } catch {
@@ -69,7 +67,7 @@ async function fetchPreviewHtml(
 }
 
 function buildLinkedInPreview(url: URL): LinkPreviewData {
-  const vanity = url.pathname.match(/\/in\/([^/]+)/i)?.[1];
+  const vanity = url.pathname.match(/\/in\/(?<vanity>[^/]+)/iu)?.groups?.vanity;
   const title = vanity ? formatVanity(vanity) : "LinkedIn Profile";
 
   return {
@@ -82,9 +80,13 @@ function buildLinkedInPreview(url: URL): LinkPreviewData {
   };
 }
 
-async function tryParseFetchedPreview(url: URL): Promise<LinkPreviewData | null> {
+async function tryParseFetchedPreview(
+  url: URL
+): Promise<LinkPreviewData | null> {
   const result = await fetchPreviewHtml(url);
-  if (!result) return null;
+  if (!result) {
+    return null;
+  }
 
   const preview = parseLinkPreview(result.html, url, result.headers);
   if (isUselessPreviewTitle(preview.title)) {
@@ -94,7 +96,9 @@ async function tryParseFetchedPreview(url: URL): Promise<LinkPreviewData | null>
   return preview;
 }
 
-export async function fetchHostAwarePreview(url: URL): Promise<LinkPreviewData | null> {
+export async function fetchHostAwarePreview(
+  url: URL
+): Promise<LinkPreviewData | null> {
   if (isXHost(url.hostname)) {
     return tryParseFetchedPreview(url);
   }

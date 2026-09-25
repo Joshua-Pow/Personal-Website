@@ -3,12 +3,12 @@
  * Generates src/lib/adages-manifest.ts from src/content/adages/*.mdx
  * so adage content is bundled at build time (no runtime fs or MDX eval on Cloudflare).
  */
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import fs from "node:fs";
+import path from "node:path";
+
 import matter from "gray-matter";
 
-const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
+const root = path.join(import.meta.dirname, "..");
 const adagesDir = path.join(root, "src/content/adages");
 const outFile = path.join(root, "src/lib/adages-manifest.ts");
 
@@ -23,12 +23,12 @@ function toTrimmedString(value, field, fileName) {
     return value.toISOString().slice(0, 10);
   }
 
-  if (typeof value === "string") {
+  if (String(value) === value) {
     return value.trim();
   }
 
   throw new Error(
-    `Frontmatter field "${field}" must be a string in ${fileName}`,
+    `Frontmatter field "${field}" must be a string in ${fileName}`
   );
 }
 
@@ -39,15 +39,15 @@ function parseFrontmatter(data, fileName) {
     const value = toTrimmedString(data[field], field, fileName);
     if (!value) {
       throw new Error(
-        `Missing required frontmatter field "${field}" in ${fileName}`,
+        `Missing required frontmatter field "${field}" in ${fileName}`
       );
     }
     parsed[field] = value;
   }
 
-  if (!/^[a-z0-9-]+$/.test(parsed.slug)) {
+  if (!/^[a-z0-9-]+$/u.test(parsed.slug)) {
     throw new Error(
-      `Invalid slug "${parsed.slug}" in ${fileName}. Use lowercase letters, numbers, and hyphens.`,
+      `Invalid slug "${parsed.slug}" in ${fileName}. Use lowercase letters, numbers, and hyphens.`
     );
   }
 
@@ -57,14 +57,14 @@ function parseFrontmatter(data, fileName) {
 const files = fs
   .readdirSync(adagesDir)
   .filter((file) => file.endsWith(".mdx"))
-  .sort();
+  .toSorted();
 
 if (files.length === 0) {
   console.warn("No adage MDX files found in src/content/adages");
 }
 
 const entries = files.map((file) => {
-  const source = fs.readFileSync(path.join(adagesDir, file), "utf8");
+  const source = fs.readFileSync(path.join(adagesDir, file), "utf-8");
   const { data, content } = matter(source);
   const frontmatter = parseFrontmatter(data, file);
 

@@ -1,6 +1,10 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-.open-next
 .wrangler
+.output
+.vinxi
+.tanstack
+dist
+
 # dependencies
 /node_modules
 /.pnp
@@ -13,10 +17,6 @@
 
 # testing
 /coverage
-
-# next.js
-/.next/
-/out/
 
 # production
 /build
@@ -35,12 +35,8 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 .env*.local
 src/lib/adages-manifest.ts
 

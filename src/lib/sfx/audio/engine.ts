@@ -4,14 +4,13 @@
  * (MIT, Daniel Belyi). See ../NOTICE.
  */
 
-import {
-  RECIPES,
-  isSoundName,
-  type NoiseLayer,
-  type Shimmer,
-  type SoundName,
-  type SoundRecipe,
-  type ToneLayer,
+import { RECIPES, isSoundName } from "../sounds/recipes";
+import type {
+  NoiseLayer,
+  Shimmer,
+  SoundName,
+  SoundRecipe,
+  ToneLayer,
 } from "../sounds/recipes";
 
 const SOURCE_STOP_PADDING = 0.05;
@@ -27,7 +26,9 @@ function renderTone(
   const oscillator = context.createOscillator();
   oscillator.type = layer.waveform;
   oscillator.frequency.setValueAtTime(layer.frequency, startTime);
-  if (layer.detune) oscillator.detune.value = layer.detune;
+  if (layer.detune) {
+    oscillator.detune.value = layer.detune;
+  }
 
   if (layer.glideTo !== undefined) {
     const glideTime = layer.glideTime ?? layer.attack + layer.decay;
@@ -39,10 +40,7 @@ function renderTone(
 
   const gain = context.createGain();
   gain.gain.setValueAtTime(0.0001, startTime);
-  gain.gain.exponentialRampToValueAtTime(
-    layer.peak,
-    startTime + layer.attack
-  );
+  gain.gain.exponentialRampToValueAtTime(layer.peak, startTime + layer.attack);
   gain.gain.exponentialRampToValueAtTime(
     0.0001,
     startTime + layer.attack + layer.decay
@@ -63,7 +61,9 @@ function renderNoise(
   const length = Math.max(1, Math.floor(duration * context.sampleRate));
   const buffer = context.createBuffer(1, length, context.sampleRate);
   const data = buffer.getChannelData(0);
-  for (let i = 0; i < length; i++) data[i] = 2 * Math.random() - 1;
+  for (let i = 0; i < length; i += 1) {
+    data[i] = 2 * Math.random() - 1;
+  }
 
   const source = context.createBufferSource();
   source.buffer = buffer;
@@ -71,14 +71,13 @@ function renderNoise(
   const filter = context.createBiquadFilter();
   filter.type = layer.filterType;
   filter.frequency.value = layer.filterFrequency;
-  if (layer.filterQ !== undefined) filter.Q.value = layer.filterQ;
+  if (layer.filterQ !== undefined) {
+    filter.Q.value = layer.filterQ;
+  }
 
   const gain = context.createGain();
   gain.gain.setValueAtTime(0.0001, startTime);
-  gain.gain.exponentialRampToValueAtTime(
-    layer.peak,
-    startTime + layer.attack
-  );
+  gain.gain.exponentialRampToValueAtTime(layer.peak, startTime + layer.attack);
   gain.gain.exponentialRampToValueAtTime(
     0.0001,
     startTime + layer.attack + layer.decay
@@ -129,8 +128,12 @@ function sourceEnd(recipe: SoundRecipe): number {
 }
 
 function shimmerTail(shimmer?: Shimmer): number {
-  if (!shimmer || shimmer.feedback <= 0) return 0;
-  if (shimmer.feedback >= 1) return shimmer.delay;
+  if (!shimmer || shimmer.feedback <= 0) {
+    return 0;
+  }
+  if (shimmer.feedback >= 1) {
+    return shimmer.delay;
+  }
 
   return (
     shimmer.delay *
@@ -150,15 +153,20 @@ function renderRecipe(context: AudioContext, recipe: SoundRecipe): void {
 
   for (const layer of recipe.layers) {
     const startTime = now + (layer.offset ?? 0);
-    if (layer.kind === "tone") renderTone(context, master, layer, startTime);
-    else renderNoise(context, master, layer, startTime);
+    if (layer.kind === "tone") {
+      renderTone(context, master, layer, startTime);
+    } else {
+      renderNoise(context, master, layer, startTime);
+    }
   }
 
   const cleanupAfterMs =
     (sourceEnd(recipe) + shimmerTail(recipe.shimmer) + CLEANUP_MARGIN) * 1000;
   setTimeout(() => {
     master.disconnect();
-    for (const node of shimmerNodes) node.disconnect();
+    for (const node of shimmerNodes) {
+      node.disconnect();
+    }
   }, cleanupAfterMs);
 }
 
@@ -167,21 +175,41 @@ let enabled = true;
 
 /** Enables or disables future playback. Preference storage stays with the app. */
 export function setEnabled(value: boolean): void {
-  if (typeof value === "boolean") enabled = value;
+  enabled = value;
 }
 
 export function isEnabled(): boolean {
   return enabled;
 }
 
+interface WebkitWindow {
+  webkitAudioContext?: typeof AudioContext;
+}
+
+function getAudioContextConstructor(): typeof AudioContext | undefined {
+  if (window.AudioContext) {
+    return window.AudioContext;
+  }
+  if (!("webkitAudioContext" in window)) {
+    return;
+  }
+  // SAFETY: Safari prefixes AudioContext as webkitAudioContext; we only read
+  // that field after confirming it exists on window.
+  const { webkitAudioContext } = window as Window & WebkitWindow;
+  return webkitAudioContext;
+}
+
 function getAudioContext(): AudioContext | null {
-  if (sharedContext) return sharedContext;
-  if (typeof window === "undefined") return null;
-  const Ctor =
-    window.AudioContext ??
-    (window as unknown as { webkitAudioContext?: typeof AudioContext })
-      .webkitAudioContext;
-  if (!Ctor) return null;
+  if (sharedContext) {
+    return sharedContext;
+  }
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const Ctor = getAudioContextConstructor();
+  if (!Ctor) {
+    return null;
+  }
   try {
     sharedContext = new Ctor();
   } catch {
@@ -190,8 +218,21 @@ function getAudioContext(): AudioContext | null {
   return sharedContext;
 }
 
+async function resumeAndPlay(context: AudioContext, recipe: SoundRecipe) {
+  try {
+    await context.resume();
+    if (enabled && context.state === "running") {
+      renderRecipe(context, recipe);
+    }
+  } catch {
+    // Some browsers reject when audio is blocked.
+  }
+}
+
 function scheduleRecipe(recipe: SoundRecipe): void {
-  if (!enabled) return;
+  if (!enabled) {
+    return;
+  }
   if (
     typeof navigator !== "undefined" &&
     navigator.userActivation?.hasBeenActive === false
@@ -200,23 +241,14 @@ function scheduleRecipe(recipe: SoundRecipe): void {
   }
 
   const context = getAudioContext();
-  if (!context) return;
+  if (!context) {
+    return;
+  }
 
   if (context.state === "running") {
     renderRecipe(context, recipe);
   } else {
-    try {
-      void context.resume().then(
-        () => {
-          if (enabled && context.state === "running") {
-            renderRecipe(context, recipe);
-          }
-        },
-        () => {}
-      );
-    } catch {
-      // Some browsers throw synchronously when audio is blocked.
-    }
+    void resumeAndPlay(context, recipe);
   }
 }
 
@@ -226,7 +258,9 @@ function scheduleRecipe(recipe: SoundRecipe): void {
  * unavailable (SSR, old browsers) or playback is disabled.
  */
 export function play(sound: SoundName = "chime"): void {
-  if (!isSoundName(sound)) return;
+  if (!isSoundName(sound)) {
+    return;
+  }
   scheduleRecipe(RECIPES[sound]);
 }
 
@@ -234,6 +268,8 @@ export function play(sound: SoundName = "chime"): void {
  * Plays an arbitrary recipe graph — used by the /sfx lab for unsaved edits.
  */
 export function playRecipe(recipe: SoundRecipe): void {
-  if (!recipe?.layers?.length) return;
+  if (!recipe?.layers?.length) {
+    return;
+  }
   scheduleRecipe(recipe);
 }

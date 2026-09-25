@@ -1,9 +1,8 @@
-"use client";
-
-import { useEffect, useRef } from "react";
 import createGlobe from "cobe";
 import { useSpring } from "motion/react";
-import { VisitorData } from "./LastVisitor";
+import { useEffect, useRef } from "react";
+
+import type { VisitorData } from "@/lib/visitor-location";
 
 interface GlobeProps {
   visitorData?: VisitorData;
@@ -20,7 +19,9 @@ export default function Globe({ visitorData }: GlobeProps) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      return;
+    }
 
     let isDestroyed = false;
     let phi = 0;
@@ -32,7 +33,9 @@ export default function Globe({ visitorData }: GlobeProps) {
     ).matches;
 
     const onResize = () => {
-      if (isDestroyed) return;
+      if (isDestroyed) {
+        return;
+      }
       width = 300;
       height = 300;
       canvas.width = width * 2;
@@ -50,7 +53,7 @@ export default function Globe({ visitorData }: GlobeProps) {
       theta: 0.3,
       dark: 1,
       diffuse: 1.2,
-      mapSamples: 16000,
+      mapSamples: 16_000,
       mapBrightness: 6,
       opacity: 0.8,
       baseColor: [0.3, 0.3, 0.3],
@@ -58,16 +61,19 @@ export default function Globe({ visitorData }: GlobeProps) {
       glowColor: [0.8, 0.8, 0.8],
       offset: [0, 0],
       scale: 0.9,
-      markers: latitude && longitude
-        ? [
-            {
-              location: [parseFloat(latitude), parseFloat(longitude)],
-              size: 0.1,
-            },
-          ]
-        : [],
+      markers:
+        latitude && longitude
+          ? [
+              {
+                location: [Number(latitude), Number(longitude)],
+                size: 0.1,
+              },
+            ]
+          : [],
       onRender: (state) => {
-        if (isDestroyed) return;
+        if (isDestroyed) {
+          return;
+        }
 
         state.phi = phi + r.get();
 
@@ -81,7 +87,9 @@ export default function Globe({ visitorData }: GlobeProps) {
     });
 
     const onPointerDown = (e: PointerEvent) => {
-      if (isDestroyed) return;
+      if (isDestroyed) {
+        return;
+      }
       pointerInteracting.current =
         e.clientX - pointerInteractionMovement.current;
       canvas.style.cursor = "grabbing";
@@ -89,7 +97,9 @@ export default function Globe({ visitorData }: GlobeProps) {
     };
 
     const onPointerUp = (e: PointerEvent) => {
-      if (isDestroyed) return;
+      if (isDestroyed) {
+        return;
+      }
       pointerInteracting.current = null;
       if (canvas.hasPointerCapture(e.pointerId)) {
         canvas.releasePointerCapture(e.pointerId);
@@ -98,14 +108,18 @@ export default function Globe({ visitorData }: GlobeProps) {
     };
 
     const onPointerMove = (e: PointerEvent) => {
-      if (isDestroyed || pointerInteracting.current === null) return;
+      if (isDestroyed || pointerInteracting.current === null) {
+        return;
+      }
       const delta = e.clientX - pointerInteracting.current;
       pointerInteractionMovement.current = delta;
       r.set(delta / 100);
     };
 
     const onPointerLeave = () => {
-      if (isDestroyed) return;
+      if (isDestroyed) {
+        return;
+      }
       pointerInteracting.current = null;
       canvas.style.cursor = "grab";
     };
@@ -132,7 +146,6 @@ export default function Globe({ visitorData }: GlobeProps) {
     <div className="flex h-full w-full items-center justify-center">
       <canvas
         ref={canvasRef}
-        role="img"
         aria-label="Interactive globe showing last visitor location"
         style={{
           width: "300px",

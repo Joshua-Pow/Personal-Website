@@ -1,7 +1,5 @@
-"use client";
+import { useEffect, useSyncExternalStore } from "react";
 
-import { useEffect } from "react";
-import { useSyncExternalStore } from "react";
 import { bind, setEnabled } from "@/lib/sfx";
 import {
   getTickSoundMutedServerSnapshot,

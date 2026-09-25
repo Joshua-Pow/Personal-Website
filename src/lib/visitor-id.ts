@@ -1,7 +1,9 @@
 const VISITOR_ID_KEY = "visitor-id:v1";
 
 export function getOrCreateVisitorId(): string {
-  if (typeof window === "undefined") return "";
+  if (typeof window === "undefined") {
+    return "";
+  }
 
   try {
     let visitorId = localStorage.getItem(VISITOR_ID_KEY);
